@@ -1380,7 +1380,7 @@
             setTimeout(() => {
                 const exportZone = document.getElementById('report-export-zone');
                 html2canvas(exportZone, { 
-                    scale: 10, // ĐỘ NÉT THEO YÊU CẦU. (Nếu iPhone xuất ảnh bị trắng tinh do quá tải RAM, hãy tự giảm số 10 này xuống 4 hoặc 5).
+                    scale: 6, // ĐỘ NÉT THEO YÊU CẦU. (Nếu iPhone xuất ảnh bị trắng tinh do quá tải RAM, hãy tự giảm số 10 này xuống 4 hoặc 5).
                     useCORS: true, 
                     backgroundColor: '#f4f7f6' 
                 }).then(canvas => {
