@@ -3,175 +3,304 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Quản lý Quỹ FC</title>
-    <!-- Bootstrap & FontAwesome -->
+    <title>Quản lý Quỹ FC Thập Cẩm</title>
+    <!-- Bootstrap 5 & FontAwesome 6 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     
     <style>
+        /* 1. RESET & BASE: Ngăn tràn trang tuyệt đối */
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100vw;
+            margin: 0;
+            padding-top: 0;
+        }
         body { 
             font-family: system-ui, -apple-system, sans-serif; 
-            background-color: #f8f9fa; 
-            padding-bottom: 70px;
+            background-color: #f4f7f6; 
+            padding-bottom: calc(95px + env(safe-area-inset-bottom));
         }
         
-        /* Cải tiến Header Cao cấp */
-        .header-bar {
-            background: linear-gradient(135deg, #198754, #126b40);
-            color: white; 
-            padding: 15px 15px 25px 15px; 
-            position: sticky; top: 0; z-index: 999; 
-            border-bottom-left-radius: 20px;
-            border-bottom-right-radius: 20px;
-            box-shadow: 0 4px 15px rgba(25, 135, 84, 0.2);
+        /* 2. HEADER ĐỒNG BỘ - BỎ MÀU */
+        .header-bar { 
+            background: #ffffff; 
+            color: #212529;
+            padding: 12px 16px; 
+            position: sticky; 
+            top: 0; 
+            z-index: 990; 
+            border-bottom: 1px solid #e9ecef;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03); 
+            width: 100%;
+            box-sizing: border-box; 
         }
-        .header-title-container {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .header-bar h4 {
-            font-weight: 800; letter-spacing: 0.5px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-        }
-        .month-selector-wrapper {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 30px;
-            padding: 4px 15px;
-            display: flex; align-items: center; justify-content: center;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255,255,255,0.3);
-            margin-top: 5px;
-        }
-        .header-bar input[type="month"] { 
-            background: transparent; border: none; color: white;
-            font-weight: bold; font-size: 1rem; outline: none;
-        }
-        /* Style icon lịch cho input month */
-        .header-bar input[type="month"]::-webkit-calendar-picker-indicator {
-            filter: invert(1); cursor: pointer;
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            gap: 10px;
         }
 
-        .bottom-nav { 
-            position: fixed; bottom: 0; left: 0; right: 0; 
-            background: white; box-shadow: 0 -4px 15px rgba(0,0,0,0.05); 
-            display: flex; z-index: 1000; padding: 10px 0;
-            padding-bottom: env(safe-area-inset-bottom, 10px); 
-            border-top-left-radius: 15px; border-top-right-radius: 15px;
-        }
-        .nav-item { 
-            flex: 1; text-align: center; color: #adb5bd; 
-            font-size: 11px; cursor: pointer; transition: all 0.2s ease;
-        }
-        .nav-item i { display: block; font-size: 22px; margin-bottom: 5px; }
-        .nav-item.active { color: #198754; font-weight: bold; transform: translateY(-3px); }
+        /* Layout cho Tab Thu Quỹ (Header Full) */
+        .header-full { display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 8px;}
+        .brand-box { display: flex; align-items: center; gap: 10px; flex-shrink: 1; min-width: 0; overflow: hidden;}
+        .brand-icon { width: 36px; height: 36px; background: rgba(25, 135, 84, 0.1); color: #198754; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+        .brand-text { display: flex; flex-direction: column; overflow: hidden; white-space: nowrap; }
+        .brand-title { font-weight: 800; font-size: 1.05rem; margin: 0; line-height: 1.2; color: #212529; text-overflow: ellipsis; overflow: hidden; }
+        .brand-sub { font-size: 0.72rem; color: #6c757d; font-weight: 500; text-overflow: ellipsis; overflow: hidden; }
         
-        .tab-pane { display: none; animation: fadeIn 0.3s ease; }
+        /* Layout cho các Tab Khác (Header Gọn) */
+        .header-compact { display: none; justify-content: space-between; align-items: center; width: 100%; gap: 10px;}
+        .tab-title { font-weight: 800; font-size: 1.1rem; margin: 0; color: #212529; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 1;}
+        
+        /* Khối chọn tháng & Setting */
+        .header-controls { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+        .month-selector-wrapper { background: #f8f9fa; border-radius: 20px; padding: 4px 10px; display: flex; align-items: center; border: 1px solid #dee2e6; max-width: 145px;}
+        .header-bar input[type="month"] { background: transparent; border: none; color: #198754; font-weight: 700; font-size: 0.85rem; outline: none; cursor: pointer; width: 100%; padding: 0; }
+        .header-bar input[type="month"]::-webkit-calendar-picker-indicator { cursor: pointer; padding: 0; margin-left: 2px; }
+
+        .btn-settings { background: transparent; border: none; color: #6c757d; font-size: 1.3rem; padding: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: color 0.2s; flex-shrink: 0;}
+        .btn-settings:active { color: #198754; }
+
+        /* Bottom Navigation */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; box-shadow: 0 -4px 15px rgba(0,0,0,0.06); display: flex; z-index: 990; padding: 8px 0; padding-bottom: calc(8px + env(safe-area-inset-bottom)); border-top-left-radius: 16px; border-top-right-radius: 16px; }
+        .nav-item { flex: 1; text-align: center; color: #adb5bd; font-size: 11px; cursor: pointer; transition: color 0.2s ease; user-select: none;}
+        .nav-item i { display: block; font-size: 20px; margin-bottom: 4px; }
+        .nav-item.active { color: #198754; font-weight: bold; }
+        
+        /* Floating Action Button (Dấu cộng nổi) */
+        .fab-btn { position: fixed; bottom: calc(78px + env(safe-area-inset-bottom)); right: 18px; width: 54px; height: 54px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 22px; color: white; border: none; box-shadow: 0 4px 14px rgba(0,0,0,0.28); z-index: 980; transition: transform 0.15s ease; }
+        .fab-btn.show { display: flex; }
+        .fab-btn:active { transform: scale(0.92); }
+
+        /* Container & Tabs */
+        .container { width: 100%; max-width: 100%; padding-left: 12px; padding-right: 12px; overflow-x: hidden; box-sizing: border-box; }
+        .tab-pane { display: none; animation: fadeIn 0.2s ease; }
         .tab-pane.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Tìm kiếm & Bộ lọc iOS */
+        .search-box { position: relative; margin-bottom: 12px; }
+        .search-box i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #adb5bd; font-size: 14px; }
+        .search-box input { padding-left: 38px; border-radius: 20px; font-size: 14px; border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         
-        .card { border: none; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 15px; }
+        .segmented-control { display: flex; background: #e9ecef; border-radius: 25px; padding: 3px; position: relative; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); }
+        .segmented-item { flex: 1; text-align: center; font-size: 12px; font-weight: 700; color: #6c757d; padding: 8px 0; cursor: pointer; position: relative; z-index: 2; transition: color 0.3s; user-select: none;}
+        .segmented-item.active { color: #198754; }
+        .segmented-indicator { position: absolute; top: 3px; bottom: 3px; width: calc(33.33% - 2px); background: white; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 1; transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
+
+        /* Kết quả trận đấu Thắng/Nghỉ/Thua */
+        .result-selector { display: flex; background: #e9ecef; border-radius: 8px; padding: 3px; }
+        .result-selector input[type="radio"] { display: none; }
+        .result-selector label { flex: 1; text-align: center; padding: 6px 0; font-size: 12px; font-weight: bold; color: #6c757d; border-radius: 6px; transition: 0.2s; margin: 0; cursor: pointer; user-select: none;}
+        .result-selector input[value="win"]:checked + label { background: #198754; color: white; box-shadow: 0 2px 4px rgba(25,135,84,0.3); }
+        .result-selector input[value="skip"]:checked + label { background: white; color: #212529; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .result-selector input[value="lose"]:checked + label { background: #dc3545; color: white; box-shadow: 0 2px 4px rgba(220,53,69,0.3); }
+
+        /* LƯỚI AVATAR (Tab Thu Quỹ) */
+        .avatar-grid { display: flex; flex-wrap: wrap; gap: 14px 10px; justify-content: flex-start; padding: 12px 10px; background: white; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); margin-bottom: 15px;}
+        .avatar-item { width: calc(25% - 8px); display: flex; flex-direction: column; align-items: center; position: relative; cursor: pointer; user-select: none;}
+        .avatar-circle { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; color: white; transition: transform 0.15s, background-color 0.3s, box-shadow 0.3s; position: relative;}
+        .avatar-item:active .avatar-circle { transform: scale(0.9); }
+        .avatar-unpaid { background-color: #f8d7da; color: #dc3545; border: 2px solid #dc3545;}
+        .avatar-paid { background-color: #198754; box-shadow: 0 4px 10px rgba(25,135,84,0.3); border: 2px solid transparent;}
+        .avatar-name { font-size: 11px; text-align: center; margin-top: 6px; color: #495057; font-weight: 600; line-height: 1.2; width: 100%; word-wrap: break-word;}
+        .avatar-badge-edit { position: absolute; top: -3px; right: -3px; background: #ffc107; color: #000; width: 18px; height: 18px; border-radius: 50%; font-size: 9px; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+
+        /* THẺ CÁ ĐỘ SIÊU NHỎ */
+        .match-card { background: white; border-radius: 12px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); cursor: pointer; transition: all 0.2s; border: 1px solid transparent; user-select: none;}
+        .match-card:active { transform: scale(0.97); }
+        .match-card.completed { opacity: 0.65; background: #f8f9fa; border-color: #e9ecef; order: 99;}
+        .match-title { font-weight: 800; font-size: 14px; color: #212529; margin-bottom: 3px; }
+        .match-date { font-size: 11px; color: #868e96; font-weight: 500;}
+        .match-status { font-size: 12px; font-weight: 800; text-align: right; }
+        .status-debt { color: #dc3545; background: #fff5f5; padding: 2px 8px; border-radius: 6px;}
+        .status-done { color: #198754; background: #e8f5e9; padding: 2px 8px; border-radius: 6px;}
+
+        /* Nút Tick tròn trong Bottom Sheet Cá Độ */
+        .tick-btn { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #adb5bd; background: white; display: flex; align-items: center; justify-content: center; transition: all 0.2s; color: transparent; font-size: 14px; flex-shrink: 0; user-select: none;}
+        .tick-btn.active { background: #198754; border-color: #198754; color: white; transform: scale(1.1); }
+        .tick-btn.unpaid { border-color: #dc3545; color: #dc3545; }
+
+        /* BOTTOM SHEET */
+        .bottom-sheet-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 1040; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(2px);}
+        .bottom-sheet-overlay.show { opacity: 1; pointer-events: auto; }
+        .bottom-sheet { position: fixed; bottom: -100%; left: 0; right: 0; background: #f8f9fa; border-radius: 24px 24px 0 0; z-index: 1050; transition: bottom 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); max-height: 88vh; display: flex; flex-direction: column; box-shadow: 0 -10px 25px rgba(0,0,0,0.1);}
+        .bottom-sheet.show { bottom: 0; }
+        .bs-header { padding: 15px 20px; background: white; border-radius: 24px 24px 0 0; display: flex; flex-direction: column; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.03); z-index: 2;}
+        .bs-drag-handle { width: 45px; height: 6px; background: #dee2e6; border-radius: 3px; margin-bottom: 12px; }
+        .bs-body { padding: 15px; overflow-y: auto; overflow-x: hidden; flex-grow: 1; }
+
+        /* List Items Tối giản */
+        .card-clean { background: white; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); overflow: hidden; margin-bottom: 15px;}
+        .item-clean { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid #f8f9fa; cursor: pointer; user-select: none;}
+        .item-clean:last-child { border-bottom: none; }
+        .item-clean.member-unpaid .mem-name { color: #dc3545; }
+        .item-clean.member-paid { background: #f8f9fa; opacity: 0.9; }
+
+        /* Bảng Tổng Nợ & Thống Kê */
+        .debt-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 15px; border-bottom: 1px solid #f0f2f5; background: white;}
+        .debt-item:last-child { border-bottom: none; }
+        .debt-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+        .debt-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; }
+        .debt-tag-quy { background-color: #fff5f5; color: #dc3545; border: 1px solid #ffc9c9; }
+        .debt-tag-cado { background-color: #fff9db; color: #b45309; border: 1px solid #fde68a; }
+        .btn-settle { border-radius: 20px; padding: 4px 14px; font-size: 12px; font-weight: 800; }
         
-        /* Custom Switch */
-        .form-switch .form-check-input { width: 3.2em; height: 1.6em; cursor: pointer; background-color: #e9ecef; border-color: #dee2e6;}
-        .form-switch .form-check-input:checked { background-color: #198754; border-color: #198754; }
-        
-        /* Fix lỗi Accordion cho mượt mà */
-        .mem-accordion-btn { position: relative; padding-right: 40px !important; }
-        .mem-accordion-btn::after {
-            content: '\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900;
-            position: absolute; right: 15px; top: 50%;
-            transform: translateY(-50%);
-            transition: transform 0.3s ease-in-out; 
-            color: #adb5bd;
-        }
-        .mem-accordion-btn:not(.collapsed)::after {
-            transform: translateY(-50%) rotate(180deg);
-        }
-        
-        .member-unpaid { border-left: 5px solid #dc3545 !important; }
-        .member-paid { border-left: 5px solid #198754 !important; background-color: #f8f9fa !important; opacity: 0.85;}
+        .stat-item { border-bottom: 1px solid #f0f2f5; padding: 12px 15px; }
+        .stat-item:last-child { border-bottom: none; }
+        .stat-bar { height: 6px; border-radius: 4px; background: #e9ecef; overflow: hidden; margin-top: 6px; display: flex;}
     </style>
 </head>
 <body>
 
-    <!-- Header Cải Tiến -->
-    <div class="header-bar">
-        <div class="header-title-container w-100">
-            <h4 class="m-0 mb-1"><i class="fas fa-futbol me-2"></i>FC THẬP CẨM</h4>
-            <div class="month-selector-wrapper">
-                <i class="far fa-calendar-alt me-2 opacity-75"></i>
-                <input type="month" id="monthSelector">
+    <!-- Header Đồng Bộ & Chống Tràn -->
+    <div class="header-bar" id="mainHeader">
+        <!-- Layout cho Tab Thu Quỹ (Header Full) -->
+        <div class="header-full" id="headerFull">
+            <div class="brand-box">
+                <div class="brand-icon"><i class="fas fa-futbol"></i></div>
+                <div class="brand-text">
+                    <h4 class="brand-title">FC THẬP CẨM</h4>
+                    <span class="brand-sub">Quản lý quỹ đội bóng</span>
+                </div>
+            </div>
+            <div class="header-controls">
+                <div class="month-selector-wrapper">
+                    <input type="month" id="monthSelectorMain" class="month-selector">
+                </div>
+                <button class="btn-settings" onclick="switchTab('cai-dat', null)">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Layout cho các Tab khác (Header Gọn) -->
+        <div class="header-compact" id="headerCompact">
+            <h4 class="tab-title" id="headerTabTitle">CÁ ĐỘ</h4>
+            <div class="header-controls">
+                <div class="month-selector-wrapper">
+                    <input type="month" id="monthSelectorCompact" class="month-selector">
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="container mt-4" style="margin-top: -15px !important;">
+    <!-- Main Container -->
+    <div class="container mt-3">
+        
         <!-- TAB 1: THU QUỸ -->
         <div id="tab-thu" class="tab-pane active">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchMemberInput" class="form-control py-2" placeholder="Tìm tên cầu thủ..." oninput="renderThuQuy()">
+            </div>
+            
+            <div class="segmented-control mt-3 mb-2">
+                <div class="segmented-indicator" id="seg-indicator"></div>
+                <div class="segmented-item active" onclick="setFilter('all', 0, this)">Tất cả</div>
+                <div class="segmented-item" onclick="setFilter('unpaid', 1, this)">Chưa nộp</div>
+                <div class="segmented-item" onclick="setFilter('paid', 2, this)">Đã nộp</div>
+            </div>
+            
+            <div class="d-flex justify-content-between align-items-center mb-1 px-1 mt-2">
+                <small class="text-muted fst-italic" style="font-size:11px;">💡 Chạm thu tiền. Nhấn giữ để sửa.</small>
+                <span class="badge bg-white text-success border shadow-sm fw-bold" id="thu-summary-badge">0/0 Đã nộp</span>
+            </div>
             <div id="thu-container">
-                <div class="text-center text-muted mt-5"><i class="fas fa-spinner fa-spin fa-2x"></i><br>Đang tải dữ liệu...</div>
+                <div class="text-center text-muted mt-5"><i class="fas fa-spinner fa-spin fa-2x"></i></div>
             </div>
         </div>
 
         <!-- TAB 2: CÁ ĐỘ -->
         <div id="tab-cado" class="tab-pane">
-            <button class="btn btn-success w-100 mb-4 py-2 rounded-pill fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalMatch">
-                <i class="fas fa-plus-circle me-1"></i> THÊM TRẬN CÁ ĐỘ
-            </button>
-            <div id="cado-container"></div>
+            <div id="cado-container" style="display: flex; flex-direction: column;"></div>
         </div>
 
-        <!-- TAB 3: CHI -->
+        <!-- TAB 3: CHI RA -->
         <div id="tab-chi" class="tab-pane">
-            <button class="btn btn-danger w-100 mb-4 py-2 rounded-pill fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalExpense">
-                <i class="fas fa-file-invoice-dollar me-1"></i> THÊM KHOẢN CHI
-            </button>
+            <div class="card p-3 mb-3 bg-danger bg-opacity-10 border border-danger border-opacity-25 shadow-sm">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-danger small fw-bold text-uppercase d-block"><i class="fas fa-receipt me-1"></i>Tổng chi trong tháng</span>
+                        <small class="text-muted" id="chi-count-label">0 khoản chi</small>
+                    </div>
+                    <h4 class="text-danger fw-bold m-0" id="chi-total-header">0 ₫</h4>
+                </div>
+            </div>
             <div id="chi-container"></div>
         </div>
 
-        <!-- TAB 4: TỔNG KẾT (Cải tiến có Quỹ Tồn Tháng Trước) -->
+        <!-- TAB 4: TỔNG KẾT -->
         <div id="tab-tongket" class="tab-pane">
-            <!-- Quỹ tồn tháng trước -->
-            <div class="card p-3 mb-3 bg-dark text-white border-0 shadow-lg text-center" style="background: linear-gradient(45deg, #212529, #343a40);">
-                <small class="opacity-75 mb-1"><i class="fas fa-history me-1"></i> DƯ QUỸ THÁNG TRƯỚC CHUYỂN SANG</small>
-                <h4 id="tk-tonquythangtruoc" class="m-0 text-warning fw-bold">0 ₫</h4>
-            </div>
-
-            <div class="row g-2 mb-3">
-                <div class="col-6"><div class="card bg-success text-white p-3 text-center h-100 border-0"><small class="opacity-75">Thu Quỹ (Tháng này)</small><h5 id="tk-thuquy" class="mt-1 mb-0">0 ₫</h5></div></div>
-                <div class="col-6"><div class="card bg-info text-white p-3 text-center h-100 border-0"><small class="opacity-75">Cá Độ (Tháng này)</small><h5 id="tk-thucado" class="mt-1 mb-0">0 ₫</h5></div></div>
-                <div class="col-6"><div class="card bg-danger text-white p-3 text-center h-100 border-0"><small class="opacity-75">Tổng Chi (Tháng này)</small><h5 id="tk-tongchi" class="mt-1 mb-0">0 ₫</h5></div></div>
-                <div class="col-6"><div class="card bg-primary text-white p-3 text-center h-100 border-0 shadow"><small class="opacity-75 fw-bold">TỔNG QUỸ HIỆN TẠI</small><h5 id="tk-tonquy" class="mt-1 mb-0">0 ₫</h5></div></div>
-            </div>
-            
-            <div class="card p-3 mb-3 border-start border-danger border-4">
-                <h6 class="text-danger mb-2 fw-bold"><i class="fas fa-exclamation-triangle"></i> CHƯA NỘP QUỸ THÁNG NÀY</h6>
-                <div id="tk-chuanopquy" class="small fw-medium text-secondary">Đang tải...</div>
+            <div class="card bg-success text-white p-3 mb-3 shadow-sm border-0" style="border-radius: 16px;">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <span class="small opacity-75 text-uppercase fw-semibold d-block">Tổng quỹ còn lại</span>
+                        <h2 id="tk-tonquy" class="fw-bold m-0 mt-1">0 ₫</h2>
+                    </div>
+                    <span class="badge bg-white text-success fw-bold px-2 py-1 rounded-pill" id="tk-month-badge">Tháng</span>
+                </div>
+                <div class="row g-2">
+                    <div class="col-6"><div class="bg-white bg-opacity-10 rounded p-2"><span class="small opacity-75 d-block"><i class="fas fa-history me-1"></i>Dư cũ</span><strong class="text-warning" id="tk-tonquythangtruoc">0 ₫</strong></div></div>
+                    <div class="col-6"><div class="bg-white bg-opacity-10 rounded p-2"><span class="small opacity-75 d-block"><i class="fas fa-wallet me-1"></i>+ Thu quỹ</span><strong class="text-white" id="tk-thuquy">0 ₫</strong></div></div>
+                    <div class="col-6"><div class="bg-white bg-opacity-10 rounded p-2"><span class="small opacity-75 d-block"><i class="fas fa-dice me-1"></i>+ Cá độ</span><strong class="text-white" id="tk-thucado">0 ₫</strong></div></div>
+                    <div class="col-6"><div class="bg-white bg-opacity-10 rounded p-2"><span class="small opacity-75 d-block"><i class="fas fa-arrow-down me-1"></i>- Đã chi</span><strong class="text-white" id="tk-tongchi">0 ₫</strong></div></div>
+                </div>
             </div>
             
-            <div class="card p-3 border-start border-warning border-4">
-                <h6 class="text-warning text-dark mb-2 fw-bold"><i class="fas fa-hand-holding-usd"></i> ĐANG NỢ TIỀN CÁ ĐỘ</h6>
-                <div id="tk-nocado" class="small">Đang tải...</div>
+            <div class="card border border-danger border-opacity-25 shadow-sm overflow-hidden mb-4">
+                <div class="d-flex justify-content-between align-items-center p-3 bg-white border-bottom">
+                    <div>
+                        <h6 class="text-danger m-0 fw-bold"><i class="fas fa-user-clock me-1"></i> TỔNG NỢ CẦN THU</h6>
+                        <small class="text-muted" id="tk-debt-sub">0 người nợ</small>
+                    </div>
+                    <span class="badge bg-danger rounded-pill px-3 py-2 fs-6 shadow-sm" id="tk-tongno-badge">0 ₫</span>
+                </div>
+                <div id="tk-bangtongno" class="bg-light"></div>
             </div>
         </div>
 
-        <!-- TAB 5: ĐỘI BÓNG (CÀI ĐẶT) -->
+        <!-- TAB 5: THỐNG KÊ KẾT QUẢ -->
+        <div id="tab-thongke" class="tab-pane">
+            <div class="card p-3 mb-3 bg-info bg-opacity-10 border border-info border-opacity-25 shadow-sm">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-info small fw-bold text-uppercase d-block" style="color: #087990 !important;"><i class="fas fa-chart-line me-1"></i>Thống kê phong độ</span>
+                        <small class="text-muted" id="stat-total-matches">0 trận đấu</small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-clean border shadow-sm" id="stat-container">
+                <div class="text-center text-muted p-4">Đang tính toán...</div>
+            </div>
+        </div>
+
+        <!-- TAB ẨN: CÀI ĐẶT -->
         <div id="tab-cai-dat" class="tab-pane">
-            <h6 class="text-muted text-uppercase small fw-bold mb-3 ps-2">Quản lý Hệ thống</h6>
-            <div class="list-group shadow-sm mb-3" style="border-radius: 15px; overflow: hidden; border: none;">
-                <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 border-bottom-0" onclick="openMemberManager()">
+            <div class="d-flex align-items-center mb-3 mt-2">
+                <button class="btn btn-sm btn-light border shadow-sm rounded-circle me-2" style="width:36px; height:36px;" onclick="switchTab('thu', document.querySelector('.nav-item'))"><i class="fas fa-arrow-left"></i></button>
+                <h6 class="text-muted text-uppercase small fw-bold m-0 ps-1">Cài đặt hệ thống</h6>
+            </div>
+            <div class="list-group shadow-sm mb-3" style="border-radius: 16px; border:none; background:white;">
+                <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 border-0 border-bottom" onclick="openMemberManager()">
                     <div class="d-flex align-items-center">
-                        <div class="bg-primary bg-opacity-10 p-2 rounded text-primary me-3"><i class="fas fa-users fa-lg"></i></div>
-                        <span class="fw-medium text-dark">Quản lý Thành Viên & Phân Đội</span>
+                        <div class="bg-primary bg-opacity-10 p-2 rounded-circle text-primary me-3" style="width:38px; height:38px; display:flex; align-items:center; justify-content:center;"><i class="fas fa-users"></i></div>
+                        <span class="fw-bold text-dark">Thành Viên & Phân Đội</span>
                     </div>
                     <i class="fas fa-chevron-right text-muted small"></i>
                 </button>
-                <div class="border-top" style="margin: 0 15px;"></div>
-                <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 border-top-0" onclick="openFundSettings()">
+                <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 border-0" onclick="openFundSettings()">
                     <div class="d-flex align-items-center">
-                        <div class="bg-warning bg-opacity-10 p-2 rounded text-warning me-3"><i class="fas fa-coins fa-lg"></i></div>
-                        <span class="fw-medium text-dark">Mức Quỹ Mặc Định</span>
+                        <div class="bg-warning bg-opacity-10 p-2 rounded-circle text-warning me-3" style="width:38px; height:38px; display:flex; align-items:center; justify-content:center;"><i class="fas fa-coins"></i></div>
+                        <span class="fw-bold text-dark">Mức Quỹ Mặc Định</span>
                     </div>
                     <div class="d-flex align-items-center">
-                        <span class="text-primary fw-bold small me-2" id="displayDefaultFund">Đang tải...</span>
+                        <span class="text-primary fw-bold small me-2" id="displayDefaultFund">...</span>
                         <i class="fas fa-chevron-right text-muted small"></i>
                     </div>
                 </button>
@@ -179,149 +308,86 @@
         </div>
     </div>
 
-    <!-- Bottom Navigation Tabs -->
-    <div class="bottom-nav">
+    <!-- Nút Dấu Cộng Nổi (FAB) - Nằm Độc lập ngoài tab để chống lỗi -->
+    <button id="globalFabBtn" class="fab-btn bg-success" onclick="handleFabClick()">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav" id="mainBottomNav">
         <div class="nav-item active" onclick="switchTab('thu', this)"><i class="fas fa-wallet"></i>Thu Quỹ</div>
         <div class="nav-item" onclick="switchTab('cado', this)"><i class="fas fa-dice"></i>Cá Độ</div>
         <div class="nav-item" onclick="switchTab('chi', this)"><i class="fas fa-receipt"></i>Chi Ra</div>
         <div class="nav-item" onclick="switchTab('tongket', this)"><i class="fas fa-chart-pie"></i>Tổng Kết</div>
-        <div class="nav-item" onclick="switchTab('cai-dat', this)"><i class="fas fa-cog"></i>Đội Bóng</div>
+        <div class="nav-item" onclick="switchTab('thongke', this)"><i class="fas fa-chart-bar"></i>Thống Kê</div>
     </div>
 
-    <!-- ================= MODALS ================= -->
+    <!-- ================= BOTTOM SHEET CÁ ĐỘ (Thu tiền người thua) ================= -->
+    <div class="bottom-sheet-overlay" id="bsOverlay" onclick="closeMatchSheet()"></div>
+    <div class="bottom-sheet" id="bsMatch">
+        <div class="bs-header w-100">
+            <div class="bs-drag-handle"></div>
+            <div class="d-flex justify-content-between align-items-center w-100 mb-2">
+                <div class="text-truncate flex-grow-1 pe-2">
+                    <h5 class="fw-bold text-dark m-0 text-truncate" id="bsMatchTitle">Tên trận</h5>
+                    <small class="text-success fw-bold" id="bsMatchPenalty">Phạt: 0đ</small> <small class="text-muted ms-1" id="bsMatchDate"></small>
+                </div>
+                <div class="text-end flex-shrink-0">
+                    <span class="badge bg-danger rounded-pill fs-6 shadow-sm" id="bsMatchDebt">Nợ: 0đ</span>
+                </div>
+            </div>
+            <div class="d-flex gap-2 w-100 mt-2">
+                <button class="btn btn-sm btn-light border fw-bold flex-grow-1 text-primary shadow-sm" onclick="openEditMatchResults()"><i class="fas fa-pen me-1"></i>Cập nhật Kết Quả</button>
+                <button class="btn btn-sm btn-light border fw-bold text-danger px-3 shadow-sm" onclick="deleteMatchFromSheet()"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>
+        <div class="bs-body" id="bsMatchContent">
+            <!-- Render người thua -->
+        </div>
+    </div>
 
-    <!-- Modal 1: Quản Lý Thành Viên & Phân đội (Fullscreen) -->
-    <div class="modal fade" id="modalMemberManager" tabindex="-1">
+    <!-- ================= MODALS TÙY CHỈNH ================= -->
+    <div class="modal fade" id="modalCustomFund" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow"><div class="modal-header bg-success text-white border-0 rounded-top-4"><h6 class="modal-title fw-bold">Thu quỹ & Ghi chú</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><input type="hidden" id="customFundMemId"><div class="text-center mb-3"><h5 id="customFundMemName" class="text-dark fw-bold m-0"></h5></div><label class="form-label small fw-bold text-muted">Số tiền đóng:</label><div class="input-group mb-3"><input type="number" id="inputCustomFund" class="form-control form-control-lg fw-bold text-success text-center"><span class="input-group-text bg-light">VNĐ</span></div><label class="form-label small fw-bold text-muted">Ghi chú (Tùy chọn):</label><input type="text" id="inputCustomNote" class="form-control bg-light" placeholder="VD: Đóng trước, nợ lại..."></div><div class="modal-footer p-3 border-0"><button class="btn btn-success w-100 rounded-pill fw-bold py-2 shadow-sm" onclick="saveCustomFund()">CẬP NHẬT</button></div></div></div></div>
+    <div class="modal fade" id="modalFundSettings" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow"><div class="modal-header bg-warning border-0 rounded-top-4"><h6 class="modal-title text-dark fw-bold"><i class="fas fa-coins me-2"></i>Mức quỹ mặc định</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-4 text-center"><p class="text-muted small mb-3">Mức tiền tự động điền khi 1 chạm thu quỹ.</p><div class="input-group"><input type="number" id="inputDefaultFund" class="form-control form-control-lg fw-bold text-primary text-center"><span class="input-group-text bg-light">VNĐ</span></div></div><div class="modal-footer p-3 border-0"><button class="btn btn-warning w-100 rounded-pill fw-bold py-2 text-dark shadow-sm" onclick="saveFundSettings()">LƯU MỨC QUỸ</button></div></div></div></div>
+
+    <!-- Modal CẬP NHẬT KẾT QUẢ TRẬN ĐẤU -->
+    <div class="modal fade" id="modalMatch" tabindex="-1">
         <div class="modal-dialog modal-fullscreen">
             <div class="modal-content bg-light">
-                <div class="modal-header bg-primary text-white border-0">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-users-cog me-2"></i>ĐỘI BÓNG</h5>
+                <div class="modal-header bg-success text-white border-0">
+                    <h6 class="modal-title fw-bold" id="matchModalTitle"><i class="fas fa-trophy me-2"></i>Kết Quả Trận Đấu</h6>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="bg-primary px-3 pb-3 pt-2 d-flex gap-2 rounded-bottom-4 shadow-sm">
-                    <button class="btn btn-light text-primary w-50 fw-bold rounded-pill shadow-sm" onclick="openMemberForm()">
-                        <i class="fas fa-user-plus me-1"></i> CẦU THỦ
-                    </button>
-                    <button class="btn btn-outline-light w-50 fw-bold rounded-pill" onclick="openAddTeamForm()">
-                        <i class="fas fa-layer-group me-1"></i> PHÂN ĐỘI
-                    </button>
-                </div>
-                <div class="modal-body p-2 pt-3">
-                    <div class="accordion" id="accMembers"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Popup Thêm Phân Đội Mới -->
-    <div class="modal fade" id="modalAddTeam" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 rounded-4 shadow">
-                <div class="modal-header bg-primary text-white border-0 rounded-top-4">
-                    <h6 class="modal-title fw-bold"><i class="fas fa-layer-group me-2"></i>Thêm phân đội mới</h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <label class="form-label small text-muted fw-bold mb-1">Tên phân đội:</label>
-                    <input type="text" id="newTeamName" class="form-control form-control-lg bg-light" placeholder="Ví dụ: Đội Khách, Tổ Trọng Tài...">
-                </div>
-                <div class="modal-footer p-3 border-0">
-                    <button class="btn btn-primary w-100 rounded-pill fw-bold py-2" onclick="addTeam()">LƯU PHÂN ĐỘI</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Popup Thêm/Sửa Cầu thủ -->
-    <div class="modal fade" id="modalMemberForm" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 rounded-4 shadow">
-                <div class="modal-header bg-primary text-white border-0 rounded-top-4">
-                    <h6 class="modal-title fw-bold" id="memFormTitle">Thêm cầu thủ</h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <input type="hidden" id="editMemId">
-                    <div class="mb-3">
-                        <label class="form-label small text-muted fw-bold mb-1">Tên cầu thủ:</label>
-                        <input type="text" id="memName" class="form-control bg-light" placeholder="Bắt buộc...">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small text-muted fw-bold mb-1">Thuộc phân đội:</label>
-                        <select id="memTeam" class="form-select bg-light"></select>
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-6">
-                            <label class="form-label small text-muted fw-bold mb-1">Ngày sinh:</label>
-                            <input type="date" id="memDOB" class="form-control bg-light">
+                <div class="modal-body p-0 d-flex flex-column">
+                    <div class="p-3 bg-white shadow-sm border-bottom">
+                        <input type="hidden" id="editMatchId">
+                        <div class="row g-2 mb-2">
+                            <div class="col-6"><label class="form-label small fw-bold mb-1">Ngày đá:</label><input type="date" id="matchDate" class="form-control bg-light" onchange="onMatchDateChange()"></div>
+                            <div class="col-6"><label class="form-label small fw-bold mb-1 text-danger">Mức phạt (₫):</label><input type="number" id="matchPenalty" class="form-control bg-light text-danger fw-bold" value="50000"></div>
                         </div>
-                        <div class="col-6">
-                            <label class="form-label small text-muted fw-bold mb-1">Số điện thoại:</label>
-                            <input type="tel" id="memPhone" class="form-control bg-light" placeholder="09xxxx...">
-                        </div>
+                        <label class="form-label small fw-bold mb-1">Tên trận (Tự động):</label>
+                        <input type="text" id="matchName" class="form-control bg-light" placeholder="VD: Tuần 2 - Thứ 5">
+                    </div>
+                    
+                    <div class="p-2 bg-light fw-bold text-muted small text-center">ĐÁNH DẤU KẾT QUẢ TỪNG CẦU THỦ</div>
+                    <div class="flex-grow-1 overflow-auto p-2" id="match-results-container">
+                        <!-- Danh sách Thắng / Nghỉ / Thua render ở đây -->
                     </div>
                 </div>
-                <div class="modal-footer p-3 border-0">
-                    <button class="btn btn-primary w-100 rounded-pill fw-bold py-2" onclick="saveMember()">LƯU THÔNG TIN</button>
+                <div class="modal-footer p-3 border-0 bg-white shadow-lg">
+                    <button type="button" class="btn btn-success w-100 rounded-pill fw-bold py-2" onclick="saveMatch()">LƯU KẾT QUẢ</button>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Popup Sửa tiền cá nhân -->
-    <div class="modal fade" id="modalCustomFund" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 rounded-4 shadow">
-                <div class="modal-header bg-success text-white border-0 rounded-top-4">
-                    <h6 class="modal-title fw-bold">Tùy chỉnh mức thu</h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4 text-center">
-                    <input type="hidden" id="customFundMemId">
-                    <p class="text-muted mb-3">Nhập số tiền thực tế <strong id="customFundMemName" class="text-dark fs-5"></strong> đã đóng tháng này:</p>
-                    <div class="input-group">
-                        <input type="number" id="inputCustomFund" class="form-control form-control-lg fw-bold text-success text-center">
-                        <span class="input-group-text bg-light">VNĐ</span>
-                    </div>
-                </div>
-                <div class="modal-footer p-3 border-0">
-                    <button class="btn btn-success w-100 rounded-pill fw-bold py-2" onclick="saveCustomFund()">XÁC NHẬN THU</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Popup Cài đặt quỹ -->
-    <div class="modal fade" id="modalFundSettings" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 rounded-4 shadow">
-                <div class="modal-header bg-warning border-0 rounded-top-4">
-                    <h6 class="modal-title text-dark fw-bold"><i class="fas fa-coins me-2"></i>Mức quỹ mặc định</h6>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4 text-center">
-                    <p class="text-muted small mb-3">Số tiền này sẽ được tự điền khi bạn gạt công tắc thu tiền.</p>
-                    <div class="input-group">
-                        <input type="number" id="inputDefaultFund" class="form-control form-control-lg fw-bold text-primary text-center">
-                        <span class="input-group-text bg-light">VNĐ</span>
-                    </div>
-                </div>
-                <div class="modal-footer p-3 border-0">
-                    <button class="btn btn-warning w-100 rounded-pill fw-bold py-2 text-dark" onclick="saveFundSettings()">CẬP NHẬT</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modals Cá độ & Chi -->
-    <div class="modal fade" id="modalMatch" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow"><div class="modal-header bg-success text-white border-0 rounded-top-4"><h6 class="modal-title fw-bold">Thêm Trận Cá Độ</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><label class="form-label small text-muted fw-bold mb-1">Tên trận / Tuần:</label><input type="text" id="matchName" class="form-control bg-light mb-3" placeholder="VD: Trận 1 - Tuần 2"><label class="form-label small text-muted fw-bold mb-1">Ngày thi đấu:</label><input type="date" id="matchDate" class="form-control bg-light mb-3"><label class="form-label small text-muted fw-bold mb-1">Mức phạt (VNĐ):</label><input type="number" id="matchPenalty" class="form-control bg-light" value="50000"></div><div class="modal-footer p-3 border-0"><button type="button" class="btn btn-success w-100 rounded-pill fw-bold py-2" onclick="saveMatch()">Lưu Trận</button></div></div></div></div>
     
-    <div class="modal fade" id="modalLosers" tabindex="-1"><div class="modal-dialog modal-dialog-centered modal-dialog-scrollable"><div class="modal-content border-0 rounded-4 shadow"><div class="modal-header bg-warning border-0 rounded-top-4"><h6 class="modal-title fw-bold">Chọn Người Thua</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-2" id="losers-checkboxes"></div><div class="modal-footer p-3 border-0"><button type="button" class="btn btn-dark w-100 rounded-pill fw-bold py-2" onclick="saveLosers()">Cập nhật danh sách</button></div></div></div></div>
-    
-    <div class="modal fade" id="modalExpense" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow"><div class="modal-header bg-danger text-white border-0 rounded-top-4"><h6 class="modal-title fw-bold">Thêm Khoản Chi</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><label class="form-label small text-muted fw-bold mb-1">Nội dung chi:</label><input type="text" id="expDesc" class="form-control bg-light mb-3" placeholder="VD: Tiền sân, nước..."><label class="form-label small text-muted fw-bold mb-1">Số tiền (VNĐ):</label><input type="number" id="expAmount" class="form-control bg-light"></div><div class="modal-footer p-3 border-0"><button type="button" class="btn btn-danger w-100 rounded-pill fw-bold py-2" onclick="saveExpense()">Lưu Khoản Chi</button></div></div></div></div>
+    <div class="modal fade" id="modalExpense" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow"><div class="modal-header bg-danger text-white border-0 rounded-top-4"><h6 class="modal-title fw-bold" id="expModalTitle">Thêm Khoản Chi</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><input type="hidden" id="editExpId"><label class="form-label small text-muted fw-bold mb-1">Nội dung chi:</label><input type="text" id="expDesc" class="form-control bg-light mb-3" placeholder="VD: Tiền sân, nước..."><label class="form-label small text-muted fw-bold mb-1">Số tiền (VNĐ):</label><input type="number" id="expAmount" class="form-control bg-light mb-3"><label class="form-label small text-muted fw-bold mb-1">Ngày chi:</label><input type="date" id="expDate" class="form-control bg-light"></div><div class="modal-footer p-3 border-0"><button type="button" class="btn btn-danger w-100 rounded-pill fw-bold py-2 shadow-sm" onclick="saveExpense()">LƯU KHOẢN CHI</button></div></div></div></div>
 
+    <div class="modal fade" id="modalMemberManager" tabindex="-1"><div class="modal-dialog modal-fullscreen"><div class="modal-content bg-light"><div class="modal-header bg-primary text-white border-0"><h5 class="modal-title fw-bold"><i class="fas fa-users-cog me-2"></i>Thành Viên</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="bg-primary px-3 pb-3 pt-1 d-flex gap-2 shadow-sm"><button class="btn btn-light text-primary w-50 fw-bold rounded-pill shadow-sm" onclick="openMemberForm()"><i class="fas fa-user-plus me-1"></i> CẦU THỦ</button><button class="btn btn-info text-white w-50 fw-bold rounded-pill shadow-sm border border-light" onclick="openAddTeamForm()"><i class="fas fa-layer-group me-1"></i> PHÂN ĐỘI</button></div><div class="modal-body p-2"><div class="accordion" id="accMembers"></div></div></div></div></div>
+    <div class="modal fade" id="modalAddTeam" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow"><div class="modal-header bg-info text-white border-0 rounded-top-4"><h6 class="modal-title fw-bold"><i class="fas fa-layer-group me-2"></i>Thêm phân đội mới</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><input type="text" id="newTeamName" class="form-control bg-light" placeholder="Tên phân đội..."></div><div class="modal-footer p-3 border-0"><button class="btn btn-info text-white w-100 rounded-pill fw-bold py-2" onclick="addTeam()">LƯU</button></div></div></div></div>
+    <div class="modal fade" id="modalMemberForm" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow"><div class="modal-header bg-primary text-white border-0 rounded-top-4"><h6 class="modal-title fw-bold" id="memFormTitle">Thêm cầu thủ</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><input type="hidden" id="editMemId"><div class="mb-3"><input type="text" id="memName" class="form-control bg-light" placeholder="Tên cầu thủ..."></div><div class="mb-3"><select id="memTeam" class="form-select bg-light"></select></div><div class="row g-2"><div class="col-6"><input type="date" id="memDOB" class="form-control bg-light"></div><div class="col-6"><input type="tel" id="memPhone" class="form-control bg-light" placeholder="SĐT..."></div></div></div><div class="modal-footer p-3 border-0"><button class="btn btn-primary w-100 rounded-pill fw-bold py-2" onclick="saveMember()">LƯU</button></div></div></div></div>
 
-    <!-- Firebase SDKs & Script -->
+    <!-- Firebase SDKs & Logic -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -335,464 +401,597 @@
         });
         const db = getDatabase(app);
 
-        // Global State
         window.state = {
             members: {}, teams: {}, 
-            monthData: { regular: {}, betting: {}, expenses: {} },
-            allFundsData: {}, // Lưu data của tất cả các tháng để tính tồn quỹ
-            globalSettings: { defaultFund: 100000 },
+            monthData: { regular: {}, regular_notes: {}, betting: {}, expenses: {} },
+            allFundsData: {}, globalSettings: { defaultFund: 100000 },
             currentMonth: new Date().toISOString().slice(0, 7),
-            currentMatchId: null
+            activeTab: 'thu', currentFilter: 'all',
+            bsMatchId: null 
         };
         
-        document.getElementById('monthSelector').value = window.state.currentMonth;
-        document.getElementById('matchDate').valueAsDate = new Date();
-        window.formatMoney = (val) => new Intl.NumberFormat('vi-VN').format(val || 0) + ' ₫';
+        document.getElementById('monthSelectorMain').value = window.state.currentMonth;
+        document.getElementById('monthSelectorCompact').value = window.state.currentMonth;
 
-        let monthUnsubscribe = null;
+        window.formatMoney = (val) => new Intl.NumberFormat('vi-VN').format(val || 0) + ' ₫';
+        window.formatShortMoney = (val) => {
+            const num = Number(val) || 0;
+            if (num >= 1000 && num % 1000 === 0) return (num / 1000) + 'k';
+            return new Intl.NumberFormat('vi-VN').format(num) + 'đ';
+        };
+        window.getInitials = (name) => {
+            if(!name) return '?';
+            const words = name.trim().split(' ');
+            return words.pop().charAt(0).toUpperCase();
+        };
+
+        window.generateMatchNameFromDate = (dateStr) => {
+            if(!dateStr) return '';
+            const [y, m, d] = dateStr.split('-').map(Number);
+            const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+            const dayName = days[new Date(y, m - 1, d).getDay()];
+            return `Tuần ${Math.ceil(d / 7)} - ${dayName} (${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')})`;
+        };
+        window.onMatchDateChange = () => {
+            if(!document.getElementById('editMatchId').value || !document.getElementById('matchName').value.trim()) 
+                document.getElementById('matchName').value = window.generateMatchNameFromDate(document.getElementById('matchDate').value);
+        };
 
         function initApp() {
-            // Cài đặt
             onValue(ref(db, 'settings'), (snapshot) => {
                 if (snapshot.exists()) window.state.globalSettings = snapshot.val();
                 document.getElementById('displayDefaultFund').innerText = window.formatMoney(window.state.globalSettings.defaultFund || 100000);
+                renderAll();
             });
-
-            // Phân đội
             onValue(ref(db, 'teams'), (snapshot) => {
-                if (snapshot.exists()) {
-                    window.state.teams = snapshot.val();
-                } else {
-                    push(ref(db, 'teams'), {name: 'Đội Già', order: 1});
-                    push(ref(db, 'teams'), {name: 'Đội Trẻ', order: 2});
-                }
-                updateTeamSelects();
-                renderAll();
+                if (snapshot.exists()) window.state.teams = snapshot.val();
+                updateTeamSelects(); renderAll();
             });
-
-            // Thành viên
             onValue(ref(db, 'members'), (snapshot) => {
-                if (snapshot.exists()) {
-                    window.state.members = snapshot.val();
-                    fixOldMembersData(); 
-                }
+                if (snapshot.exists()) window.state.members = snapshot.val();
+                fixOldMembersData();
                 renderAll();
-                if(document.getElementById('modalMemberManager').classList.contains('show')) renderFullMemberManager();
             });
-
-            // Lấy TẤT CẢ dữ liệu quỹ để tính toán quỹ tồn mang sang
             onValue(ref(db, 'funds'), (snapshot) => {
-                if(snapshot.exists()) {
-                    window.state.allFundsData = snapshot.val();
-                } else {
-                    window.state.allFundsData = {};
-                }
-                
-                // Cập nhật dữ liệu tháng hiện tại
-                window.state.monthData = window.state.allFundsData[window.state.currentMonth] || { regular: {}, betting: {}, expenses: {} };
+                window.state.allFundsData = snapshot.exists() ? snapshot.val() : {};
+                window.state.monthData = window.state.allFundsData[window.state.currentMonth] || { regular: {}, regular_notes: {}, betting: {}, expenses: {} };
                 renderAll();
             });
         }
 
+        // Tự động phân đội dữ liệu cũ vào Team IDs (Batch Update để ko bị lỗi)
         function fixOldMembersData() {
-            let teamGiaId = null; let teamTreId = null;
-            Object.entries(window.state.teams).forEach(([tId, t]) => {
+            const teamEntries = Object.entries(window.state.teams);
+            if(teamEntries.length === 0) return;
+
+            let teamGiaId = null, teamTreId = null;
+            teamEntries.forEach(([tId, t]) => {
                 if(t.name.toLowerCase().includes('già')) teamGiaId = tId;
                 if(t.name.toLowerCase().includes('trẻ')) teamTreId = tId;
             });
-            if(!teamGiaId || !teamTreId) return;
+            const fallbackTeamId = teamEntries[0][0];
+
+            let hasUpdates = false;
+            const updates = {};
 
             Object.entries(window.state.members).forEach(([mId, m]) => {
-                if(m.team && !m.teamId) {
-                    if(m.team === 'Già') m.teamId = teamGiaId;
-                    if(m.team === 'Trẻ') m.teamId = teamTreId;
-                    update(ref(db, `members/${mId}`), { teamId: m.teamId, team: null });
+                if(!m.teamId || !window.state.teams[m.teamId]) {
+                    let targetId = fallbackTeamId;
+                    if(m.team === 'Già' && teamGiaId) targetId = teamGiaId;
+                    else if(m.team === 'Trẻ' && teamTreId) targetId = teamTreId;
+                    
+                    updates[`members/${mId}/teamId`] = targetId;
+                    updates[`members/${mId}/team`] = null;
+                    hasUpdates = true;
                 }
             });
+            if(hasUpdates) update(ref(db), updates);
         }
 
-        // --- HÀM TÍNH TỒN QUỸ CÁC THÁNG TRƯỚC LŨY KẾ ---
         function getCarryOverFund(targetMonthStr) {
-            let previousTotal = 0;
-            
-            // Lấy tất cả các "YYYY-MM" có trong Database, lọc ra những tháng NHỎ HƠN tháng đang chọn
-            const allMonths = Object.keys(window.state.allFundsData).sort();
-            
-            allMonths.forEach(mStr => {
+            let prevTotal = 0;
+            Object.keys(window.state.allFundsData).sort().forEach(mStr => {
                 if (mStr < targetMonthStr) {
                     const mData = window.state.allFundsData[mStr];
-                    
-                    // Tính thu quỹ
-                    let mThuQuy = 0;
-                    Object.values(mData.regular || {}).forEach(amt => mThuQuy += (Number(amt) || 0));
-                    
-                    // Tính thu cá độ
-                    let mThuCaDo = 0;
-                    Object.values(mData.betting || {}).forEach(match => {
-                        Object.values(match.losers || {}).forEach(amt => mThuCaDo += (Number(amt) || 0));
-                    });
-                    
-                    // Tính chi
-                    let mChi = 0;
-                    Object.values(mData.expenses || {}).forEach(exp => mChi += (Number(exp.amount) || 0));
-                    
-                    // Cộng dồn
-                    previousTotal += (mThuQuy + mThuCaDo - mChi);
+                    let tQ = 0, tC = 0, tChi = 0;
+                    Object.values(mData.regular || {}).forEach(a => tQ += (Number(a)||0));
+                    Object.values(mData.betting || {}).forEach(m => Object.values(m.losers||{}).forEach(a => tC += (Number(a)||0)));
+                    Object.values(mData.expenses || {}).forEach(e => tChi += (Number(e.amount)||0));
+                    prevTotal += (tQ + tC - tChi);
                 }
-            });
-            
-            return previousTotal;
+            }); return prevTotal;
         }
 
+        function renderAll() { 
+            renderThuQuy(); renderCaDo(); renderChi(); renderTongKet(); renderThongKe();
+            if(window.state.bsMatchId) renderBottomSheetContent(); 
+        }
 
-        function renderAll() { renderThuQuy(); renderCaDo(); renderChi(); renderTongKet(); }
+        // ================= TAB 1: THU QUỸ =================
+        window.setFilter = (type, index, el) => {
+            window.state.currentFilter = type;
+            document.querySelectorAll('.segmented-item').forEach(btn => btn.classList.remove('active'));
+            el.classList.add('active'); 
+            document.getElementById('seg-indicator').style.transform = `translateX(${index * 100}%)`;
+            renderThuQuy();
+        };
 
-        // --- CẢI TIẾN TAB THU QUỸ ---
-        function renderThuQuy() {
+        window.renderThuQuy = () => {
             const container = document.getElementById('thu-container');
             const defaultFund = window.state.globalSettings.defaultFund || 100000;
-            let html = '';
+            const filter = window.state.currentFilter;
+            const searchKeyword = (document.getElementById('searchMemberInput')?.value || '').trim().toLowerCase();
             
-            Object.entries(window.state.teams).sort((a,b) => a[1].order - b[1].order).forEach(([tId, teamData]) => {
-                let unpaids = [];
-                let paids = [];
-                let teamTotalMoney = 0;
+            let html = ''; let totalMembers = 0; let totalPaid = 0;
+            
+            Object.entries(window.state.teams).sort((a,b) => (a[1].order||0) - (b[1].order||0)).forEach(([tId, tData]) => {
+                let unpaids = []; let paids = []; let tMoney = 0; let tCount = 0;
                 
                 Object.entries(window.state.members).forEach(([mId, m]) => {
                     if(m.teamId === tId) {
-                        const paidAmt = window.state.monthData.regular?.[mId] || 0;
-                        if(paidAmt > 0) {
-                            paids.push({ id: mId, name: m.name, amount: paidAmt });
-                            teamTotalMoney += Number(paidAmt);
-                        } else {
-                            unpaids.push({ id: mId, name: m.name });
-                        }
+                        const paidAmt = Number(window.state.monthData.regular?.[mId]) || 0;
+                        const note = window.state.monthData.regular_notes?.[mId] || '';
+                        tCount++; totalMembers++;
+                        if(searchKeyword && !m.name.toLowerCase().includes(searchKeyword)) return;
+                        if(paidAmt > 0) { totalPaid++; tMoney += paidAmt; paids.push({id: mId, name: m.name, amt: paidAmt, note}); } 
+                        else unpaids.push({id: mId, name: m.name});
                     }
                 });
 
-                const totalTeam = unpaids.length + paids.length;
-                if(totalTeam > 0) {
-                    let percent = Math.round((paids.length / totalTeam) * 100);
-                    
-                    html += `
-                    <div class="mt-3 mb-1 px-1">
-                        <div class="d-flex justify-content-between align-items-end mb-1">
-                            <h6 class="text-success fw-bold m-0 border-start border-success border-4 ps-2 rounded-1"> ${teamData.name.toUpperCase()}</h6>
-                            <small class="text-muted fw-bold">${paids.length}/${totalTeam} Đã nộp</small>
-                        </div>
-                    </div>
-                    
-                    <div class="card p-0 mb-4 border-0 shadow-sm"><ul class="list-group list-group-flush rounded-3">`;
+                if(unpaids.length > 0 || paids.length > 0) {
+                    const dispUnpaid = (filter === 'all' || filter === 'unpaid') ? unpaids : [];
+                    const dispPaid = (filter === 'all' || filter === 'paid') ? paids : [];
 
-                    // Nhóm Chưa Nộp
-                    unpaids.forEach(m => {
-                        html += `
-                        <li class="list-group-item px-3 py-3 border-bottom d-flex justify-content-between align-items-center bg-white member-unpaid">
-                            <span class="fw-bold text-dark">${m.name}</span>
-                            <div class="d-flex align-items-center gap-3">
-                                <span class="badge bg-danger rounded-pill px-2 shadow-sm">Chưa nộp</span>
-                                <div class="form-check form-switch m-0">
-                                    <input class="form-check-input m-0 shadow-sm" type="checkbox" role="switch" onchange="toggleRegularFund('${m.id}', ${defaultFund}, this.checked)">
-                                </div>
-                            </div>
-                        </li>`;
-                    });
-                    
-                    // Nhóm Đã Nộp
-                    paids.forEach(m => {
-                        html += `
-                        <li class="list-group-item px-3 py-3 border-bottom d-flex justify-content-between align-items-center member-paid">
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="text-muted fw-bold">${m.name}</span>
-                            </div>
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="d-flex flex-column align-items-end" onclick="openCustomFund('${m.id}', '${m.name}', ${m.amount})" style="cursor:pointer">
-                                    <span class="text-success fw-bold fs-6">${window.formatMoney(m.amount)}</span>
-                                </div>
-                                <div class="form-check form-switch m-0">
-                                    <input class="form-check-input m-0 shadow-sm" type="checkbox" role="switch" checked onchange="toggleRegularFund('${m.id}', ${defaultFund}, this.checked)">
-                                </div>
-                            </div>
-                        </li>`;
-                    });
-                    
-                    // Header Tổng đội
                     html += `
-                        <li class="list-group-item bg-light border-0 py-2 d-flex justify-content-between align-items-center">
-                            <span class="text-muted fw-bold small">Tổng thu đội này:</span>
-                            <span class="text-primary fw-bold">${window.formatMoney(teamTotalMoney)}</span>
-                        </li>`;
-                    
-                    html += `</ul></div>`;
+                    <div class="d-flex justify-content-between align-items-end mt-4 mb-2 px-1">
+                        <span class="fw-bold text-success text-uppercase border-start border-success border-4 ps-2">${tData.name}</span>
+                        <small class="text-primary fw-bold bg-white px-2 py-1 rounded-pill shadow-sm">Tổng: ${window.formatMoney(tMoney)}</small>
+                    </div>`;
+
+                    if(dispUnpaid.length > 0) {
+                        html += `<div class="avatar-grid">`;
+                        dispUnpaid.forEach(m => {
+                            html += `
+                            <div class="avatar-item" onclick="toggleRegularFund('${m.id}', ${defaultFund}, true)" oncontextmenu="handleLongPress(event, '${m.id}', '${m.name}', ${defaultFund})">
+                                <div class="avatar-circle avatar-unpaid">${window.getInitials(m.name)}</div>
+                                <span class="avatar-name">${m.name}</span>
+                            </div>`;
+                        });
+                        html += `</div>`;
+                    }
+
+                    if(dispPaid.length > 0) {
+                        if(filter === 'paid' || searchKeyword) {
+                            html += `<div class="avatar-grid">`;
+                            dispPaid.forEach(m => {
+                                html += `<div class="avatar-item" onclick="toggleRegularFund('${m.id}', null, false)" oncontextmenu="handleLongPress(event, '${m.id}', '${m.name}', ${m.amt})"><div class="avatar-circle avatar-paid">${window.getInitials(m.name)}${(m.note || m.amt !== defaultFund) ? '<div class="avatar-badge-edit"><i class="fas fa-pen"></i></div>' : ''}</div><span class="avatar-name">${m.name}</span></div>`;
+                            });
+                            html += `</div>`;
+                        } else {
+                            html += `
+                            <div class="bg-white rounded-3 p-2 text-center text-muted fw-bold small shadow-sm mb-3" style="cursor:pointer;" onclick="this.nextElementSibling.classList.toggle('d-none');">
+                                <i class="fas fa-check-circle text-success me-1"></i> Đã nộp (${dispPaid.length} người) <i class="fas fa-chevron-down ms-1"></i>
+                            </div>
+                            <div class="avatar-grid d-none">`;
+                            dispPaid.forEach(m => {
+                                html += `<div class="avatar-item" onclick="toggleRegularFund('${m.id}', null, false)" oncontextmenu="handleLongPress(event, '${m.id}', '${m.name}', ${m.amt})"><div class="avatar-circle avatar-paid">${window.getInitials(m.name)}${(m.note || m.amt !== defaultFund) ? '<div class="avatar-badge-edit"><i class="fas fa-pen"></i></div>' : ''}</div><span class="avatar-name">${m.name}</span></div>`;
+                            });
+                            html += `</div>`;
+                        }
+                    }
                 }
             });
-            container.innerHTML = html;
-        }
 
-        window.toggleRegularFund = (mId, defaultFund, isChecked) => {
-            const val = isChecked ? Number(defaultFund) : null;
-            set(ref(db, `funds/${window.state.currentMonth}/regular/${mId}`), val);
+            document.getElementById('thu-summary-badge').innerText = `${totalPaid}/${totalMembers} Đã nộp`;
+            container.innerHTML = html || '<div class="text-center text-muted mt-5">Không có dữ liệu.</div>';
         };
 
-        window.openCustomFund = (mId, mName, currentAmount) => {
-            document.getElementById('customFundMemId').value = mId;
-            document.getElementById('customFundMemName').innerText = mName;
-            document.getElementById('inputCustomFund').value = currentAmount;
+        window.handleLongPress = (e, mId, mName, amt) => {
+            e.preventDefault(); 
+            window.openCustomFund(mId, mName, amt);
+        };
+
+        window.toggleRegularFund = (mId, amt, isAdding) => {
+            set(ref(db, `funds/${window.state.currentMonth}/regular/${mId}`), isAdding ? amt : null);
+            if(!isAdding) remove(ref(db, `funds/${window.state.currentMonth}/regular_notes/${mId}`));
+        };
+
+        window.openCustomFund = (mId, mName, amt) => {
+            document.getElementById('customFundMemId').value = mId; document.getElementById('customFundMemName').innerText = mName;
+            document.getElementById('inputCustomFund').value = amt;
+            document.getElementById('inputCustomNote').value = window.state.monthData.regular_notes?.[mId] || '';
             new bootstrap.Modal(document.getElementById('modalCustomFund')).show();
         };
 
         window.saveCustomFund = () => {
             const mId = document.getElementById('customFundMemId').value;
             const amt = Number(document.getElementById('inputCustomFund').value);
+            const note = document.getElementById('inputCustomNote').value.trim();
             if(amt > 0) {
-                set(ref(db, `funds/${window.state.currentMonth}/regular/${mId}`), amt).then(() => {
-                    bootstrap.Modal.getInstance(document.getElementById('modalCustomFund')).hide();
-                });
-            } else {
-                alert("Số tiền phải lớn hơn 0");
+                update(ref(db), {
+                    [`funds/${window.state.currentMonth}/regular/${mId}`]: amt,
+                    [`funds/${window.state.currentMonth}/regular_notes/${mId}`]: note || null
+                }).then(() => bootstrap.Modal.getInstance(document.getElementById('modalCustomFund')).hide());
             }
         };
 
-        // --- QUẢN LÝ PHÂN ĐỘI & THÀNH VIÊN ---
-        window.openMemberManager = () => {
-            renderFullMemberManager();
-            new bootstrap.Modal(document.getElementById('modalMemberManager')).show();
-        };
+        // ================= TAB 2: CÁ ĐỘ & KẾT QUẢ =================
+        function renderCaDo() {
+            const container = document.getElementById('cado-container'); 
+            const betting = window.state.monthData.betting || {};
+            if(Object.keys(betting).length === 0) {
+                container.innerHTML = '<div class="text-center text-muted mt-5"><i class="fas fa-box-open fa-2x mb-3 opacity-25"></i><br>Chưa có trận nào.<br><small>Bấm nút (+) để thêm trận.</small></div>';
+                return;
+            }
 
-        function renderFullMemberManager() {
-            const container = document.getElementById('accMembers');
+            const matchesList = Object.entries(betting).map(([mId, m]) => {
+                const total = Number(m.penalty_amount) || 0;
+                let col = 0; const losers = m.losers || {};
+                const count = Object.keys(losers).length;
+                Object.values(losers).forEach(a => col += (Number(a)||0));
+                return { id: mId, ...m, total, count, debt: (count * total) - col, isDone: (count > 0 && ((count * total) - col) <= 0) };
+            }).sort((a,b) => (a.isDone === b.isDone ? 0 : a.isDone ? 1 : -1));
+
             let html = '';
-            
-            Object.entries(window.state.teams).sort((a,b) => a[1].order - b[1].order).forEach(([tId, teamData]) => {
-                const count = Object.values(window.state.members).filter(m => m.teamId === tId).length;
-                
-                // Header phân đội kèm nút sửa/xóa
+            matchesList.forEach(m => {
+                let statusHtml = m.count === 0 ? `<span class="status-debt bg-secondary text-white">Chưa cập nhật KQ</span>` 
+                               : m.debt > 0 ? `<span class="status-debt">Nợ: ${window.formatShortMoney(m.debt)}</span>` 
+                               : `<span class="status-done"><i class="fas fa-check"></i> Đã thu xong</span>`;
+
                 html += `
-                <div class="bg-primary bg-opacity-10 px-3 py-2 d-flex justify-content-between align-items-center mt-3 border-start border-primary border-4 rounded-end">
-                    <span class="text-primary fw-bold text-uppercase">${teamData.name} <span class="badge bg-primary rounded-pill ms-1">${count}</span></span>
-                    <div>
-                        <i class="fas fa-pen text-warning me-3" onclick="editTeam('${tId}', '${teamData.name}')" style="cursor:pointer;"></i>
-                        <i class="fas fa-trash text-danger" onclick="deleteTeam('${tId}', ${count})" style="cursor:pointer;"></i>
+                <div class="match-card ${m.isDone ? 'completed' : ''}" onclick="openMatchSheet('${m.id}')">
+                    <div class="flex-grow-1 text-truncate pe-2">
+                        <div class="match-title text-truncate">${m.name}</div>
+                        <div class="match-date"><i class="far fa-calendar-alt text-success me-1"></i>${m.date ? new Date(m.date).toLocaleDateString('vi-VN') : '---'}</div>
+                    </div>
+                    <div class="text-end flex-shrink-0">
+                        <div class="match-status mb-1">${statusHtml}</div>
+                        <span class="badge bg-light text-secondary border shadow-sm">${window.formatShortMoney(m.total)} / thua</span>
                     </div>
                 </div>`;
-                
+            });
+            container.innerHTML = html;
+        }
+
+        window.openMatchSheet = (matchId) => {
+            window.state.bsMatchId = matchId;
+            document.getElementById('bsOverlay').classList.add('show');
+            document.getElementById('bsMatch').classList.add('show');
+            renderBottomSheetContent();
+        };
+        window.closeMatchSheet = () => {
+            window.state.bsMatchId = null;
+            document.getElementById('bsOverlay').classList.remove('show');
+            document.getElementById('bsMatch').classList.remove('show');
+        };
+        window.deleteMatchFromSheet = () => {
+            if(confirm("Xóa toàn bộ dữ liệu trận đấu này?")) {
+                remove(ref(db, `funds/${window.state.currentMonth}/betting/${window.state.bsMatchId}`));
+                closeMatchSheet();
+            }
+        };
+
+        function renderBottomSheetContent() {
+            const matchId = window.state.bsMatchId; if(!matchId) return;
+            const match = window.state.monthData.betting?.[matchId]; if(!match) return closeMatchSheet();
+
+            const matchTotal = Number(match.penalty_amount) || 0;
+            const losers = match.losers || {};
+            const loserIds = Object.keys(losers);
+            let debtTotal = 0;
+
+            document.getElementById('bsMatchTitle').innerText = match.name;
+            document.getElementById('bsMatchDate').innerText = match.date ? new Date(match.date).toLocaleDateString('vi-VN') : '';
+            document.getElementById('bsMatchPenalty').innerText = `Phạt: ${window.formatShortMoney(matchTotal)}`;
+
+            let html = '<div class="card-clean border">';
+            if(loserIds.length === 0) {
+                html += `<div class="p-4 text-center text-muted fw-bold">Chưa cập nhật kết quả trận này.<br><small class="fw-normal">Bấm "Cập nhật Kết Quả" để đánh dấu Thắng/Thua.</small></div>`;
+            } else {
+                Object.entries(window.state.teams).sort((a,b)=>(a[1].order||0)-(b[1].order||0)).forEach(([tId, t]) => {
+                    let teamHtml = '';
+                    loserIds.forEach(mId => {
+                        const m = window.state.members[mId];
+                        if(m && m.teamId === tId) {
+                            const paidAmt = Number(losers[mId]) || 0;
+                            const isPaid = paidAmt >= matchTotal;
+                            if(!isPaid) debtTotal += (matchTotal - paidAmt);
+
+                            let tickClass = isPaid ? 'tick-btn active' : 'tick-btn unpaid';
+                            let tickIcon = isPaid ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>';
+
+                            teamHtml += `
+                            <div class="item-clean ${isPaid ? 'member-paid' : 'member-unpaid'}" onclick="toggleBettingStatus('${matchId}', '${mId}', ${matchTotal}, ${isPaid})">
+                                <div class="mem-name ${isPaid ? 'text-muted text-decoration-line-through' : ''}">${m.name}</div>
+                                <div class="${tickClass}">${tickIcon}</div>
+                            </div>`;
+                        }
+                    });
+                    if(teamHtml) html += `<div class="bg-light px-3 py-1 fw-bold small text-muted border-bottom">${t.name}</div>` + teamHtml;
+                });
+            }
+            html += '</div>';
+            document.getElementById('bsMatchContent').innerHTML = html;
+            
+            const badgeDebt = document.getElementById('bsMatchDebt');
+            if(debtTotal > 0) { badgeDebt.className = 'badge bg-danger rounded-pill fs-6 shadow-sm'; badgeDebt.innerText = 'Cần thu: ' + window.formatShortMoney(debtTotal); }
+            else if(loserIds.length > 0) { badgeDebt.className = 'badge bg-success rounded-pill fs-6 shadow-sm'; badgeDebt.innerHTML = '<i class="fas fa-check"></i> Đã thu đủ'; }
+            else { badgeDebt.className = 'badge bg-secondary rounded-pill fs-6'; badgeDebt.innerHTML = 'Trống'; }
+        }
+
+        window.toggleBettingStatus = (matchId, mId, matchTotal, isPaid) => {
+            set(ref(db, `funds/${window.state.currentMonth}/betting/${matchId}/losers/${mId}`), isPaid ? 0 : matchTotal);
+        };
+
+        window.renderMatchResultsSelection = (winners = {}, losers = {}) => {
+            let html = '';
+            Object.entries(window.state.teams).sort((a,b)=>(a[1].order||0)-(b[1].order||0)).forEach(([tId, t]) => {
+                html += `<div class="small fw-bold text-primary mt-3 mb-1 px-1 text-uppercase">${t.name}</div>`;
                 Object.entries(window.state.members).forEach(([mId, m]) => {
                     if(m.teamId === tId) {
-                        const phone = m.phone || 'Chưa cập nhật';
-                        const dob = m.dob ? new Date(m.dob).toLocaleDateString('vi-VN') : 'Chưa cập nhật';
+                        const isWin = winners[mId] !== undefined;
+                        const isLose = losers[mId] !== undefined;
+                        const isSkip = !isWin && !isLose;
                         
-                        // Fix lỗi Accordion HTML BS5:
                         html += `
-                        <div class="accordion-item border-0 border-bottom">
-                            <h2 class="accordion-header" id="head_${mId}">
-                                <button class="accordion-button mem-accordion-btn collapsed py-3 px-3 shadow-none bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#col_${mId}" aria-expanded="false" aria-controls="col_${mId}">
-                                    <span class="fw-bold text-dark">${m.name}</span>
-                                </button>
-                            </h2>
-                            <div id="col_${mId}" class="accordion-collapse collapse" aria-labelledby="head_${mId}" data-bs-parent="#accMembers">
-                                <div class="accordion-body p-3 bg-light rounded m-2 shadow-sm border border-white">
-                                    <div class="row g-2 mb-3 small">
-                                        <div class="col-6"><span class="text-muted"><i class="fas fa-phone text-info fa-fw"></i> </span> <strong class="text-dark">${phone}</strong></div>
-                                        <div class="col-6"><span class="text-muted"><i class="fas fa-birthday-cake text-danger fa-fw"></i> </span> <strong class="text-dark">${dob}</strong></div>
-                                    </div>
-                                    <div class="d-flex gap-2">
-                                        <button class="btn btn-sm btn-primary w-50 fw-bold" onclick="openEditMember('${mId}')"><i class="fas fa-pen me-1"></i> Sửa</button>
-                                        <button class="btn btn-sm btn-outline-danger w-50 fw-bold" onclick="deleteMember('${mId}')"><i class="fas fa-trash me-1"></i> Xóa</button>
-                                    </div>
-                                </div>
+                        <div class="d-flex justify-content-between align-items-center border-bottom bg-white px-2 py-2">
+                            <span class="fw-bold text-dark text-truncate pe-2" style="font-size:14px;">${m.name}</span>
+                            <div class="result-selector flex-shrink-0" style="width: 170px;">
+                                <input type="radio" name="res_${mId}" id="win_${mId}" value="win" class="res-radio" data-mid="${mId}" ${isWin ? 'checked' : ''}>
+                                <label for="win_${mId}">Thắng</label>
+                                <input type="radio" name="res_${mId}" id="skip_${mId}" value="skip" class="res-radio" data-mid="${mId}" ${isSkip ? 'checked' : ''}>
+                                <label for="skip_${mId}">Nghỉ</label>
+                                <input type="radio" name="res_${mId}" id="lose_${mId}" value="lose" class="res-radio" data-mid="${mId}" ${isLose ? 'checked' : ''}>
+                                <label for="lose_${mId}">Thua</label>
                             </div>
                         </div>`;
                     }
                 });
             });
-            container.innerHTML = html;
-        }
-
-        // Logic Phân đội
-        window.openAddTeamForm = () => {
-            document.getElementById('newTeamName').value = '';
-            new bootstrap.Modal(document.getElementById('modalAddTeam')).show();
+            document.getElementById('match-results-container').innerHTML = html;
         };
 
-        window.addTeam = () => {
-            const name = document.getElementById('newTeamName').value;
-            if(!name) return alert("Vui lòng nhập tên phân đội!");
-            push(ref(db, 'teams'), {name: name, order: Date.now()}).then(() => {
-                bootstrap.Modal.getInstance(document.getElementById('modalAddTeam')).hide();
-            });
+        window.openAddMatchModal = () => {
+            document.getElementById('editMatchId').value = '';
+            document.getElementById('matchModalTitle').innerHTML = '<i class="fas fa-trophy me-2"></i>Tạo Trận & Kết Quả';
+            const todayStr = new Date().toISOString().slice(0, 10);
+            document.getElementById('matchDate').value = todayStr;
+            document.getElementById('matchName').value = window.generateMatchNameFromDate(todayStr);
+            document.getElementById('matchPenalty').value = '50000';
+            window.renderMatchResultsSelection({}, {});
+            new bootstrap.Modal(document.getElementById('modalMatch')).show();
         };
 
-        window.editTeam = (tId, oldName) => {
-            const newName = prompt("Nhập tên mới cho phân đội:", oldName);
-            if(newName && newName !== oldName) update(ref(db, `teams/${tId}`), {name: newName});
-        };
-
-        window.deleteTeam = (tId, memberCount) => {
-            if(memberCount > 0) return alert("Phân đội đang có người. Vui lòng xóa hoặc đổi đội cho các thành viên trước!");
-            if(confirm("Bạn có chắc muốn xóa phân đội này?")) remove(ref(db, `teams/${tId}`));
-        };
-
-        function updateTeamSelects() {
-            let html = '';
-            Object.entries(window.state.teams).forEach(([tId, t]) => {
-                html += `<option value="${tId}">${t.name}</option>`;
-            });
-            document.getElementById('memTeam').innerHTML = html;
-        }
-
-        // Logic Cầu thủ
-        window.openMemberForm = () => {
-            document.getElementById('editMemId').value = '';
-            document.getElementById('memName').value = '';
-            document.getElementById('memPhone').value = '';
-            document.getElementById('memDOB').value = '';
-            document.getElementById('memFormTitle').innerText = "Thêm cầu thủ mới";
-            new bootstrap.Modal(document.getElementById('modalMemberForm')).show();
-        };
-
-        window.openEditMember = (mId) => {
-            const m = window.state.members[mId];
-            document.getElementById('editMemId').value = mId;
-            document.getElementById('memName').value = m.name;
-            document.getElementById('memTeam').value = m.teamId;
-            document.getElementById('memPhone').value = m.phone || '';
-            document.getElementById('memDOB').value = m.dob || '';
-            document.getElementById('memFormTitle').innerText = "Sửa thông tin: " + m.name;
-            new bootstrap.Modal(document.getElementById('modalMemberForm')).show();
-        };
-
-        window.saveMember = () => {
-            const id = document.getElementById('editMemId').value;
-            const payload = {
-                name: document.getElementById('memName').value,
-                teamId: document.getElementById('memTeam').value,
-                phone: document.getElementById('memPhone').value,
-                dob: document.getElementById('memDOB').value
-            };
-            if(!payload.name) return alert("Vui lòng nhập tên cầu thủ!");
+        window.openEditMatchResults = () => {
+            const matchId = window.state.bsMatchId;
+            const match = window.state.monthData.betting?.[matchId]; if(!match) return;
+            document.getElementById('editMatchId').value = matchId;
+            document.getElementById('matchModalTitle').innerHTML = '<i class="fas fa-trophy me-2"></i>Cập nhật Kết Quả';
+            document.getElementById('matchDate').value = match.date || '';
+            document.getElementById('matchName').value = match.name || '';
+            document.getElementById('matchPenalty').value = match.penalty_amount || 50000;
+            window.renderMatchResultsSelection(match.winners || {}, match.losers || {});
             
-            if(id) update(ref(db, `members/${id}`), payload).then(() => bootstrap.Modal.getInstance(document.getElementById('modalMemberForm')).hide());
-            else push(ref(db, 'members'), payload).then(() => bootstrap.Modal.getInstance(document.getElementById('modalMemberForm')).hide());
+            closeMatchSheet();
+            new bootstrap.Modal(document.getElementById('modalMatch')).show();
         };
 
-        window.deleteMember = (mId) => { if(confirm("Xóa cầu thủ này?")) remove(ref(db, `members/${mId}`)); };
-
-
-        // --- CÁC LOGIC KHÁC ---
-        window.openFundSettings = () => {
-            document.getElementById('inputDefaultFund').value = window.state.globalSettings.defaultFund || 100000;
-            new bootstrap.Modal(document.getElementById('modalFundSettings')).show();
-        };
-        window.saveFundSettings = () => {
-            const amt = Number(document.getElementById('inputDefaultFund').value);
-            if(amt > 0) set(ref(db, 'settings/defaultFund'), amt).then(() => bootstrap.Modal.getInstance(document.getElementById('modalFundSettings')).hide());
-        };
-
-        window.switchTab = (tabId, element) => {
-            document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
-            document.getElementById('tab-' + tabId).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            element.classList.add('active');
-        };
-        
-        document.getElementById('monthSelector').addEventListener('change', (e) => {
-            window.state.currentMonth = e.target.value;
-            
-            // Lấy data tháng vừa chọn
-            window.state.monthData = window.state.allFundsData[window.state.currentMonth] || { regular: {}, betting: {}, expenses: {} };
-            renderAll();
-        });
-
-
-        // CÁ ĐỘ & CHI
-        function renderCaDo() {
-            const container = document.getElementById('cado-container'); const betting = window.state.monthData.betting || {};
-            if(Object.keys(betting).length === 0) return container.innerHTML = '<div class="text-center text-muted mt-5"><i class="fas fa-box-open fa-2x mb-3 text-success opacity-50"></i><br>Chưa có trận cá độ nào trong tháng.</div>';
-            let html = `<div class="accordion" id="accMatches">`;
-            Object.entries(betting).forEach(([matchId, match], index) => {
-                const matchTotal = match.penalty_amount || 0; let collected = 0; const losers = match.losers || {};
-                Object.values(losers).forEach(amt => collected += (Number(amt) || 0)); const debt = (Object.keys(losers).length * matchTotal) - collected;
-                html += `<div class="accordion-item mb-3 border-0 shadow-sm rounded-3 overflow-hidden"><h2 class="accordion-header"><button class="accordion-button ${index === 0 ? '' : 'collapsed'} bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#col${matchId}"><div class="w-100 me-2"><strong class="text-dark d-block fs-6">${match.name}</strong>${match.date ? `<small class="text-muted d-block"><i class="far fa-calendar-alt text-info"></i> ${new Date(match.date).toLocaleDateString('vi-VN')}</small>` : ''}<small class="text-danger fw-bold">Phạt: ${window.formatMoney(matchTotal)}/người</small></div></button></h2><div id="col${matchId}" class="accordion-collapse collapse ${index === 0 ? 'show' : ''}" data-bs-parent="#accMatches"><div class="accordion-body p-0 bg-light"><div class="p-2 d-flex justify-content-between border-bottom"><button class="btn btn-sm btn-dark fw-bold" onclick="openSelectLosersModal('${matchId}')"><i class="fas fa-user-plus"></i> Ds Người Thua</button><button class="btn btn-sm btn-outline-danger" onclick="deleteMatch('${matchId}')"><i class="fas fa-trash"></i> Xóa Trận</button></div><ul class="list-group list-group-flush">`;
-                if(Object.keys(losers).length === 0) html += `<li class="list-group-item text-center text-muted small py-3 bg-light">Chưa chọn người thua</li>`;
-                else Object.entries(losers).forEach(([mId, amt]) => {
-                    const isPaid = Number(amt) >= matchTotal;
-                    html += `<li class="list-group-item px-3 d-flex justify-content-between align-items-center bg-white"><span class="fw-bold ${isPaid ? 'text-muted' : 'text-danger'}">${window.state.members[mId]?.name || 'Unknown'}</span><div class="form-check form-switch m-0 d-flex align-items-center gap-2"><span class="small ${isPaid ? 'text-success' : 'text-danger'} fw-bold">${isPaid ? 'Đã đóng' : 'Còn nợ'}</span><input class="form-check-input m-0 shadow-sm" type="checkbox" role="switch" ${isPaid ? 'checked' : ''} onchange="toggleBettingFund('${matchId}', '${mId}', ${matchTotal}, this.checked)"></div></li>`;
-                });
-                html += `</ul><div class="d-flex justify-content-between px-3 py-3 bg-white rounded-bottom border-top"><span class="text-success fw-bold">Tổng thu: ${window.formatMoney(collected)}</span><span class="text-danger fw-bold">Tổng nợ: ${window.formatMoney(debt)}</span></div></div></div></div>`;
-            });
-            container.innerHTML = html + `</div>`;
-        }
-        window.toggleBettingFund = (matchId, mId, matchTotal, isChecked) => set(ref(db, `funds/${window.state.currentMonth}/betting/${matchId}/losers/${mId}`), isChecked ? Number(matchTotal) : 0);
         window.saveMatch = () => {
-            const name = document.getElementById('matchName').value; const date = document.getElementById('matchDate').value; const penalty = document.getElementById('matchPenalty').value;
-            if(!name || !penalty) return; push(ref(db, `funds/${window.state.currentMonth}/betting`), {name, date, penalty_amount: Number(penalty), losers: {}}).then(() => bootstrap.Modal.getInstance(document.getElementById('modalMatch')).hide());
-        };
-        window.deleteMatch = (matchId) => { if(confirm("Xóa trận này?")) remove(ref(db, `funds/${window.state.currentMonth}/betting/${matchId}`)); };
-        window.openSelectLosersModal = (matchId) => {
-            window.state.currentMatchId = matchId; const losers = window.state.monthData.betting[matchId].losers || {}; let html = '';
-            Object.entries(window.state.members).forEach(([mId, m]) => {
-                html += `<div class="form-check border-bottom py-2 px-4 bg-light mb-1"><input class="form-check-input shadow-sm" type="checkbox" value="${mId}" id="chk_${mId}" ${losers[mId] !== undefined ? 'checked' : ''}><label class="form-check-label w-100 fw-bold text-dark" for="chk_${mId}">${m.name}</label></div>`;
+            const editId = document.getElementById('editMatchId').value;
+            const name = document.getElementById('matchName').value.trim(); 
+            const date = document.getElementById('matchDate').value; 
+            const penalty = Number(document.getElementById('matchPenalty').value);
+            if(!name || !penalty) return alert("Vui lòng nhập tên trận và mức phạt!");
+            
+            const newWinners = {};
+            const newLosers = {};
+            
+            document.querySelectorAll('.res-radio:checked').forEach(radio => {
+                const mId = radio.getAttribute('data-mid');
+                if(radio.value === 'win') newWinners[mId] = true;
+                else if(radio.value === 'lose') newLosers[mId] = 0; 
             });
-            document.getElementById('losers-checkboxes').innerHTML = html; new bootstrap.Modal(document.getElementById('modalLosers')).show();
+
+            if(editId) {
+                const oldMatch = window.state.monthData.betting?.[editId] || {};
+                const oldLosers = oldMatch.losers || {};
+                Object.keys(newLosers).forEach(mId => {
+                    if(oldLosers[mId] !== undefined) newLosers[mId] = oldLosers[mId] >= penalty ? penalty : oldLosers[mId];
+                });
+                update(ref(db, `funds/${window.state.currentMonth}/betting/${editId}`), { name, date, penalty_amount: penalty, winners: newWinners, losers: newLosers })
+                .then(() => bootstrap.Modal.getInstance(document.getElementById('modalMatch')).hide());
+            } else {
+                push(ref(db, `funds/${window.state.currentMonth}/betting`), { name, date, penalty_amount: penalty, winners: newWinners, losers: newLosers })
+                .then(() => bootstrap.Modal.getInstance(document.getElementById('modalMatch')).hide());
+            }
         };
-        window.saveLosers = () => {
-            const matchId = window.state.currentMatchId; const currentLosers = window.state.monthData.betting[matchId].losers || {}; let newLosers = {};
-            document.querySelectorAll('#modalLosers .form-check-input:checked').forEach(chk => { newLosers[chk.value] = currentLosers[chk.value] !== undefined ? currentLosers[chk.value] : 0; });
-            set(ref(db, `funds/${window.state.currentMonth}/betting/${matchId}/losers`), newLosers).then(() => bootstrap.Modal.getInstance(document.getElementById('modalLosers')).hide());
+
+        // ================= TAB 3: CHI RA =================
+        window.openAddExpenseModal = () => {
+            document.getElementById('editExpId').value = ''; document.getElementById('expModalTitle').innerText = 'Thêm Khoản Chi';
+            document.getElementById('expDesc').value = ''; document.getElementById('expAmount').value = '';
+            document.getElementById('expDate').value = new Date().toISOString().slice(0, 10);
+            new bootstrap.Modal(document.getElementById('modalExpense')).show();
         };
-        
+        window.openEditExpenseModal = (expId) => {
+            const exp = window.state.monthData.expenses?.[expId]; if(!exp) return;
+            document.getElementById('editExpId').value = expId; document.getElementById('expModalTitle').innerText = 'Sửa Khoản Chi';
+            document.getElementById('expDesc').value = exp.desc || ''; document.getElementById('expAmount').value = exp.amount || '';
+            document.getElementById('expDate').value = exp.rawDate || new Date().toISOString().slice(0, 10);
+            new bootstrap.Modal(document.getElementById('modalExpense')).show();
+        };
+        window.saveExpense = () => {
+            const editId = document.getElementById('editExpId').value;
+            const desc = document.getElementById('expDesc').value.trim(); const amt = Number(document.getElementById('expAmount').value); const rawDate = document.getElementById('expDate').value;
+            if(!desc || !amt) return; const payload = { desc, amount: amt, date: rawDate ? new Date(rawDate).toLocaleDateString('vi-VN') : new Date().toLocaleDateString('vi-VN'), rawDate };
+            if(editId) update(ref(db, `funds/${window.state.currentMonth}/expenses/${editId}`), payload).then(() => bootstrap.Modal.getInstance(document.getElementById('modalExpense')).hide());
+            else push(ref(db, `funds/${window.state.currentMonth}/expenses`), payload).then(() => bootstrap.Modal.getInstance(document.getElementById('modalExpense')).hide());
+        };
         function renderChi() {
             const container = document.getElementById('chi-container'); const expenses = window.state.monthData.expenses || {};
-            if(Object.keys(expenses).length === 0) return container.innerHTML = '<div class="text-center text-muted mt-5"><i class="fas fa-box-open fa-2x mb-3 text-danger opacity-50"></i><br>Chưa có khoản chi nào trong tháng.</div>';
-            let html = '<ul class="list-group list-group-flush card shadow-sm border-0 rounded-3 overflow-hidden">';
-            Object.entries(expenses).forEach(([expId, exp]) => { html += `<li class="list-group-item d-flex justify-content-between align-items-center py-3"><div><div class="fw-bold text-dark fs-6">${exp.desc}</div><small class="text-muted"><i class="far fa-calendar-alt text-info"></i> ${exp.date}</small></div><div class="d-flex align-items-center gap-3"><strong class="text-danger fs-6">-${window.formatMoney(exp.amount)}</strong><button class="btn btn-sm btn-light text-danger border rounded-circle shadow-sm" style="width:30px; height:30px; padding:0" onclick="deleteExpense('${expId}')"><i class="fas fa-times"></i></button></div></li>`; });
-            container.innerHTML = html + '</ul>';
+            const expEntries = Object.entries(expenses); let totalExp = 0; expEntries.forEach(([_, exp]) => totalExp += (Number(exp.amount)||0));
+            document.getElementById('chi-total-header').innerText = window.formatMoney(totalExp); document.getElementById('chi-count-label').innerText = `${expEntries.length} khoản chi`;
+            if(expEntries.length === 0) return container.innerHTML = '<div class="text-center text-muted mt-5"><i class="fas fa-box-open fa-2x mb-2 opacity-25"></i></div>';
+            let html = '<div class="card-clean border">';
+            expEntries.forEach(([expId, exp]) => { 
+                html += `<div class="item-clean"><div class="text-truncate me-2"><div class="fw-bold text-dark text-truncate">${exp.desc}</div><small class="text-muted"><i class="far fa-calendar-alt me-1 text-info"></i>${exp.date}</small></div><div class="d-flex align-items-center gap-2 flex-shrink-0"><strong class="text-danger me-1">-${window.formatShortMoney(exp.amount)}</strong><button class="btn btn-sm btn-light text-primary border rounded-circle shadow-sm" style="width:30px;height:30px;padding:0" onclick="openEditExpenseModal('${expId}')"><i class="fas fa-pen"></i></button><button class="btn btn-sm btn-light text-danger border rounded-circle shadow-sm" style="width:30px;height:30px;padding:0" onclick="if(confirm('Xóa?')) remove(ref(db, 'funds/${window.state.currentMonth}/expenses/${expId}'))"><i class="fas fa-trash"></i></button></div></div>`; 
+            });
+            container.innerHTML = html + '</div>';
         }
-        window.saveExpense = () => {
-            const desc = document.getElementById('expDesc').value; const amt = document.getElementById('expAmount').value;
-            if(!desc || !amt) return; push(ref(db, `funds/${window.state.currentMonth}/expenses`), {desc, amount: Number(amt), date: new Date().toLocaleDateString('vi-VN')}).then(() => { bootstrap.Modal.getInstance(document.getElementById('modalExpense')).hide(); document.getElementById('expDesc').value = ''; document.getElementById('expAmount').value = ''; });
-        };
-        window.deleteExpense = (expId) => { if(confirm("Hủy khoản chi này?")) remove(ref(db, `funds/${window.state.currentMonth}/expenses/${expId}`)); };
 
-
-        // --- TỔNG KẾT ---
+        // ================= TAB 4: TỔNG KẾT =================
         function renderTongKet() {
-            // Tính toán của THÁNG HIỆN TẠI
-            let thuQuy = 0, thuCaDo = 0, tongChi = 0; const dsNoCaDo = []; const chuaNopQuy = [];
+            const defaultFund = window.state.globalSettings.defaultFund || 100000;
+            let thuQuy = 0, thuCaDo = 0, tongChi = 0; 
             
+            const memberDebts = {};
+            Object.entries(window.state.members).forEach(([mId, m]) => {
+                memberDebts[mId] = { name: m.name, teamName: window.state.teams[m.teamId]?.name || '', quyDebt: 0, cadoDebt: 0, cadoCount: 0 };
+            });
+
+            let unpaidQuyCount = 0; let unpaidCadoPeopleCount = 0;
             Object.values(window.state.monthData.regular || {}).forEach(amt => thuQuy += (Number(amt) || 0));
-            Object.entries(window.state.members).forEach(([mId, m]) => { if((Number(window.state.monthData.regular?.[mId]) || 0) <= 0) chuaNopQuy.push(m.name); });
+            Object.entries(window.state.members).forEach(([mId, _]) => { 
+                if((Number(window.state.monthData.regular?.[mId]) || 0) <= 0 && memberDebts[mId]) { memberDebts[mId].quyDebt = defaultFund; unpaidQuyCount++; }
+            });
             
-            Object.values(window.state.monthData.betting || {}).forEach(match => {
-                const matchTotal = match.penalty_amount || 0;
+            Object.entries(window.state.monthData.betting || {}).forEach(([_, match]) => {
+                const matchTotal = Number(match.penalty_amount) || 0;
                 Object.entries(match.losers || {}).forEach(([mId, amt]) => {
                     const paid = Number(amt) || 0; thuCaDo += paid;
-                    if (paid < matchTotal) dsNoCaDo.push({ mName: window.state.members[mId]?.name, matchName: match.name, debt: matchTotal - paid });
+                    if (paid < matchTotal && memberDebts[mId]) { memberDebts[mId].cadoDebt += (matchTotal - paid); memberDebts[mId].cadoCount += 1; }
                 });
             });
             
             Object.values(window.state.monthData.expenses || {}).forEach(exp => tongChi += (Number(exp.amount) || 0));
-            
-            // Tính LŨY KẾ CÁC THÁNG TRƯỚC (Carry-over)
             const tonQuyThangTruoc = getCarryOverFund(window.state.currentMonth);
+            const tongHienTai = tonQuyThangTruoc + thuQuy + thuCaDo - tongChi;
             
-            // Render số liệu
+            const [y, m] = window.state.currentMonth.split('-');
+            document.getElementById('tk-month-badge').innerText = `Tháng ${m}/${y}`;
             document.getElementById('tk-tonquythangtruoc').innerText = window.formatMoney(tonQuyThangTruoc);
             document.getElementById('tk-thuquy').innerText = window.formatMoney(thuQuy);
             document.getElementById('tk-thucado').innerText = window.formatMoney(thuCaDo);
             document.getElementById('tk-tongchi').innerText = window.formatMoney(tongChi);
-            
-            // TỔNG QUỸ HIỆN TẠI = Dư cũ + Thu mới + Cá độ - Chi mới
-            const tongHienTai = tonQuyThangTruoc + thuQuy + thuCaDo - tongChi;
             document.getElementById('tk-tonquy').innerText = window.formatMoney(tongHienTai);
             
-            // Render danh sách nợ
-            document.getElementById('tk-chuanopquy').innerHTML = chuaNopQuy.length > 0 ? chuaNopQuy.map(n => `<span class="badge bg-danger me-1 mb-1 shadow-sm px-2 py-1">${n}</span>`).join('') : '<span class="text-success fw-bold"><i class="fas fa-check-circle"></i> Đã nộp đủ</span>';
-            if(dsNoCaDo.length === 0) document.getElementById('tk-nocado').innerHTML = '<span class="text-success fw-bold"><i class="fas fa-check-circle"></i> Không ai nợ</span>';
-            else { let htmlNo = '<ul class="list-unstyled mb-0">'; dsNoCaDo.forEach(item => { htmlNo += `<li class="border-bottom py-2 d-flex justify-content-between align-items-center"><span class="fw-bold text-dark">${item.mName} <small class="text-muted fw-normal d-block">(${item.matchName})</small></span><strong class="text-danger">${window.formatMoney(item.debt)}</strong></li>`; }); document.getElementById('tk-nocado').innerHTML = htmlNo + '</ul>'; }
+            const debtors = Object.entries(memberDebts).map(([mId, d]) => { if(d.cadoDebt > 0) unpaidCadoPeopleCount++; return { mId, ...d, totalDebt: d.quyDebt + d.cadoDebt }; }).filter(d => d.totalDebt > 0).sort((a, b) => b.totalDebt - a.totalDebt);
+            document.getElementById('tk-tongno-badge').innerText = window.formatMoney(debtors.reduce((sum, d) => sum + d.totalDebt, 0));
+            document.getElementById('tk-debt-sub').innerText = `Nợ quỹ: ${unpaidQuyCount} • Nợ độ: ${unpaidCadoPeopleCount}`;
+
+            if(debtors.length === 0) document.getElementById('tk-bangtongno').innerHTML = '<div class="text-success fw-bold p-3 text-center"><i class="fas fa-check-circle me-1"></i> Xong! Không còn ai nợ.</div>';
+            else {
+                let htmlDebt = '';
+                debtors.forEach(d => {
+                    let tagsHtml = '';
+                    if(d.quyDebt > 0) tagsHtml += `<span class="debt-tag debt-tag-quy">Quỹ ${window.formatShortMoney(d.quyDebt)}</span>`;
+                    if(d.cadoDebt > 0) tagsHtml += `<span class="debt-tag debt-tag-cado">Độ ${window.formatShortMoney(d.cadoDebt)} (${d.cadoCount}t)</span>`;
+                    htmlDebt += `<div class="debt-item bg-white"><div class="text-truncate flex-grow-1 me-2"><div class="fw-bold text-dark text-truncate" style="font-size:14px;">${d.name} <small class="text-muted fw-normal">(${d.teamName})</small></div><div class="debt-tags">${tagsHtml}</div></div><div class="d-flex align-items-center gap-2 flex-shrink-0"><span class="fw-bold text-danger">${window.formatShortMoney(d.totalDebt)}</span><button class="btn btn-success btn-settle shadow-sm" onclick="settleAllMemberDebt('${d.mId}', '${d.name}', ${d.totalDebt})">Thu</button></div></div>`;
+                });
+                document.getElementById('tk-bangtongno').innerHTML = htmlDebt;
+            }
         }
 
-        // Bắt đầu
+        window.settleAllMemberDebt = (mId, mName, totalDebt) => {
+            if(!confirm(`Xác nhận đã thu ${window.formatMoney(totalDebt)} của ${mName}?`)) return;
+            const defaultFund = window.state.globalSettings.defaultFund || 100000; const updates = {};
+            if((Number(window.state.monthData.regular?.[mId]) || 0) <= 0) updates[`funds/${window.state.currentMonth}/regular/${mId}`] = Number(defaultFund);
+            Object.entries(window.state.monthData.betting || {}).forEach(([matchId, match]) => {
+                const matchTotal = Number(match.penalty_amount) || 0;
+                if(match.losers && match.losers[mId] !== undefined && Number(match.losers[mId]) < matchTotal) updates[`funds/${window.state.currentMonth}/betting/${matchId}/losers/${mId}`] = matchTotal;
+            }); update(ref(db), updates);
+        };
+
+        // ================= TAB 5: THỐNG KÊ =================
+        function renderThongKe() {
+            const container = document.getElementById('stat-container');
+            const betting = window.state.monthData.betting || {};
+            const matchIds = Object.keys(betting);
+            
+            document.getElementById('stat-total-matches').innerText = `${matchIds.length} trận đấu`;
+            if(matchIds.length === 0) return container.innerHTML = '<div class="text-center text-muted p-4"><i class="fas fa-box-open fa-2x mb-2 opacity-25"></i><br>Chưa có dữ liệu thi đấu tháng này.</div>';
+
+            const stats = {};
+            Object.keys(window.state.members).forEach(mId => { stats[mId] = { name: window.state.members[mId].name, win: 0, lose: 0, skip: 0 }; });
+
+            matchIds.forEach(mId => {
+                const match = betting[mId];
+                Object.keys(stats).forEach(memId => {
+                    if((match.winners||{})[memId]) stats[memId].win++;
+                    else if((match.losers||{})[memId] !== undefined) stats[memId].lose++;
+                    else stats[memId].skip++;
+                });
+            });
+
+            const activeStats = Object.values(stats).filter(s => (s.win + s.lose) > 0).sort((a, b) => b.win - a.win || a.lose - b.lose);
+            if(activeStats.length === 0) return container.innerHTML = '<div class="text-center text-muted p-4">Chưa có ai tham gia thi đấu.</div>';
+
+            let html = '';
+            activeStats.forEach((s, index) => {
+                const totalPlayed = s.win + s.lose; const winRate = Math.round((s.win / totalPlayed) * 100);
+                let rankHtml = `<span class="text-muted fw-bold" style="width:20px;">#${index+1}</span>`;
+                if(index === 0) rankHtml = `<i class="fas fa-medal text-warning" style="font-size:18px; width:20px;"></i>`;
+                else if(index === 1) rankHtml = `<i class="fas fa-medal text-secondary" style="font-size:18px; width:20px;"></i>`;
+                else if(index === 2) rankHtml = `<i class="fas fa-medal" style="color: #cd7f32; font-size:18px; width:20px;"></i>`;
+
+                html += `<div class="stat-item bg-white"><div class="d-flex justify-content-between align-items-center mb-1"><div class="d-flex align-items-center gap-2">${rankHtml}<span class="fw-bold text-dark">${s.name}</span></div><div class="d-flex gap-2 text-center" style="font-size:11px;"><div class="bg-success bg-opacity-10 text-success rounded px-2 py-1"><strong>${s.win}</strong> T</div><div class="bg-danger bg-opacity-10 text-danger rounded px-2 py-1"><strong>${s.lose}</strong> B</div><div class="bg-secondary bg-opacity-10 text-secondary rounded px-2 py-1"><strong>${s.skip}</strong> N</div></div></div><div class="d-flex align-items-center gap-2 mt-1"><span class="small text-muted fw-bold" style="font-size:10px; width:25px;">${winRate}%</span><div class="stat-bar flex-grow-1"><div class="bg-success" style="width: ${winRate}%"></div><div class="bg-danger" style="width: ${100 - winRate}%"></div></div></div></div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        // ================= HEADER & CHUYỂN TAB =================
+        window.switchTab = (tabId, element) => {
+            window.state.activeTab = tabId;
+            
+            const headerFull = document.getElementById('headerFull');
+            const headerCompact = document.getElementById('headerCompact');
+            const titleElement = document.getElementById('headerTabTitle');
+
+            if(tabId === 'thu') {
+                headerFull.style.display = 'flex';
+                headerCompact.style.display = 'none';
+            } else if (tabId !== 'cai-dat') {
+                headerFull.style.display = 'none';
+                headerCompact.style.display = 'flex';
+                if(tabId === 'cado') titleElement.innerText = 'CÁ ĐỘ';
+                else if(tabId === 'chi') titleElement.innerText = 'CHI RA';
+                else if(tabId === 'tongket') titleElement.innerText = 'TỔNG KẾT';
+                else if(tabId === 'thongke') titleElement.innerText = 'THỐNG KÊ';
+            } else {
+                headerFull.style.display = 'none';
+                headerCompact.style.display = 'none';
+            }
+
+            document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+            
+            if(element) { 
+                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                element.classList.add('active');
+            }
+
+            const fab = document.getElementById('globalFabBtn');
+            if(tabId === 'cado') { fab.className = 'fab-btn bg-success show'; fab.innerHTML = '<i class="fas fa-plus"></i>'; }
+            else if(tabId === 'chi') { fab.className = 'fab-btn bg-danger show'; fab.innerHTML = '<i class="fas fa-plus"></i>'; }
+            else { fab.className = 'fab-btn'; }
+        };
+
+        window.handleFabClick = () => {
+            if(window.state.activeTab === 'cado') window.openAddMatchModal();
+            else if(window.state.activeTab === 'chi') window.openAddExpenseModal();
+        };
+        
+        document.getElementById('monthSelectorMain').addEventListener('change', (e) => handleMonthChange(e.target.value));
+        document.getElementById('monthSelectorCompact').addEventListener('change', (e) => handleMonthChange(e.target.value));
+
+        function handleMonthChange(newMonth) {
+            window.state.currentMonth = newMonth;
+            document.getElementById('monthSelectorMain').value = newMonth;
+            document.getElementById('monthSelectorCompact').value = newMonth;
+            window.state.monthData = window.state.allFundsData[window.state.currentMonth] || { regular: {}, regular_notes: {}, betting: {}, expenses: {} };
+            renderAll();
+        }
+
         initApp();
     </script>
 </body>
