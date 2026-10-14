@@ -459,7 +459,7 @@
                         <input type="hidden" id="editMatchId">
                         <div class="row g-2 mb-2">
                             <div class="col-6"><label class="form-label small fw-bold mb-1">Ngày đá:</label><input type="date" id="matchDate" class="form-control bg-light" onchange="onMatchDateChange()"></div>
-                            <div class="col-6"><label class="form-label small fw-bold mb-1 text-danger">Tiền độ (₫):</label><input type="number" id="matchPenalty" class="form-control bg-light text-danger fw-bold" value="50000"></div>
+                            <div class="col-6"><label class="form-label small fw-bold mb-1 text-danger">Tiền độ (₫):</label><input type="number" id="matchPenalty" class="form-control bg-light text-danger fw-bold" value="0">
                         </div>
                         <label class="form-label small fw-bold mb-1">Tên trận:</label>
                         <input type="text" id="matchName" class="form-control bg-light" placeholder="VD: Tuần 2 - Thứ 5">
@@ -854,13 +854,14 @@
             document.getElementById('match-results-container').innerHTML = html;
         };
 
-        window.openAddMatchModal = () => {
+       window.openAddMatchModal = () => {
             document.getElementById('editMatchId').value = '';
             document.getElementById('matchModalTitle').innerHTML = '<i class="fas fa-trophy me-2"></i>Tạo Trận & Kết Quả';
             const todayStr = new Date().toISOString().slice(0, 10);
             document.getElementById('matchDate').value = todayStr;
             document.getElementById('matchName').value = window.generateMatchNameFromDate(todayStr);
-            document.getElementById('matchPenalty').value = '50000';
+            // THAY ĐỔI: Đặt mặc định là 0đ khi tạo trận mới
+            document.getElementById('matchPenalty').value = '0';
             window.renderMatchResultsSelection({}, {});
             new bootstrap.Modal(document.getElementById('modalMatch')).show();
         };
@@ -872,7 +873,8 @@
             document.getElementById('matchModalTitle').innerHTML = '<i class="fas fa-trophy me-2"></i>Cập nhật Kết Quả';
             document.getElementById('matchDate').value = match.date || '';
             document.getElementById('matchName').value = match.name || '';
-            document.getElementById('matchPenalty').value = match.penalty_amount || 50000;
+            // THAY ĐỔI: Lấy giá trị cũ, nếu không có thì đặt là 0
+            document.getElementById('matchPenalty').value = match.penalty_amount || 0;
             window.renderMatchResultsSelection(match.winners || {}, match.losers || {});
             
             closeMatchSheet();
@@ -883,8 +885,11 @@
             const editId = document.getElementById('editMatchId').value;
             const name = document.getElementById('matchName').value.trim(); 
             const date = document.getElementById('matchDate').value; 
-            const penalty = Number(document.getElementById('matchPenalty').value);
-            if(!name || !penalty) return alert("Vui lòng nhập tên trận và tiền độ!");
+            // THAY ĐỔI: Chuyển đổi giá trị thành số, nếu trống thì mặc định là 0
+            const penalty = Number(document.getElementById('matchPenalty').value) || 0; 
+            
+            // THAY ĐỔI: Bỏ kiểm tra biến penalty, giờ chỉ cần có tên trận là đủ
+            if(!name) return alert("Vui lòng nhập tên trận đấu!");
             
             const newWinners = {};
             const newLosers = {};
@@ -1380,7 +1385,7 @@
             setTimeout(() => {
                 const exportZone = document.getElementById('report-export-zone');
                 html2canvas(exportZone, { 
-                    scale: 5, // Độ nét x10 theo yêu cầu. (Nếu máy cấu hình yếu bị xuất ra ảnh trắng, hãy giảm xuống 4 hoặc 5)
+                    scale: 10, // Độ nét x10 theo yêu cầu. (Nếu máy cấu hình yếu bị xuất ra ảnh trắng, hãy giảm xuống 4 hoặc 5)
                     useCORS: true, 
                     backgroundColor: '#f4f7f6' 
                 }).then(canvas => {
