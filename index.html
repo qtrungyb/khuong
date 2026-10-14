@@ -1380,7 +1380,7 @@
             setTimeout(() => {
                 const exportZone = document.getElementById('report-export-zone');
                 html2canvas(exportZone, { 
-                    scale: 10, // Độ nét x10 theo yêu cầu. (Nếu máy cấu hình yếu bị xuất ra ảnh trắng, hãy giảm xuống 4 hoặc 5)
+                    scale: 5, // Độ nét x10 theo yêu cầu. (Nếu máy cấu hình yếu bị xuất ra ảnh trắng, hãy giảm xuống 4 hoặc 5)
                     useCORS: true, 
                     backgroundColor: '#f4f7f6' 
                 }).then(canvas => {
