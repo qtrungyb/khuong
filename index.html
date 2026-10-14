@@ -1376,54 +1376,53 @@
             const now = new Date();
             document.getElementById('exp-footer-time').innerText = `🕒 Trích xuất lúc ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')} ngày ${now.toLocaleDateString('vi-VN')} - Vui lòng hoàn thành quỹ cho Thủ quỹ nhé! ⚽❤️`;
 
-            // 3. Chụp Ảnh và Tải Xuống (Xử lý riêng cho iPhone & Độ nét x10)
+            // 3. Chụp Ảnh và Lưu thẳng bằng Native Share (Hỗ trợ iPhone lưu vào Thư Viện)
             setTimeout(() => {
                 const exportZone = document.getElementById('report-export-zone');
                 html2canvas(exportZone, { 
-                    scale: 6, // ĐỘ NÉT THEO YÊU CẦU. (Nếu iPhone xuất ảnh bị trắng tinh do quá tải RAM, hãy tự giảm số 10 này xuống 4 hoặc 5).
+                    scale: 10, // Độ nét x10 theo yêu cầu. (Nếu máy cấu hình yếu bị xuất ra ảnh trắng, hãy giảm xuống 4 hoặc 5)
                     useCORS: true, 
                     backgroundColor: '#f4f7f6' 
                 }).then(canvas => {
-                    const dataUrl = canvas.toDataURL("image/png");
-                    const fileName = `Bao_Cao_FC_Thang_${m}_${y}.png`;
-                    
-                    // Nhận diện xem người dùng có đang xài iPhone/iPad hay không
-                    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-                    
-                    if (isIOS) {
-                        // iOS chặn tải file tự động -> Tạo lớp phủ toàn màn hình để người dùng Nhấn Giữ -> Lưu
-                        const overlay = document.createElement('div');
-                        overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; display:flex; flex-direction:column; align-items:center; overflow-y:auto; backdrop-filter:blur(5px);';
+                    // Đóng gói ảnh thành dạng Blob thay vì chuỗi DataURL để tránh tràn RAM iPhone
+                    canvas.toBlob((blob) => {
+                        if (!blob) {
+                            alert('Lỗi: Bộ nhớ máy không đủ để xử lý scale: 10. Vui lòng giảm scale xuống 4 hoặc 5 trong code.');
+                            btn.innerHTML = oldHtml;
+                            return;
+                        }
                         
-                        const header = document.createElement('div');
-                        header.style.cssText = 'width: 100%; display:flex; justify-content:space-between; padding:20px 20px 5px 20px; align-items:center;';
-                        header.innerHTML = `
-                            <div style="color:#ffc107; font-size:14px; font-weight:bold;"><i class="fas fa-lightbulb me-1"></i> Nhấn giữ ảnh bên dưới để Lưu/Chia sẻ</div>
-                            <div style="color:white; font-size:26px; cursor:pointer; padding:5px;"><i class="fas fa-times"></i></div>
-                        `;
-                        // Bấm dấu X để tắt ảnh
-                        header.children[1].onclick = () => document.body.removeChild(overlay);
+                        const fileName = `Bao_Cao_FC_Thang_${m}_${y}.png`;
+                        const file = new File([blob], fileName, { type: 'image/png' });
 
-                        const img = document.createElement('img');
-                        img.src = dataUrl;
-                        img.style.cssText = 'width:92%; max-width:600px; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.5); margin-top: 15px; margin-bottom:40px;';
-
-                        overlay.appendChild(header);
-                        overlay.appendChild(img);
-                        document.body.appendChild(overlay);
-                    } else {
-                        // Máy tính hoặc Android thì kích hoạt tải thẳng về máy
-                        const link = document.createElement('a');
-                        link.download = fileName;
-                        link.href = dataUrl;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                    }
-                    
-                    btn.innerHTML = oldHtml; // Trả lại trạng thái nút
+                        // Nếu trình duyệt (iPhone/Android đời mới) hỗ trợ Web Share API
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            navigator.share({
+                                files: [file],
+                                title: 'Báo Cáo FC Thập Cẩm',
+                                text: 'Gửi anh em bảng tổng kết quỹ tháng này nhé!'
+                            }).then(() => {
+                                btn.innerHTML = oldHtml;
+                            }).catch((error) => {
+                                console.log('Người dùng hủy chia sẻ', error);
+                                btn.innerHTML = oldHtml;
+                            });
+                        } else {
+                            // Máy tính hoặc trình duyệt cũ không hỗ trợ Share thì tự động tải file xuống
+                            const objUrl = URL.createObjectURL(blob);
+                            const link = document.createElement('a');
+                            link.download = fileName;
+                            link.href = objUrl;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            URL.revokeObjectURL(objUrl);
+                            
+                            btn.innerHTML = oldHtml;
+                        }
+                    }, 'image/png');
                 }).catch(err => {
-                    alert('Lỗi khi tạo ảnh. Nếu bạn xài iPhone mà gặp lỗi này, hãy giảm biến scale xuống mức 4 hoặc 5.');
+                    alert('Lỗi khi vẽ ảnh. Hãy thử giảm scale xuống 5.');
                     console.error(err);
                     btn.innerHTML = oldHtml;
                 });
