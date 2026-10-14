@@ -45,23 +45,24 @@
             gap: 10px;
         }
 
-        /* Layout cho Tab Thu Quỹ (Header Full) */
-        .header-full { display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 8px;}
-        .brand-box { display: flex; align-items: center; gap: 10px; flex-shrink: 1; min-width: 0; overflow: hidden;}
+        /* Layout cho Tab Thu Quỹ (Header Full) - Sửa lại để xuống dòng nếu màn nhỏ */
+        .header-full { display: flex; flex-direction: column; align-items: flex-start; width: 100%; gap: 8px; }
+        .header-full-top { display: flex; justify-content: space-between; width: 100%; align-items: center; }
+        .brand-box { display: flex; align-items: center; gap: 10px; flex-shrink: 1; }
         .brand-icon { width: 36px; height: 36px; background: rgba(25, 135, 84, 0.1); color: #198754; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-        .brand-text { display: flex; flex-direction: column; overflow: hidden; white-space: nowrap; }
-        .brand-title { font-weight: 800; font-size: 1.05rem; margin: 0; line-height: 1.2; color: #212529; text-overflow: ellipsis; overflow: hidden; }
-        .brand-sub { font-size: 0.72rem; color: #6c757d; font-weight: 500; text-overflow: ellipsis; overflow: hidden; }
+        .brand-text { display: flex; flex-direction: column; }
+        .brand-title { font-weight: 800; font-size: 1.15rem; margin: 0; line-height: 1.2; color: #212529; white-space: normal; } /* Bỏ overflow, cho phép xuống dòng nếu cần */
         
         /* Layout cho các Tab Khác (Header Gọn) */
-        .header-compact { display: none; justify-content: space-between; align-items: center; width: 100%; gap: 10px;}
-        .tab-title { font-weight: 800; font-size: 1.1rem; margin: 0; color: #212529; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 1;}
+        .header-compact { display: none; flex-direction: column; align-items: flex-start; width: 100%; gap: 8px; }
+        .header-compact-top { display: flex; justify-content: space-between; width: 100%; align-items: center; }
+        .tab-title { font-weight: 800; font-size: 1.2rem; margin: 0; color: #212529; text-transform: uppercase; letter-spacing: 0.5px; }
         
         /* Khối chọn tháng & Setting */
-        .header-controls { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-        .month-selector-wrapper { background: #f8f9fa; border-radius: 20px; padding: 4px 10px; display: flex; align-items: center; border: 1px solid #dee2e6; max-width: 145px;}
-        .header-bar input[type="month"] { background: transparent; border: none; color: #198754; font-weight: 700; font-size: 0.85rem; outline: none; cursor: pointer; width: 100%; padding: 0; }
-        .header-bar input[type="month"]::-webkit-calendar-picker-indicator { cursor: pointer; padding: 0; margin-left: 2px; }
+        .header-controls { display: flex; align-items: center; gap: 8px; width: 100%; justify-content: space-between;} /* Trải đều ra 2 bên */
+        .month-selector-wrapper { background: #f8f9fa; border-radius: 20px; padding: 6px 14px; display: flex; align-items: center; border: 1px solid #dee2e6; max-width: none; flex-grow: 1; } /* Bỏ max-width để hiện đầy đủ chữ, kéo dài ra */
+        .header-bar input[type="month"] { background: transparent; border: none; color: #198754; font-weight: 700; font-size: 0.9rem; outline: none; cursor: pointer; width: 100%; padding: 0; }
+        .header-bar input[type="month"]::-webkit-calendar-picker-indicator { cursor: pointer; padding: 0; margin-left: 6px; transform: scale(1.2); } /* Phóng to icon lịch 1 chút */
 
         .btn-settings { background: transparent; border: none; color: #6c757d; font-size: 1.3rem; padding: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: color 0.2s; flex-shrink: 0;}
         .btn-settings:active { color: #198754; }
@@ -84,9 +85,20 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* Tìm kiếm & Bộ lọc iOS */
-        .search-box { position: relative; margin-bottom: 12px; }
-        .search-box i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #adb5bd; font-size: 14px; }
-        .search-box input { padding-left: 38px; border-radius: 20px; font-size: 14px; border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .search-box { position: relative; margin-bottom: 16px; padding: 2px; } /* Thêm padding nhẹ để tránh shadow bị cắt */
+        .search-box i { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #adb5bd; font-size: 15px; z-index: 2; pointer-events: none;}
+        .search-box input { 
+            padding-left: 42px !important; /* Đẩy chữ xa icon hơn */
+            border-radius: 25px !important; /* Bo góc tròn hơn */
+            font-size: 14px; 
+            border: 1px solid #ced4da !important; /* Hiển thị rõ viền bao quanh */
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06); /* Giữ bóng mờ */
+            height: 42px; /* Tăng chiều cao lên 1 chút cho cân đối */
+        }
+        .search-box input:focus {
+            border-color: #198754 !important; /* Viền xanh khi bấm vào */
+            box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25) !important; /* Hiệu ứng glow xanh Bootstrap */
+        }
         
         .segmented-control { display: flex; background: #e9ecef; border-radius: 25px; padding: 3px; position: relative; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); }
         .segmented-item { flex: 1; text-align: center; font-size: 12px; font-weight: 700; color: #6c757d; padding: 8px 0; cursor: pointer; position: relative; z-index: 2; transition: color 0.3s; user-select: none;}
@@ -154,6 +166,31 @@
         .stat-item { border-bottom: 1px solid #f0f2f5; padding: 12px 15px; }
         .stat-item:last-child { border-bottom: none; }
         .stat-bar { height: 6px; border-radius: 4px; background: #e9ecef; overflow: hidden; margin-top: 6px; display: flex;}
+		/* --- CSS MỚI CHO THÀNH VIÊN & PHÂN ĐỘI --- */
+        .team-group { background: #fff; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); margin-bottom: 16px; overflow: hidden; border: 1px solid #f0f2f5; }
+        .team-header { padding: 14px 16px; background: #f8f9fa; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f2f5; cursor: pointer; user-select: none; }
+        .team-header-title { font-weight: 800; color: #212529; text-transform: uppercase; font-size: 14px; display: flex; align-items: center; gap: 8px;}
+        .team-header-title i { color: #0d6efd; }
+        
+        .mem-list { display: none; }
+        .mem-list.show { display: block; animation: fadeIn 0.2s ease; }
+        
+        .mem-item { padding: 12px 16px; border-bottom: 1px solid #f0f2f5; position: relative; transition: background-color 0.2s; }
+        .mem-item:last-child { border-bottom: none; }
+        .mem-item:active { background-color: #f8f9fa; }
+        
+        .mem-info-row { display: flex; justify-content: space-between; align-items: center; }
+        .mem-name-text { font-weight: 700; color: #343a40; font-size: 15px; }
+        .mem-meta { font-size: 12px; color: #6c757d; margin-top: 4px; display: flex; gap: 12px; align-items: center;}
+        
+        .mem-actions { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #dee2e6; justify-content: flex-end; gap: 8px; }
+        .mem-item.expanded .mem-actions { display: flex; }
+        .mem-item.expanded .fa-chevron-down { transform: rotate(180deg); }
+        .chevron-icon { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); color: #adb5bd; }
+        
+        .btn-action-sm { border-radius: 20px; padding: 4px 14px; font-size: 12px; font-weight: 700; border: 1px solid #dee2e6; background: white; color: #495057; display: flex; align-items: center; gap: 6px; }
+        .btn-action-sm.edit:active { background: #e7f1ff; border-color: #0d6efd; color: #0d6efd; }
+        .btn-action-sm.delete:active { background: #f8d7da; border-color: #dc3545; color: #dc3545; }
     </style>
 </head>
 <body>
@@ -162,26 +199,32 @@
     <div class="header-bar" id="mainHeader">
         <!-- Layout cho Tab Thu Quỹ (Header Full) -->
         <div class="header-full" id="headerFull">
-            <div class="brand-box">
-                <div class="brand-icon"><i class="fas fa-futbol"></i></div>
-                <div class="brand-text">
-                    <h4 class="brand-title">FC THẬP CẨM</h4>
-                    <span class="brand-sub">Quản lý quỹ đội bóng</span>
-                </div>
-            </div>
-            <div class="header-controls">
-                <div class="month-selector-wrapper">
-                    <input type="month" id="monthSelectorMain" class="month-selector">
+            <div class="header-full-top">
+                <div class="brand-box">
+                    <div class="brand-icon"><i class="fas fa-futbol"></i></div>
+                    <div class="brand-text">
+                        <h4 class="brand-title">FC THẬP CẨM</h4>
+                    </div>
                 </div>
                 <button class="btn-settings" onclick="switchTab('cai-dat', null)">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
+            <div class="header-controls">
+                <div class="month-selector-wrapper">
+                    <input type="month" id="monthSelectorMain" class="month-selector">
+                </div>
+            </div>
         </div>
 
         <!-- Layout cho các Tab khác (Header Gọn) -->
         <div class="header-compact" id="headerCompact">
-            <h4 class="tab-title" id="headerTabTitle">CÁ ĐỘ</h4>
+            <div class="header-compact-top">
+                <h4 class="tab-title" id="headerTabTitle">CÁ ĐỘ</h4>
+                <button class="btn-settings" onclick="switchTab('cai-dat', null)" style="visibility: hidden;"> <!-- Giữ cân bằng layout, ẩn đi nút setting thừa -->
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
             <div class="header-controls">
                 <div class="month-selector-wrapper">
                     <input type="month" id="monthSelectorCompact" class="month-selector">
@@ -237,6 +280,59 @@
 
         <!-- TAB 4: TỔNG KẾT -->
         <div id="tab-tongket" class="tab-pane">
+            
+            <!-- NÚT XUẤT BÁO CÁO ẢNH -->
+            <button id="btnExportImage" class="btn btn-primary w-100 mb-3 fw-bold rounded-pill shadow-sm py-2" onclick="exportReportImage()" style="background: linear-gradient(135deg, #0d6efd, #0b5ed7); border: none;">
+                <i class="fas fa-camera-retro me-2"></i> XUẤT ẢNH BÁO CÁO NHÓM
+            </button>
+
+            <!-- BẢN THIẾT KẾ ẨN DÙNG ĐỂ CHỤP ẢNH (BỔ SUNG THU QUỸ, THU ĐỘ) -->
+            <div id="report-export-zone" style="position: fixed; left: -9999px; top: 0; width: 800px; background: #f4f7f6; padding: 24px; font-family: system-ui, -apple-system, sans-serif; z-index: -1;">
+                <!-- Header Ảnh -->
+                <div style="background: white; border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                    <div style="font-size: 28px; font-weight: 900; color: #198754; text-transform: uppercase;">BẢNG VÀNG QUỸ FC THẬP CẨM</div>
+                    <div style="font-size: 18px; color: #6c757d; font-weight: bold; margin-top: 8px;" id="exp-month">Tổng kết Tháng...</div>
+                    
+                    <!-- Lưới 5 Cột Tổng Kết -->
+                    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 24px;">
+                        <div style="background: #fff3cd; padding: 12px 6px; border-radius: 12px; border: 1px solid #ffe69c;">
+                            <div style="font-size: 11px; color: #664d03; font-weight: bold;">TỒN ĐẦU KỲ</div>
+                            <div style="font-size: 17px; font-weight: 900; color: #997404; margin-top: 4px;" id="exp-old">0đ</div>
+                        </div>
+                        <div style="background: #e2e3e5; padding: 12px 6px; border-radius: 12px; border: 1px solid #d3d6d8;">
+                            <div style="font-size: 11px; color: #41464b; font-weight: bold;">+ THU QUỸ</div>
+                            <div style="font-size: 17px; font-weight: 900; color: #212529; margin-top: 4px;" id="exp-thuquy">0đ</div>
+                        </div>
+                        <div style="background: #cff4fc; padding: 12px 6px; border-radius: 12px; border: 1px solid #b6effb;">
+                            <div style="font-size: 11px; color: #055160; font-weight: bold;">+ THU ĐỘ</div>
+                            <div style="font-size: 17px; font-weight: 900; color: #087990; margin-top: 4px;" id="exp-thucado">0đ</div>
+                        </div>
+                        <div style="background: #f8d7da; padding: 12px 6px; border-radius: 12px; border: 1px solid #f5c2c7;">
+                            <div style="font-size: 11px; color: #842029; font-weight: bold;">- TỔNG CHI</div>
+                            <div style="font-size: 17px; font-weight: 900; color: #dc3545; margin-top: 4px;" id="exp-chi">0đ</div>
+                        </div>
+                        <div style="background: #d1e7dd; padding: 12px 6px; border-radius: 12px; border: 1px solid #badbcc;">
+                            <div style="font-size: 11px; color: #0f5132; font-weight: bold;">QUỸ HIỆN TẠI</div>
+                            <div style="font-size: 17px; font-weight: 900; color: #198754; margin-top: 4px;" id="exp-now">0đ</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Body Ảnh Lưỡng Cực -->
+                <div style="display: flex; gap: 16px; align-items: flex-start;">
+                    <!-- Cột Đã Nộp -->
+                    <div style="flex: 1; background: white; border-radius: 16px; padding: 20px; border-top: 6px solid #198754; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                        <h4 style="color: #198754; font-weight: 800; margin-top: 0; margin-bottom: 16px; font-size: 18px;"><i class="fas fa-check-circle"></i> ĐÃ NỘP QUỸ & ĐỘ</h4>
+                        <div id="exp-paid-list"></div>
+                    </div>
+                    <!-- Cột Nợ -->
+                    <div style="flex: 1; background: white; border-radius: 16px; padding: 20px; border-top: 6px solid #dc3545; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                        <h4 style="color: #dc3545; font-weight: 800; margin-top: 0; margin-bottom: 16px; font-size: 18px;"><i class="fas fa-exclamation-triangle"></i> CẦN THU (NỢ)</h4>
+                        <div id="exp-debt-list"></div>
+                    </div>
+                </div>
+                <div style="margin-top: 20px; text-align: center; font-size: 14px; color: #6c757d; font-style: italic;" id="exp-footer-time"></div>
+            </div>
             <div class="card bg-success text-white p-3 mb-3 shadow-sm border-0" style="border-radius: 16px;">
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <div>
@@ -317,7 +413,7 @@
     <div class="bottom-nav" id="mainBottomNav">
         <div class="nav-item active" onclick="switchTab('thu', this)"><i class="fas fa-wallet"></i>Thu Quỹ</div>
         <div class="nav-item" onclick="switchTab('cado', this)"><i class="fas fa-dice"></i>Cá Độ</div>
-        <div class="nav-item" onclick="switchTab('chi', this)"><i class="fas fa-receipt"></i>Chi Ra</div>
+        <div class="nav-item" onclick="switchTab('chi', this)"><i class="fas fa-receipt"></i>Chi Quỹ</div>
         <div class="nav-item" onclick="switchTab('tongket', this)"><i class="fas fa-chart-pie"></i>Tổng Kết</div>
         <div class="nav-item" onclick="switchTab('thongke', this)"><i class="fas fa-chart-bar"></i>Thống Kê</div>
     </div>
@@ -330,7 +426,7 @@
             <div class="d-flex justify-content-between align-items-center w-100 mb-2">
                 <div class="text-truncate flex-grow-1 pe-2">
                     <h5 class="fw-bold text-dark m-0 text-truncate" id="bsMatchTitle">Tên trận</h5>
-                    <small class="text-success fw-bold" id="bsMatchPenalty">Phạt: 0đ</small> <small class="text-muted ms-1" id="bsMatchDate"></small>
+                    <small class="text-success fw-bold" id="bsMatchPenalty">Tiền độ: 0đ</small> <small class="text-muted ms-1" id="bsMatchDate"></small>
                 </div>
                 <div class="text-end flex-shrink-0">
                     <span class="badge bg-danger rounded-pill fs-6 shadow-sm" id="bsMatchDebt">Nợ: 0đ</span>
@@ -363,9 +459,9 @@
                         <input type="hidden" id="editMatchId">
                         <div class="row g-2 mb-2">
                             <div class="col-6"><label class="form-label small fw-bold mb-1">Ngày đá:</label><input type="date" id="matchDate" class="form-control bg-light" onchange="onMatchDateChange()"></div>
-                            <div class="col-6"><label class="form-label small fw-bold mb-1 text-danger">Mức phạt (₫):</label><input type="number" id="matchPenalty" class="form-control bg-light text-danger fw-bold" value="50000"></div>
+                            <div class="col-6"><label class="form-label small fw-bold mb-1 text-danger">Tiền độ (₫):</label><input type="number" id="matchPenalty" class="form-control bg-light text-danger fw-bold" value="50000"></div>
                         </div>
-                        <label class="form-label small fw-bold mb-1">Tên trận (Tự động):</label>
+                        <label class="form-label small fw-bold mb-1">Tên trận:</label>
                         <input type="text" id="matchName" class="form-control bg-light" placeholder="VD: Tuần 2 - Thứ 5">
                     </div>
                     
@@ -384,11 +480,12 @@
     <div class="modal fade" id="modalExpense" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow"><div class="modal-header bg-danger text-white border-0 rounded-top-4"><h6 class="modal-title fw-bold" id="expModalTitle">Thêm Khoản Chi</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><input type="hidden" id="editExpId"><label class="form-label small text-muted fw-bold mb-1">Nội dung chi:</label><input type="text" id="expDesc" class="form-control bg-light mb-3" placeholder="VD: Tiền sân, nước..."><label class="form-label small text-muted fw-bold mb-1">Số tiền (VNĐ):</label><input type="number" id="expAmount" class="form-control bg-light mb-3"><label class="form-label small text-muted fw-bold mb-1">Ngày chi:</label><input type="date" id="expDate" class="form-control bg-light"></div><div class="modal-footer p-3 border-0"><button type="button" class="btn btn-danger w-100 rounded-pill fw-bold py-2 shadow-sm" onclick="saveExpense()">LƯU KHOẢN CHI</button></div></div></div></div>
 
     <div class="modal fade" id="modalMemberManager" tabindex="-1"><div class="modal-dialog modal-fullscreen"><div class="modal-content bg-light"><div class="modal-header bg-primary text-white border-0"><h5 class="modal-title fw-bold"><i class="fas fa-users-cog me-2"></i>Thành Viên</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="bg-primary px-3 pb-3 pt-1 d-flex gap-2 shadow-sm"><button class="btn btn-light text-primary w-50 fw-bold rounded-pill shadow-sm" onclick="openMemberForm()"><i class="fas fa-user-plus me-1"></i> CẦU THỦ</button><button class="btn btn-info text-white w-50 fw-bold rounded-pill shadow-sm border border-light" onclick="openAddTeamForm()"><i class="fas fa-layer-group me-1"></i> PHÂN ĐỘI</button></div><div class="modal-body p-2"><div class="accordion" id="accMembers"></div></div></div></div></div>
-    <div class="modal fade" id="modalAddTeam" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow"><div class="modal-header bg-info text-white border-0 rounded-top-4"><h6 class="modal-title fw-bold"><i class="fas fa-layer-group me-2"></i>Thêm phân đội mới</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><input type="text" id="newTeamName" class="form-control bg-light" placeholder="Tên phân đội..."></div><div class="modal-footer p-3 border-0"><button class="btn btn-info text-white w-100 rounded-pill fw-bold py-2" onclick="addTeam()">LƯU</button></div></div></div></div>
+    <div class="modal fade" id="modalAddTeam" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow"><div class="modal-header bg-info text-white border-0 rounded-top-4"><h6 class="modal-title fw-bold" id="teamModalTitle"><i class="fas fa-layer-group me-2"></i>Thêm phân đội mới</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><input type="hidden" id="editTeamId"><input type="text" id="newTeamName" class="form-control bg-light" placeholder="Tên phân đội..."></div><div class="modal-footer p-3 border-0"><button class="btn btn-info text-white w-100 rounded-pill fw-bold py-2" onclick="addTeam()">LƯU</button></div></div></div></div>
     <div class="modal fade" id="modalMemberForm" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow"><div class="modal-header bg-primary text-white border-0 rounded-top-4"><h6 class="modal-title fw-bold" id="memFormTitle">Thêm cầu thủ</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><input type="hidden" id="editMemId"><div class="mb-3"><input type="text" id="memName" class="form-control bg-light" placeholder="Tên cầu thủ..."></div><div class="mb-3"><select id="memTeam" class="form-select bg-light"></select></div><div class="row g-2"><div class="col-6"><input type="date" id="memDOB" class="form-control bg-light"></div><div class="col-6"><input type="tel" id="memPhone" class="form-control bg-light" placeholder="SĐT..."></div></div></div><div class="modal-footer p-3 border-0"><button class="btn btn-primary w-100 rounded-pill fw-bold py-2" onclick="saveMember()">LƯU</button></div></div></div></div>
 
     <!-- Firebase SDKs & Logic -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue, set, push, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
@@ -445,12 +542,18 @@
             });
             onValue(ref(db, 'teams'), (snapshot) => {
                 if (snapshot.exists()) window.state.teams = snapshot.val();
+                else window.state.teams = {}; // Đảm bảo không bị lỗi nếu xóa hết team
                 updateTeamSelects(); renderAll();
+                // TỰ ĐỘNG VẼ LẠI NẾU MODAL ĐANG MỞ
+                if(document.getElementById('modalMemberManager').classList.contains('show')) renderMemberManager();
             });
             onValue(ref(db, 'members'), (snapshot) => {
                 if (snapshot.exists()) window.state.members = snapshot.val();
+                else window.state.members = {};
                 fixOldMembersData();
                 renderAll();
+                // TỰ ĐỘNG VẼ LẠI NẾU MODAL ĐANG MỞ
+                if(document.getElementById('modalMemberManager').classList.contains('show')) renderMemberManager();
             });
             onValue(ref(db, 'funds'), (snapshot) => {
                 window.state.allFundsData = snapshot.exists() ? snapshot.val() : {};
@@ -682,7 +785,7 @@
 
             document.getElementById('bsMatchTitle').innerText = match.name;
             document.getElementById('bsMatchDate').innerText = match.date ? new Date(match.date).toLocaleDateString('vi-VN') : '';
-            document.getElementById('bsMatchPenalty').innerText = `Phạt: ${window.formatShortMoney(matchTotal)}`;
+            document.getElementById('bsMatchPenalty').innerText = `Tiền độ: ${window.formatShortMoney(matchTotal)}`;
 
             let html = '<div class="card-clean border">';
             if(loserIds.length === 0) {
@@ -781,7 +884,7 @@
             const name = document.getElementById('matchName').value.trim(); 
             const date = document.getElementById('matchDate').value; 
             const penalty = Number(document.getElementById('matchPenalty').value);
-            if(!name || !penalty) return alert("Vui lòng nhập tên trận và mức phạt!");
+            if(!name || !penalty) return alert("Vui lòng nhập tên trận và tiền độ!");
             
             const newWinners = {};
             const newLosers = {};
@@ -938,7 +1041,361 @@
             });
             container.innerHTML = html;
         }
+		// ================= TAB ẨN: CÀI ĐẶT (QUẢN LÝ QUỸ & THÀNH VIÊN) =================
+        
+        // 1. Cài đặt mức quỹ mặc định
+        window.openFundSettings = () => {
+            document.getElementById('inputDefaultFund').value = window.state.globalSettings.defaultFund || 100000;
+            new bootstrap.Modal(document.getElementById('modalFundSettings')).show();
+        };
 
+        window.saveFundSettings = () => {
+            const amt = Number(document.getElementById('inputDefaultFund').value);
+            if(amt > 0) {
+                update(ref(db, 'settings'), { defaultFund: amt })
+                .then(() => bootstrap.Modal.getInstance(document.getElementById('modalFundSettings')).hide());
+            }
+        };
+
+        // 2. Quản lý Phân đội
+        window.updateTeamSelects = () => {
+            const select = document.getElementById('memTeam');
+            if(!select) return;
+            select.innerHTML = Object.entries(window.state.teams)
+                .sort((a,b) => (a[1].order||0) - (b[1].order||0))
+                .map(([id, t]) => `<option value="${id}">${t.name}</option>`).join('');
+        };
+
+        window.openAddTeamForm = () => {
+            document.getElementById('editTeamId').value = '';
+            document.getElementById('newTeamName').value = '';
+            document.getElementById('teamModalTitle').innerHTML = '<i class="fas fa-layer-group me-2"></i>Thêm phân đội';
+            new bootstrap.Modal(document.getElementById('modalAddTeam')).show();
+        };
+
+        window.openEditTeam = (e, tId) => {
+            e.stopPropagation(); // Ngăn sự kiện click lan ra ngoài làm gập team
+            const t = window.state.teams[tId];
+            if(!t) return;
+            document.getElementById('editTeamId').value = tId;
+            document.getElementById('newTeamName').value = t.name;
+            document.getElementById('teamModalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>Sửa tên đội';
+            new bootstrap.Modal(document.getElementById('modalAddTeam')).show();
+        };
+
+        window.addTeam = () => {
+            const name = document.getElementById('newTeamName').value.trim();
+            const editId = document.getElementById('editTeamId').value;
+            if(!name) return alert("Vui lòng nhập tên đội!");
+            
+            // Xử lý trực tiếp, Firebase tự trigger onValue để cập nhật giao diện
+            if(editId) {
+                update(ref(db, `teams/${editId}`), { name })
+                    .then(() => bootstrap.Modal.getInstance(document.getElementById('modalAddTeam')).hide());
+            } else {
+                const order = Object.keys(window.state.teams).length + 1;
+                push(ref(db, 'teams'), { name, order })
+                    .then(() => bootstrap.Modal.getInstance(document.getElementById('modalAddTeam')).hide());
+            }
+        };
+
+        window.deleteTeam = (e, tId) => {
+            e.stopPropagation();
+            const hasMembers = Object.values(window.state.members).some(m => m.teamId === tId);
+            if(hasMembers) return alert("Phân đội này đang có thành viên. Vui lòng chuyển hoặc xóa thành viên trước!");
+            if(confirm("Bạn có chắc muốn xóa phân đội này vĩnh viễn?")) {
+                remove(ref(db, `teams/${tId}`));
+            }
+        };
+
+        // 3. Quản lý Thành viên (Giao diện mới)
+        window.openMemberManager = () => {
+            window.renderMemberManager();
+            new bootstrap.Modal(document.getElementById('modalMemberManager')).show();
+        };
+
+        // Hàm này bắt sự kiện click vào Tên Cầu Thủ để xổ Menu Sửa/Xóa
+        window.toggleMemberActions = (mId) => {
+            const el = document.getElementById(`mem_item_${mId}`);
+            if(el) el.classList.toggle('expanded');
+        };
+
+        // Hàm bắt sự kiện click gập/mở Phân Đội
+        window.toggleTeamGroup = (tId) => {
+            const el = document.getElementById(`team_list_${tId}`);
+            if(el) el.classList.toggle('show');
+            const icon = document.getElementById(`team_icon_${tId}`);
+            if(icon) {
+                if(el.classList.contains('show')) { icon.classList.remove('fa-chevron-right'); icon.classList.add('fa-chevron-down'); }
+                else { icon.classList.remove('fa-chevron-down'); icon.classList.add('fa-chevron-right'); }
+            }
+        };
+
+        window.deleteMember = (e, mId, mName) => {
+            e.stopPropagation();
+            if(confirm(`Xóa cầu thủ "${mName}" khỏi danh sách?`)) {
+                remove(ref(db, `members/${mId}`));
+            }
+        };
+
+        window.renderMemberManager = () => {
+            let html = '';
+            const accMembers = document.getElementById('accMembers');
+            if(!accMembers) return;
+
+            Object.entries(window.state.teams).sort((a,b) => (a[1].order||0) - (b[1].order||0)).forEach(([tId, t], index) => {
+                let memHtml = '';
+                let count = 0;
+                
+                Object.entries(window.state.members).forEach(([mId, m]) => {
+                    if(m.teamId === tId) {
+                        count++;
+                        const dobStr = m.dob ? new Date(m.dob).toLocaleDateString('vi-VN') : '---';
+                        const phoneStr = m.phone || 'Chưa có SĐT';
+                        
+                        memHtml += `
+                        <div class="mem-item" id="mem_item_${mId}" onclick="toggleMemberActions('${mId}')">
+                            <div class="mem-info-row">
+                                <div>
+                                    <div class="mem-name-text">${m.name}</div>
+                                    <div class="mem-meta">
+                                        <span><i class="fas fa-phone-alt text-success opacity-75"></i> ${phoneStr}</span>
+                                        <span><i class="fas fa-birthday-cake text-warning opacity-75"></i> ${dobStr}</span>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-down chevron-icon"></i>
+                            </div>
+                            <div class="mem-actions">
+                                <button class="btn-action-sm edit" onclick="openMemberForm(event, '${mId}')"><i class="fas fa-pen text-primary"></i> Sửa</button>
+                                <button class="btn-action-sm delete" onclick="deleteMember(event, '${mId}', '${m.name}')"><i class="fas fa-trash text-danger"></i> Xóa</button>
+                            </div>
+                        </div>`;
+                    }
+                });
+                
+                // Mặc định mở Team đầu tiên, các team khác đóng
+                const isShow = index === 0 ? 'show' : '';
+                const iconClass = index === 0 ? 'fa-chevron-down' : 'fa-chevron-right';
+
+                html += `
+                <div class="team-group">
+                    <div class="team-header" onclick="toggleTeamGroup('${tId}')">
+                        <div class="team-header-title">
+                            <i class="fas fa-shield-alt"></i> ${t.name} <span class="badge bg-secondary rounded-pill ms-1" style="font-size:10px;">${count}</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="fas fa-pen text-secondary" style="font-size:14px; padding:4px;" onclick="openEditTeam(event, '${tId}')"></i>
+                            <i class="fas fa-trash text-danger opacity-75" style="font-size:14px; padding:4px;" onclick="deleteTeam(event, '${tId}')"></i>
+                            <i class="fas ${iconClass} text-muted ms-2" id="team_icon_${tId}"></i>
+                        </div>
+                    </div>
+                    <div class="mem-list ${isShow}" id="team_list_${tId}">
+                        ${memHtml || '<div class="p-4 text-center text-muted small fst-italic">Chưa có thành viên nào.</div>'}
+                    </div>
+                </div>`;
+            });
+            accMembers.innerHTML = html;
+        };
+
+        window.openMemberForm = (e, mId = '') => {
+            if(e) e.stopPropagation();
+            document.getElementById('editMemId').value = mId;
+            if(mId && window.state.members[mId]) {
+                const m = window.state.members[mId];
+                document.getElementById('memFormTitle').innerText = 'Sửa Cầu Thủ';
+                document.getElementById('memName').value = m.name || '';
+                document.getElementById('memTeam').value = m.teamId || '';
+                document.getElementById('memDOB').value = m.dob || '';
+                document.getElementById('memPhone').value = m.phone || '';
+            } else {
+                document.getElementById('memFormTitle').innerText = 'Thêm Cầu Thủ';
+                document.getElementById('memName').value = '';
+                document.getElementById('memDOB').value = '';
+                document.getElementById('memPhone').value = '';
+                
+                // Set default team nếu có
+                const select = document.getElementById('memTeam');
+                if(select.options.length > 0) select.selectedIndex = 0;
+            }
+            new bootstrap.Modal(document.getElementById('modalMemberForm')).show();
+        };
+
+        window.saveMember = () => {
+            const id = document.getElementById('editMemId').value;
+            const name = document.getElementById('memName').value.trim();
+            const teamId = document.getElementById('memTeam').value;
+            const dob = document.getElementById('memDOB').value;
+            const phone = document.getElementById('memPhone').value;
+            
+            if(!name || !teamId) return alert('Vui lòng nhập tên và chọn phân đội!');
+            const payload = { name, teamId, dob, phone };
+            
+            if(id) {
+                update(ref(db, `members/${id}`), payload).then(() => bootstrap.Modal.getInstance(document.getElementById('modalMemberForm')).hide());
+            } else {
+                push(ref(db, 'members'), payload).then(() => bootstrap.Modal.getInstance(document.getElementById('modalMemberForm')).hide());
+            }
+        };
+
+        // --- HÀM SỬA LỖI ĐỒNG BỘ: Gắn renderMemberManager vào initApp ---
+        // Ghi đè lại hàm fixOldMembersData (kết hợp gọi renderMemberManager)
+        const originalFixOldMembersData = fixOldMembersData;
+        window.fixOldMembersData = () => {
+            originalFixOldMembersData();
+            if(document.getElementById('modalMemberManager').classList.contains('show')) {
+                renderMemberManager();
+            }
+        };
+		// ================= XUẤT ẢNH BÁO CÁO (BẢN CHI TIẾT & SIÊU GỌN) =================
+        window.exportReportImage = () => {
+            const btn = document.getElementById('btnExportImage');
+            const oldHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Đang vẽ Báo cáo...';
+
+            const defaultFund = window.state.globalSettings.defaultFund || 100000;
+            let thuQuy = 0, thuCaDo = 0, tongChi = 0;
+            
+            // 1. Tạo bộ khung lưu trữ dữ liệu
+            const reportData = {};
+            Object.entries(window.state.members).forEach(([mId, m]) => {
+                reportData[mId] = {
+                    name: m.name,
+                    quyPaid: 0, cadoPaid: 0,
+                    quyDebt: 0, cadoDebt: 0,
+                    owedMatches: [] 
+                };
+            });
+
+            // Tiền Quỹ
+            Object.entries(window.state.members).forEach(([mId, m]) => {
+                const paid = Number(window.state.monthData.regular?.[mId]) || 0;
+                if (paid > 0) { reportData[mId].quyPaid = paid; thuQuy += paid; } 
+                else if (reportData[mId]) { reportData[mId].quyDebt = defaultFund; }
+            });
+
+            // Tiền Cá Độ (Sửa lỗi lặp ngày tháng)
+            Object.entries(window.state.monthData.betting || {}).forEach(([matchId, match]) => {
+                const matchTotal = Number(match.penalty_amount) || 0;
+                
+                Object.entries(match.losers || {}).forEach(([mId, amt]) => {
+                    const paid = Number(amt) || 0;
+                    if (reportData[mId]) {
+                        reportData[mId].cadoPaid += paid;
+                        thuCaDo += paid;
+                        
+                        if (paid < matchTotal) {
+                            reportData[mId].cadoDebt += (matchTotal - paid);
+                            // SỬA: Chỉ lấy tên trận (vì tên trận thường đã có sẵn ngày tháng)
+                            reportData[mId].owedMatches.push(match.name);
+                        }
+                    }
+                });
+            });
+
+            Object.values(window.state.monthData.expenses || {}).forEach(exp => tongChi += (Number(exp.amount) || 0));
+            const tonQuyThangTruoc = getCarryOverFund(window.state.currentMonth);
+            const tongHienTai = tonQuyThangTruoc + thuQuy + thuCaDo - tongChi;
+
+            // 2. Phân loại
+            const paidList = [];
+            const debtList = [];
+
+            Object.values(reportData).forEach(d => {
+                const totalPaid = d.quyPaid + d.cadoPaid;
+                const totalDebt = d.quyDebt + d.cadoDebt;
+                
+                if (totalPaid > 0) paidList.push({ ...d, totalPaid });
+                if (totalDebt > 0) debtList.push({ ...d, totalDebt });
+            });
+
+            paidList.sort((a,b) => b.totalPaid - a.totalPaid);
+            debtList.sort((a,b) => b.totalDebt - a.totalDebt);
+
+            // 3. Đổ dữ liệu vào HTML 
+            const [y, m] = window.state.currentMonth.split('-');
+            document.getElementById('exp-month').innerText = `TỔNG KẾT THÁNG ${m}/${y}`;
+            document.getElementById('exp-old').innerText = window.formatMoney(tonQuyThangTruoc);
+            document.getElementById('exp-thuquy').innerText = window.formatMoney(thuQuy);
+            document.getElementById('exp-thucado').innerText = window.formatMoney(thuCaDo);
+            document.getElementById('exp-chi').innerText = window.formatMoney(tongChi);
+            document.getElementById('exp-now').innerText = window.formatMoney(tongHienTai);
+
+            // Render ĐÃ NỘP (Thu gọn: Tên và Số tiền cùng 1 dòng)
+            let paidHtml = '';
+            if (paidList.length === 0) {
+                paidHtml = '<div style="color:#adb5bd; font-style:italic; text-align:center;">Chưa có thành viên nào nộp.</div>';
+            } else {
+                paidList.forEach(p => {
+                    let details = [];
+                    if (p.quyPaid > 0) details.push(`Quỹ ${window.formatShortMoney(p.quyPaid)}`);
+                    if (p.cadoPaid > 0) details.push(`Độ ${window.formatShortMoney(p.cadoPaid)}`);
+                    
+                    paidHtml += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:#f8f9fa; padding:8px 12px; border-radius:8px; margin-bottom:6px;">
+                        <div style="display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;">
+                            <span style="font-weight:800; color:#212529; font-size:14px;">${p.name}</span>
+                            <span style="font-size:12px; color:#6c757d; font-weight:600;">(${details.join(' • ')})</span>
+                        </div>
+                        <div style="font-weight:900; color:#198754; font-size:15px; margin-left:10px;">+${window.formatShortMoney(p.totalPaid)}</div>
+                    </div>`;
+                });
+            }
+            document.getElementById('exp-paid-list').innerHTML = paidHtml;
+
+            // Render NỢ (Thu gọn: Đưa Tag lên cạnh Tên, Giảm padding)
+            let debtHtml = '';
+            if (debtList.length === 0) {
+                debtHtml = '<div style="color:#198754; font-weight:bold; text-align:center; padding: 20px; font-size:16px;">Tuyệt vời! Tất cả đã hoàn thành. 🎉</div>';
+            } else {
+                debtList.forEach(d => {
+                    let tags = '';
+                    if(d.quyDebt > 0) tags += `<span style="background:#fff5f5; color:#dc3545; border:1px solid #ffc9c9; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold;">Quỹ ${window.formatShortMoney(d.quyDebt)}</span>`;
+                    if(d.cadoDebt > 0) tags += `<span style="background:#fff9db; color:#b45309; border:1px solid #fde68a; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold;">Độ ${window.formatShortMoney(d.cadoDebt)}</span>`;
+                    
+                    let matchDetails = '';
+                    if (d.owedMatches.length > 0) {
+                        // SỬA: Chuỗi hiển thị ngắn gọn "⚠️ Trận: ..."
+                        matchDetails = `<div style="font-size:11.5px; color:#b45309; margin-top:4px; font-style:italic; font-weight:500;">⚠️ Trận: ${d.owedMatches.join(', ')}</div>`;
+                    }
+                    
+                    debtHtml += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:#f8f9fa; padding:8px 12px; border-radius:8px; margin-bottom:6px;">
+                        <div style="flex:1; padding-right:10px;">
+                            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                <div style="font-weight:800; color:#212529; font-size:14px;">${d.name}</div>
+                                <div style="display:flex; gap:4px;">${tags}</div>
+                            </div>
+                            ${matchDetails}
+                        </div>
+                        <div style="font-weight:900; color:#dc3545; font-size:15px;">${window.formatShortMoney(d.totalDebt)}</div>
+                    </div>`;
+                });
+            }
+            document.getElementById('exp-debt-list').innerHTML = debtHtml;
+            
+            const now = new Date();
+            document.getElementById('exp-footer-time').innerText = `🕒 Trích xuất lúc ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')} ngày ${now.toLocaleDateString('vi-VN')} - Vui lòng hoàn thành quỹ cho Thủ quỹ nhé! ⚽❤️`;
+
+            // 3. Chụp Ảnh và Tải Xuống (Sửa scale thành 3 để nét căng)
+            setTimeout(() => {
+                const exportZone = document.getElementById('report-export-zone');
+                html2canvas(exportZone, { 
+                    scale: 6, // GIÚP ẢNH SẮC NÉT HƠN GẤP RƯỠI
+                    useCORS: true, 
+                    backgroundColor: '#f4f7f6' 
+                }).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = `Bao_Cao_FC_Thang_${m}_${y}.png`;
+                    link.href = canvas.toDataURL("image/png");
+                    link.click();
+                    btn.innerHTML = oldHtml;
+                }).catch(err => {
+                    alert('Lỗi khi tạo ảnh, vui lòng thử lại.');
+                    console.error(err);
+                    btn.innerHTML = oldHtml;
+                });
+            }, 300);
+        };
         // ================= HEADER & CHUYỂN TAB =================
         window.switchTab = (tabId, element) => {
             window.state.activeTab = tabId;
