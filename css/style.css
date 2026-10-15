@@ -160,31 +160,37 @@
         .stat-item { border-bottom: 1px solid #f0f2f5; padding: 12px 15px; }
         .stat-item:last-child { border-bottom: none; }
         .stat-bar { height: 6px; border-radius: 4px; background: #e9ecef; overflow: hidden; margin-top: 6px; display: flex;}
-		/* --- CSS MỚI CHO THÀNH VIÊN & PHÂN ĐỘI --- */
-        .team-group { background: #fff; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); margin-bottom: 16px; overflow: hidden; border: 1px solid #f0f2f5; }
-        .team-header { padding: 14px 16px; background: #f8f9fa; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f2f5; cursor: pointer; user-select: none; }
-        .team-header-title { font-weight: 800; color: #212529; text-transform: uppercase; font-size: 14px; display: flex; align-items: center; gap: 8px;}
-        .team-header-title i { color: #0d6efd; }
+		/* --- CSS NÂNG CẤP CHO THÀNH VIÊN & PHÂN ĐỘI --- */
+        .team-group { background: transparent; margin-bottom: 20px; }
+        .team-header { padding: 12px 16px; background: linear-gradient(to right, #198754, #20c997); border-radius: 14px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; box-shadow: 0 4px 10px rgba(25,135,84,0.2); margin-bottom: 10px; color: white;}
+        .team-header-title { font-weight: 800; text-transform: uppercase; font-size: 14px; display: flex; align-items: center; gap: 8px;}
         
-        .mem-list { display: none; }
-        .mem-list.show { display: block; animation: fadeIn 0.2s ease; }
+        .mem-list { display: none; padding: 0 5px;}
+        .mem-list.show { display: block; animation: fadeIn 0.3s ease; }
         
-        .mem-item { padding: 12px 16px; border-bottom: 1px solid #f0f2f5; position: relative; transition: background-color 0.2s; }
-        .mem-item:last-child { border-bottom: none; }
-        .mem-item:active { background-color: #f8f9fa; }
+        .mem-item { background: white; border-radius: 16px; padding: 14px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); position: relative; transition: all 0.2s; border: 1px solid #f0f2f5;}
+        .mem-item:active { transform: scale(0.98); }
         
-        .mem-info-row { display: flex; justify-content: space-between; align-items: center; }
-        .mem-name-text { font-weight: 700; color: #343a40; font-size: 15px; }
-        .mem-meta { font-size: 12px; color: #6c757d; margin-top: 4px; display: flex; gap: 12px; align-items: center;}
+        .mem-info-row { display: flex; align-items: center; gap: 12px; }
+        .mem-avatar-wrap { width: 48px; height: 48px; border-radius: 50%; background: #e9ecef; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #6c757d; font-size: 18px; overflow: hidden; flex-shrink: 0; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1);}
+        .mem-avatar-wrap img { width: 100%; height: 100%; object-fit: cover; }
+        .mem-name-text { font-weight: 800; color: #212529; font-size: 15px; margin-bottom: 3px; }
+        .mem-meta { font-size: 11px; color: #868e96; display: flex; gap: 10px; align-items: center; font-weight: 500;}
         
-        .mem-actions { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #dee2e6; justify-content: flex-end; gap: 8px; }
+        .mem-actions { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #e9ecef; justify-content: flex-end; gap: 8px; }
+        .mem-item.expanded { border-color: #0d6efd; box-shadow: 0 4px 15px rgba(13,110,253,0.1); }
         .mem-item.expanded .mem-actions { display: flex; }
-        .mem-item.expanded .fa-chevron-down { transform: rotate(180deg); }
-        .chevron-icon { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); color: #adb5bd; }
+        .mem-item.expanded .chevron-icon { transform: rotate(180deg); color: #0d6efd;}
+        .chevron-icon { transition: transform 0.3s ease; color: #ced4da; font-size: 14px; margin-left: auto;}
         
-        .btn-action-sm { border-radius: 20px; padding: 4px 14px; font-size: 12px; font-weight: 700; border: 1px solid #dee2e6; background: white; color: #495057; display: flex; align-items: center; gap: 6px; }
-        .btn-action-sm.edit:active { background: #e7f1ff; border-color: #0d6efd; color: #0d6efd; }
-        .btn-action-sm.delete:active { background: #f8d7da; border-color: #dc3545; color: #dc3545; }
+        /* CSS cho khu vực tải Avatar trong Modal */
+        .avatar-upload-zone { width: 90px; height: 90px; border-radius: 50%; background: #f8f9fa; border: 2px dashed #ced4da; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; flex-direction: column; cursor: pointer; position: relative; overflow: hidden; transition: border-color 0.2s;}
+        .avatar-upload-zone:active { background: #e9ecef; }
+        .avatar-upload-zone.has-img { border-style: solid; border-color: #198754; }
+        .avatar-upload-zone img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 2;}
+        .avatar-upload-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.5); color: white; font-size: 10px; padding: 4px 0; text-align: center; z-index: 3; opacity: 0; transition: opacity 0.2s;}
+        .avatar-upload-zone.has-img:active .avatar-upload-overlay { opacity: 1; }
+        .btn-remove-avatar { position: absolute; top: 0; right: 30%; background: #dc3545; color: white; border: 2px solid white; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; cursor: pointer; z-index: 4; display: none; box-shadow: 0 2px 4px rgba(0,0,0,0.2);}
 		/* --- CSS MỚI CHO GỢI Ý NHANH (QUICK CHIPS) --- */
         .quick-chip {
             display: inline-block; padding: 5px 12px; border-radius: 15px;
