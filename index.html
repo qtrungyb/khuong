@@ -67,11 +67,16 @@
         .btn-settings { background: transparent; border: none; color: #6c757d; font-size: 1.3rem; padding: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: color 0.2s; flex-shrink: 0;}
         .btn-settings:active { color: #198754; }
 
-        /* Bottom Navigation */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; box-shadow: 0 -4px 15px rgba(0,0,0,0.06); display: flex; z-index: 990; padding: 8px 0; padding-bottom: calc(8px + env(safe-area-inset-bottom)); border-top-left-radius: 16px; border-top-right-radius: 16px; }
-        .nav-item { flex: 1; text-align: center; color: #adb5bd; font-size: 11px; cursor: pointer; transition: color 0.2s ease; user-select: none;}
+        /* Bottom Navigation (Đã khóa 1 dòng chống nhảy Dock) */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; box-shadow: 0 -4px 15px rgba(0,0,0,0.06); display: flex; z-index: 990; padding: 8px 2px; padding-bottom: calc(8px + env(safe-area-inset-bottom)); border-top-left-radius: 16px; border-top-right-radius: 16px; }
+        .nav-item { flex: 1; text-align: center; color: #adb5bd; font-size: 10.5px; cursor: pointer; transition: color 0.2s ease; user-select: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 2px; }
         .nav-item i { display: block; font-size: 20px; margin-bottom: 4px; }
-        .nav-item.active { color: #198754; font-weight: bold; }
+        .nav-item.active { color: #198754; font-weight: 700; }
+
+        /* Thẻ Sub-tab cho mục Độ & Giao Lưu */
+        .subtab-card { cursor: pointer; transition: all 0.2s ease; user-select: none; opacity: 0.55; transform: scale(0.97); border: 2px solid transparent !important; }
+        .subtab-card.active-cado { opacity: 1; transform: scale(1); border-color: #198754 !important; box-shadow: 0 4px 12px rgba(25,135,84,0.18) !important; }
+        .subtab-card.active-giaoluu { opacity: 1; transform: scale(1); border-color: #0d6efd !important; box-shadow: 0 4px 12px rgba(13,110,253,0.18) !important; }
         
         /* Floating Action Button (Dấu cộng nổi) */
         .fab-btn { position: fixed; bottom: calc(78px + env(safe-area-inset-bottom)); right: 18px; width: 54px; height: 54px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 22px; color: white; border: none; box-shadow: 0 4px 14px rgba(0,0,0,0.28); z-index: 980; transition: transform 0.15s ease; }
@@ -191,6 +196,35 @@
         .btn-action-sm { border-radius: 20px; padding: 4px 14px; font-size: 12px; font-weight: 700; border: 1px solid #dee2e6; background: white; color: #495057; display: flex; align-items: center; gap: 6px; }
         .btn-action-sm.edit:active { background: #e7f1ff; border-color: #0d6efd; color: #0d6efd; }
         .btn-action-sm.delete:active { background: #f8d7da; border-color: #dc3545; color: #dc3545; }
+		/* --- CSS MỚI CHO GỢI Ý NHANH (QUICK CHIPS) --- */
+        .quick-chip {
+            display: inline-block; padding: 5px 12px; border-radius: 15px;
+            background: #e9ecef; color: #495057; font-size: 11px; font-weight: 700;
+            margin: 0 6px 8px 0; cursor: pointer; border: 1px solid #dee2e6;
+            transition: all 0.15s ease; user-select: none;
+        }
+        .quick-chip:active { transform: scale(0.92); background: #0d6efd; color: white; border-color: #0d6efd; }
+        .quick-chip-amt { background: #e8f5e9; color: #198754; border-color: #badbcc; }
+        .quick-chip-amt:active { background: #198754; color: white; }
+
+        /* --- CSS MỚI CHO TIMELINE GIAO LƯU --- */
+        .timeline-container { position: relative; padding-left: 20px; margin-top: 15px; margin-bottom: 10px; }
+        .timeline-container::before { content: ''; position: absolute; left: 9px; top: 10px; bottom: -10px; width: 2px; background: #e9ecef; z-index: 1;}
+        .timeline-item { position: relative; margin-bottom: 16px; background: white; border-radius: 14px; padding: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid #f0f2f5; display: flex; justify-content: space-between; align-items: flex-start; z-index: 2;}
+        .timeline-icon { position: absolute; left: -20px; top: 14px; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 3px solid #f4f7f6; z-index: 3; color: white;}
+        .icon-san { background: #198754; } .icon-nuoc { background: #0dcaf0; } .icon-thuong { background: #ffc107; color: #000; } .icon-khac { background: #0d6efd; }
+        .timeline-content { flex-grow: 1; padding-left: 10px; padding-right: 10px; }
+        .timeline-title { font-weight: 800; font-size: 13.5px; color: #212529; margin-bottom: 4px; line-height: 1.3; }
+        .timeline-date { font-size: 11px; color: #868e96; font-weight: 500; display: flex; align-items: center; gap: 4px; }
+        .timeline-amount { background: #e8f5e9; color: #198754; padding: 4px 10px; border-radius: 8px; font-weight: 900; font-size: 14px; flex-shrink: 0; box-shadow: 0 2px 5px rgba(25,135,84,0.15);}
+        .timeline-actions { margin-top: 8px; display: flex; gap: 8px; }
+        .tl-btn { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; border: 1px solid #dee2e6; background: #f8f9fa; color: #6c757d; cursor: pointer;}
+        .tl-btn.edit:active { background: #e7f1ff; color: #0d6efd; border-color: #0d6efd; }
+        .tl-btn.delete:active { background: #f8d7da; color: #dc3545; border-color: #dc3545; }
+		/* --- CSS CHO BIỂU ĐỒ DONUT TỔNG KẾT --- */
+        .donut-chart-container { position: relative; width: 66px; height: 66px; flex-shrink: 0;}
+        .donut-chart { width: 100%; height: 100%; border-radius: 50%; background: conic-gradient(#e9ecef 0% 100%); transition: background 0.5s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.1);}
+        .donut-inner { position: absolute; top: 14px; left: 14px; width: 38px; height: 38px; background: #157347; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);}
     </style>
 </head>
 <body>
@@ -259,12 +293,46 @@
             </div>
         </div>
 
-        <!-- TAB 2: CÁ ĐỘ -->
+        <!-- TAB 2: CÁ ĐỘ & GIAO LƯU -->
         <div id="tab-cado" class="tab-pane">
-            <div id="cado-container" style="display: flex; flex-direction: column;"></div>
+            <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+            </div>
+            <!-- 2 Thẻ Thống Kê kiêm Nút chuyển Sub-tab (Giao lưu mặc định bên trái & active) -->
+            <div class="row g-2 mb-3">
+                <div class="col-6" onclick="switchCadoSubTab('giaoluu')">
+                    <div id="card-sub-giaoluu" class="card p-2 bg-primary bg-opacity-10 subtab-card active-giaoluu h-100" style="border-radius: 14px;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-primary small fw-bold text-uppercase"><i class="fas fa-handshake me-1"></i>Giao Lưu</span>
+                            <i class="fas fa-check-circle text-primary small" id="icon-sub-giaoluu"></i>
+                        </div>
+                        <h5 class="text-primary fw-bold m-0 mt-1" id="giaoluu-thu-header">0 ₫</h5>
+                        <small class="text-muted d-block mt-1" style="font-size: 11px;" id="giaoluu-sub-header">0 khoản thu</small>
+                    </div>
+                </div>
+                <div class="col-6" onclick="switchCadoSubTab('cado')">
+                    <div id="card-sub-cado" class="card p-2 bg-success bg-opacity-10 subtab-card h-100" style="border-radius: 14px;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-success small fw-bold text-uppercase"><i class="fas fa-dice me-1"></i>Cá Độ</span>
+                            <i class="fas fa-check-circle text-success small d-none" id="icon-sub-cado"></i>
+                        </div>
+                        <h5 class="text-success fw-bold m-0 mt-1" id="cado-thu-header">0 ₫</h5>
+                        <small class="text-muted d-block mt-1" style="font-size: 11px;" id="cado-sub-header">0 trận • Nợ: 0 ₫</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nhánh 1 (Mặc định hiện): Danh sách Giao lưu & Thu khác -->
+            <div id="subtab-giaoluu-view">
+                <div id="giaoluu-container"></div>
+            </div>
+
+            <!-- Nhánh 2 (Mặc định ẩn): Danh sách Trận đấu & Cá độ -->
+            <div id="subtab-cado-view" class="d-none">
+                <div id="cado-container" style="display: flex; flex-direction: column;"></div>
+            </div>
         </div>
 
-        <!-- TAB 3: CHI RA -->
+        <!-- TAB 3: CHI QUỸ (CHỈ TRỪ TIỀN QUỸ) -->
         <div id="tab-chi" class="tab-pane">
             <div class="card p-3 mb-3 bg-danger bg-opacity-10 border border-danger border-opacity-25 shadow-sm">
                 <div class="d-flex justify-content-between align-items-center">
@@ -293,8 +361,8 @@
                     <div style="font-size: 28px; font-weight: 900; color: #198754; text-transform: uppercase;">BẢNG VÀNG QUỸ FC THẬP CẨM</div>
                     <div style="font-size: 18px; color: #6c757d; font-weight: bold; margin-top: 8px;" id="exp-month">Tổng kết Tháng...</div>
                     
-                    <!-- Lưới 5 Cột Tổng Kết -->
-                    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 24px;">
+                    <!-- Lưới 6 Cột Tổng Kết (3x2) -->
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 24px;">
                         <div style="background: #fff3cd; padding: 12px 6px; border-radius: 12px; border: 1px solid #ffe69c;">
                             <div style="font-size: 11px; color: #664d03; font-weight: bold;">TỒN ĐẦU KỲ</div>
                             <div style="font-size: 17px; font-weight: 900; color: #997404; margin-top: 4px;" id="exp-old">0đ</div>
@@ -307,13 +375,18 @@
                             <div style="font-size: 11px; color: #055160; font-weight: bold;">+ THU ĐỘ</div>
                             <div style="font-size: 17px; font-weight: 900; color: #087990; margin-top: 4px;" id="exp-thucado">0đ</div>
                         </div>
+                        
+                        <div style="background: #d1e7dd; padding: 12px 6px; border-radius: 12px; border: 1px solid #badbcc;">
+                            <div style="font-size: 11px; color: #0f5132; font-weight: bold;">+ GIAO LƯU</div>
+                            <div style="font-size: 17px; font-weight: 900; color: #198754; margin-top: 4px;" id="exp-thukhac">0đ</div>
+                        </div>
                         <div style="background: #f8d7da; padding: 12px 6px; border-radius: 12px; border: 1px solid #f5c2c7;">
                             <div style="font-size: 11px; color: #842029; font-weight: bold;">- TỔNG CHI</div>
                             <div style="font-size: 17px; font-weight: 900; color: #dc3545; margin-top: 4px;" id="exp-chi">0đ</div>
                         </div>
-                        <div style="background: #d1e7dd; padding: 12px 6px; border-radius: 12px; border: 1px solid #badbcc;">
-                            <div style="font-size: 11px; color: #0f5132; font-weight: bold;">QUỸ HIỆN TẠI</div>
-                            <div style="font-size: 17px; font-weight: 900; color: #198754; margin-top: 4px;" id="exp-now">0đ</div>
+                        <div style="background: #198754; padding: 12px 6px; border-radius: 12px; border: 1px solid #146c43;">
+                            <div style="font-size: 11px; color: #ffffff; font-weight: bold;">QUỸ HIỆN TẠI</div>
+                            <div style="font-size: 17px; font-weight: 900; color: #ffffff; margin-top: 4px;" id="exp-now">0đ</div>
                         </div>
                     </div>
                 </div>
@@ -333,19 +406,70 @@
                 </div>
                 <div style="margin-top: 20px; text-align: center; font-size: 14px; color: #6c757d; font-style: italic;" id="exp-footer-time"></div>
             </div>
-            <div class="card bg-success text-white p-3 mb-3 shadow-sm border-0" style="border-radius: 16px;">
-                <div class="d-flex justify-content-between align-items-start mb-3">
+            <!-- DASHBOARD TỔNG KẾT (CHỦ ĐỀ SÂN CỎ & QUẢ BÓNG) -->
+            <div class="card p-4 mb-3 shadow border-0" style="border-radius: 20px; background: linear-gradient(135deg, #2b9348, #155d27); color: white; position: relative; overflow: hidden;">
+                <!-- Họa tiết vạch cắt cỏ sân bóng in chìm -->
+                <div style="position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent, transparent 24px, rgba(255,255,255,0.04) 24px, rgba(255,255,255,0.04) 48px); pointer-events: none; z-index: 0;"></div>
+                
+                <!-- Biểu tượng Quả bóng khổng lồ in chìm -->
+                <i class="fas fa-futbol" style="position: absolute; right: -25px; bottom: -25px; font-size: 150px; opacity: 0.15; transform: rotate(-15deg); z-index: 0;"></i>
+                
+                <div class="d-flex justify-content-between align-items-start mb-4 position-relative z-1">
                     <div>
-                        <span class="small opacity-75 text-uppercase fw-semibold d-block">Tổng quỹ còn lại</span>
-                        <h2 id="tk-tonquy" class="fw-bold m-0 mt-1">0 ₫</h2>
+                        <span class="small text-uppercase fw-bold d-block mb-1" style="letter-spacing: 0.5px; color: #a3e6b4;">Quỹ Đội Còn Lại</span>
+                        <h1 id="tk-tonquy" class="fw-black m-0" style="font-size: 34px; letter-spacing: -1px; font-weight: 900; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">0 ₫</h1>
                     </div>
-                    <span class="badge bg-white text-success fw-bold px-2 py-1 rounded-pill" id="tk-month-badge">Tháng</span>
+                    <span class="badge bg-white text-success fw-bold px-3 py-2 rounded-pill shadow-sm" id="tk-month-badge">Tháng</span>
                 </div>
-                <div class="row g-2">
-                    <div class="col-6"><div class="bg-white bg-opacity-10 rounded p-2"><span class="small opacity-75 d-block"><i class="fas fa-history me-1"></i>Dư cũ</span><strong class="text-warning" id="tk-tonquythangtruoc">0 ₫</strong></div></div>
-                    <div class="col-6"><div class="bg-white bg-opacity-10 rounded p-2"><span class="small opacity-75 d-block"><i class="fas fa-wallet me-1"></i>+ Thu quỹ</span><strong class="text-white" id="tk-thuquy">0 ₫</strong></div></div>
-                    <div class="col-6"><div class="bg-white bg-opacity-10 rounded p-2"><span class="small opacity-75 d-block"><i class="fas fa-dice me-1"></i>+ Cá độ</span><strong class="text-white" id="tk-thucado">0 ₫</strong></div></div>
-                    <div class="col-6"><div class="bg-white bg-opacity-10 rounded p-2"><span class="small opacity-75 d-block"><i class="fas fa-arrow-down me-1"></i>- Đã chi</span><strong class="text-white" id="tk-tongchi">0 ₫</strong></div></div>
+
+                <!-- Biểu đồ + Dòng tiền -->
+                <div class="d-flex align-items-center gap-3 p-3 bg-white bg-opacity-10 rounded-4 position-relative z-1 border border-white border-opacity-25" style="backdrop-filter: blur(4px);">
+                    <div class="donut-chart-container">
+                        <div id="tk-chart" class="donut-chart" style="box-shadow: 0 2px 8px rgba(0,0,0,0.2);"></div>
+                        <div class="donut-inner" style="background: #1b7031;"><i class="fas fa-futbol opacity-75" style="font-size: 18px;"></i></div>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-center mb-2 border-bottom border-white border-opacity-25 pb-2">
+                            <span class="small fw-bold"><i class="fas fa-arrow-up text-info me-1"></i> Tổng Thu</span>
+                            <span class="fw-bold" id="tk-tongthu-label">0 ₫</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="small fw-bold" style="color: #ff9999;"><i class="fas fa-arrow-down me-1"></i> Đã Chi</span>
+                            <span class="fw-bold" style="color: #ff9999;" id="tk-tongchi-label">0 ₫</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LƯỚI 4 Ô CHI TIẾT DÒNG TIỀN (Grid) -->
+            <div class="row g-3 mb-4">
+                <div class="col-6">
+                    <div class="bg-white p-3 rounded-4 shadow-sm border border-light position-relative overflow-hidden h-100">
+                        <i class="fas fa-history position-absolute text-muted" style="right:-10px; bottom:-10px; font-size: 50px; opacity: 0.05;"></i>
+                        <span class="text-muted small fw-bold text-uppercase d-block mb-1">Dư Cũ</span>
+                        <h5 class="fw-bold text-dark m-0" id="tk-tonquythangtruoc">0 ₫</h5>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="bg-white p-3 rounded-4 shadow-sm border border-light position-relative overflow-hidden h-100">
+                        <i class="fas fa-wallet position-absolute text-success" style="right:-10px; bottom:-10px; font-size: 50px; opacity: 0.05;"></i>
+                        <span class="text-success small fw-bold text-uppercase d-block mb-1">Thu Quỹ</span>
+                        <h5 class="fw-bold text-success m-0" id="tk-thuquy">0 ₫</h5>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="bg-white p-3 rounded-4 shadow-sm border border-light position-relative overflow-hidden h-100">
+                        <i class="fas fa-dice position-absolute text-primary" style="right:-10px; bottom:-10px; font-size: 50px; opacity: 0.05;"></i>
+                        <span class="text-primary small fw-bold text-uppercase d-block mb-1">Thu Độ</span>
+                        <h5 class="fw-bold text-primary m-0" id="tk-thucado">0 ₫</h5>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="bg-white p-3 rounded-4 shadow-sm border border-light position-relative overflow-hidden h-100">
+                        <i class="fas fa-handshake position-absolute text-info" style="right:-10px; bottom:-10px; font-size: 50px; opacity: 0.05;"></i>
+                        <span class="text-info small fw-bold text-uppercase d-block mb-1">Giao Lưu</span>
+                        <h5 class="fw-bold text-info m-0" id="tk-thukhac">0 ₫</h5>
+                    </div>
                 </div>
             </div>
             
@@ -412,7 +536,7 @@
     <!-- Bottom Navigation -->
     <div class="bottom-nav" id="mainBottomNav">
         <div class="nav-item active" onclick="switchTab('thu', this)"><i class="fas fa-wallet"></i>Thu Quỹ</div>
-        <div class="nav-item" onclick="switchTab('cado', this)"><i class="fas fa-dice"></i>Cá Độ</div>
+        <div class="nav-item" onclick="switchTab('cado', this)"><i class="fas fa-dice"></i>Giao Lưu</div>
         <div class="nav-item" onclick="switchTab('chi', this)"><i class="fas fa-receipt"></i>Chi Quỹ</div>
         <div class="nav-item" onclick="switchTab('tongket', this)"><i class="fas fa-chart-pie"></i>Tổng Kết</div>
         <div class="nav-item" onclick="switchTab('thongke', this)"><i class="fas fa-chart-bar"></i>Thống Kê</div>
@@ -459,7 +583,7 @@
                         <input type="hidden" id="editMatchId">
                         <div class="row g-2 mb-2">
                             <div class="col-6"><label class="form-label small fw-bold mb-1">Ngày đá:</label><input type="date" id="matchDate" class="form-control bg-light" onchange="onMatchDateChange()"></div>
-                            <div class="col-6"><label class="form-label small fw-bold mb-1 text-danger">Tiền độ (₫):</label><input type="number" id="matchPenalty" class="form-control bg-light text-danger fw-bold" value="0">
+                            <div class="col-6"><label class="form-label small fw-bold mb-1 text-danger">Tiền độ (₫):</label><input type="number" id="matchPenalty" class="form-control bg-light text-danger fw-bold" value="0"></div>
                         </div>
                         <label class="form-label small fw-bold mb-1">Tên trận:</label>
                         <input type="text" id="matchName" class="form-control bg-light" placeholder="VD: Tuần 2 - Thứ 5">
@@ -477,12 +601,56 @@
         </div>
     </div>
     
-    <div class="modal fade" id="modalExpense" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow"><div class="modal-header bg-danger text-white border-0 rounded-top-4"><h6 class="modal-title fw-bold" id="expModalTitle">Thêm Khoản Chi</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><input type="hidden" id="editExpId"><label class="form-label small text-muted fw-bold mb-1">Nội dung chi:</label><input type="text" id="expDesc" class="form-control bg-light mb-3" placeholder="VD: Tiền sân, nước..."><label class="form-label small text-muted fw-bold mb-1">Số tiền (VNĐ):</label><input type="number" id="expAmount" class="form-control bg-light mb-3"><label class="form-label small text-muted fw-bold mb-1">Ngày chi:</label><input type="date" id="expDate" class="form-control bg-light"></div><div class="modal-footer p-3 border-0"><button type="button" class="btn btn-danger w-100 rounded-pill fw-bold py-2 shadow-sm" onclick="saveExpense()">LƯU KHOẢN CHI</button></div></div></div></div>
+    <!-- Modal CHI QUỸ (Chỉ trừ tiền) -->
+    <div class="modal fade" id="modalExpense" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow"><div class="modal-header bg-danger text-white border-0 rounded-top-4"><h6 class="modal-title fw-bold" id="expModalTitle"><i class="fas fa-minus-circle me-2"></i>Thêm Khoản Chi</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><input type="hidden" id="editExpId"><label class="form-label small text-muted fw-bold mb-1">Nội dung chi:</label><input type="text" id="expDesc" class="form-control bg-light mb-3" placeholder="VD: Tiền sân khách, mua nước, bóng..."><label class="form-label small text-muted fw-bold mb-1">Số tiền trừ quỹ (VNĐ):</label><input type="number" id="expAmount" class="form-control bg-light text-danger fw-bold mb-3"><label class="form-label small text-muted fw-bold mb-1">Ngày chi:</label><input type="date" id="expDate" class="form-control bg-light"></div><div class="modal-footer p-3 border-0"><button type="button" class="btn btn-danger w-100 rounded-pill fw-bold py-2 shadow-sm" onclick="saveExpense()">LƯU KHOẢN CHI</button></div></div></div></div>
 
+    <!-- Modal THU GIAO LƯU / THU KHÁC (Tích hợp Quick Chips) -->
+    <div class="modal fade" id="modalIncome" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 shadow">
+                <div class="modal-header bg-primary text-white border-0 rounded-top-4">
+                    <h6 class="modal-title fw-bold" id="incModalTitle"><i class="fas fa-plus-circle me-2"></i>Thu Giao Lưu / Thu Khác</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <input type="hidden" id="editIncId">
+                    
+                    <label class="form-label small text-muted fw-bold mb-1">Nội dung thu:</label>
+                    <input type="text" id="incDesc" class="form-control bg-light mb-2" placeholder="VD: Đội bạn chia tiền sân nhà...">
+                    <!-- Gợi ý nhanh Nội dung -->
+                    <div class="mb-3">
+                        <span class="quick-chip" onclick="document.getElementById('incDesc').value = '⚽ Đối tác trả tiền sân'"><i class="fas fa-futbol text-primary me-1"></i>Tiền sân</span>
+                        <span class="quick-chip" onclick="document.getElementById('incDesc').value = '🤝 Đội bạn gửi tiền nước'"><i class="fas fa-tint text-info me-1"></i>Tiền nước</span>
+                        <span class="quick-chip" onclick="document.getElementById('incDesc').value = '🏆 Thưởng / Quỹ thừa giải đấu'"><i class="fas fa-trophy text-warning me-1"></i>Thưởng giải</span>
+                        <span class="quick-chip" onclick="document.getElementById('incDesc').value = '💎 Tài trợ đội bóng'"><i class="fas fa-gem text-danger me-1"></i>Tài trợ</span>
+                    </div>
+
+                    <label class="form-label small text-muted fw-bold mb-1">Số tiền (VNĐ):</label>
+                    <input type="number" id="incAmount" class="form-control bg-light text-primary fw-bold mb-2">
+                    <!-- Gợi ý nhanh Số tiền -->
+                    <div class="mb-3">
+                        <span class="quick-chip quick-chip-amt" onclick="document.getElementById('incAmount').value = 50000">50k</span>
+                        <span class="quick-chip quick-chip-amt" onclick="document.getElementById('incAmount').value = 100000">100k</span>
+                        <span class="quick-chip quick-chip-amt" onclick="document.getElementById('incAmount').value = 150000">150k</span>
+                        <span class="quick-chip quick-chip-amt" onclick="document.getElementById('incAmount').value = 200000">200k</span>
+                        <span class="quick-chip quick-chip-amt" onclick="document.getElementById('incAmount').value = 250000">250k</span>
+                        <span class="quick-chip quick-chip-amt" onclick="document.getElementById('incAmount').value = 300000">300k</span>
+                        <span class="quick-chip quick-chip-amt" onclick="document.getElementById('incAmount').value = 500000">500k</span>
+                    </div>
+
+                    <label class="form-label small text-muted fw-bold mb-1">Ngày thu:</label>
+                    <input type="date" id="incDate" class="form-control bg-light">
+                </div>
+                <div class="modal-footer p-3 border-0">
+                    <button type="button" class="btn btn-primary w-100 rounded-pill fw-bold py-2 shadow-sm" onclick="saveIncome()">CỘNG VÀO QUỸ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+	<!-- CÁC MODAL QUẢN LÝ THÀNH VIÊN VÀ PHÂN ĐỘI (ĐÃ KHÔI PHỤC) -->
     <div class="modal fade" id="modalMemberManager" tabindex="-1"><div class="modal-dialog modal-fullscreen"><div class="modal-content bg-light"><div class="modal-header bg-primary text-white border-0"><h5 class="modal-title fw-bold"><i class="fas fa-users-cog me-2"></i>Thành Viên</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="bg-primary px-3 pb-3 pt-1 d-flex gap-2 shadow-sm"><button class="btn btn-light text-primary w-50 fw-bold rounded-pill shadow-sm" onclick="openMemberForm()"><i class="fas fa-user-plus me-1"></i> CẦU THỦ</button><button class="btn btn-info text-white w-50 fw-bold rounded-pill shadow-sm border border-light" onclick="openAddTeamForm()"><i class="fas fa-layer-group me-1"></i> PHÂN ĐỘI</button></div><div class="modal-body p-2"><div class="accordion" id="accMembers"></div></div></div></div></div>
     <div class="modal fade" id="modalAddTeam" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow"><div class="modal-header bg-info text-white border-0 rounded-top-4"><h6 class="modal-title fw-bold" id="teamModalTitle"><i class="fas fa-layer-group me-2"></i>Thêm phân đội mới</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><input type="hidden" id="editTeamId"><input type="text" id="newTeamName" class="form-control bg-light" placeholder="Tên phân đội..."></div><div class="modal-footer p-3 border-0"><button class="btn btn-info text-white w-100 rounded-pill fw-bold py-2" onclick="addTeam()">LƯU</button></div></div></div></div>
     <div class="modal fade" id="modalMemberForm" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow"><div class="modal-header bg-primary text-white border-0 rounded-top-4"><h6 class="modal-title fw-bold" id="memFormTitle">Thêm cầu thủ</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><input type="hidden" id="editMemId"><div class="mb-3"><input type="text" id="memName" class="form-control bg-light" placeholder="Tên cầu thủ..."></div><div class="mb-3"><select id="memTeam" class="form-select bg-light"></select></div><div class="row g-2"><div class="col-6"><input type="date" id="memDOB" class="form-control bg-light"></div><div class="col-6"><input type="tel" id="memPhone" class="form-control bg-light" placeholder="SĐT..."></div></div></div><div class="modal-footer p-3 border-0"><button class="btn btn-primary w-100 rounded-pill fw-bold py-2" onclick="saveMember()">LƯU</button></div></div></div></div>
-
     <!-- Firebase SDKs & Logic -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -599,14 +767,17 @@
                     let tQ = 0, tC = 0, tChi = 0;
                     Object.values(mData.regular || {}).forEach(a => tQ += (Number(a)||0));
                     Object.values(mData.betting || {}).forEach(m => Object.values(m.losers||{}).forEach(a => tC += (Number(a)||0)));
-                    Object.values(mData.expenses || {}).forEach(e => tChi += (Number(e.amount)||0));
+                    Object.values(mData.expenses || {}).forEach(e => {
+                        if (e.type === 'thu') tQ += (Number(e.amount)||0); // Cộng Thu khác vào tồn
+                        else tChi += (Number(e.amount)||0); // Trừ chi
+                    });
                     prevTotal += (tQ + tC - tChi);
                 }
             }); return prevTotal;
         }
 
         function renderAll() { 
-            renderThuQuy(); renderCaDo(); renderChi(); renderTongKet(); renderThongKe();
+            renderThuQuy(); renderCaDo(); renderGiaoLuu(); renderChi(); renderTongKet(); renderThongKe();
             if(window.state.bsMatchId) renderBottomSheetContent(); 
         }
 
@@ -722,18 +893,29 @@
         function renderCaDo() {
             const container = document.getElementById('cado-container'); 
             const betting = window.state.monthData.betting || {};
-            if(Object.keys(betting).length === 0) {
-                container.innerHTML = '<div class="text-center text-muted mt-5"><i class="fas fa-box-open fa-2x mb-3 opacity-25"></i><br>Chưa có trận nào.<br><small>Bấm nút (+) để thêm trận.</small></div>';
-                return;
-            }
+            const matchKeys = Object.keys(betting);
+
+            let totalCollected = 0;
+            let totalDebt = 0;
 
             const matchesList = Object.entries(betting).map(([mId, m]) => {
                 const total = Number(m.penalty_amount) || 0;
                 let col = 0; const losers = m.losers || {};
                 const count = Object.keys(losers).length;
                 Object.values(losers).forEach(a => col += (Number(a)||0));
-                return { id: mId, ...m, total, count, debt: (count * total) - col, isDone: (count > 0 && ((count * total) - col) <= 0) };
+                const debt = Math.max(0, (count * total) - col);
+                totalCollected += col;
+                totalDebt += debt;
+                return { id: mId, ...m, total, count, debt, isDone: (count > 0 && debt <= 0) };
             }).sort((a,b) => (a.isDone === b.isDone ? 0 : a.isDone ? 1 : -1));
+
+            document.getElementById('cado-thu-header').innerText = window.formatMoney(totalCollected);
+            document.getElementById('cado-sub-header').innerText = `${matchKeys.length} trận • Nợ: ${window.formatShortMoney(totalDebt)}`;
+
+            if(matchKeys.length === 0) {
+                container.innerHTML = '<div class="card-clean border p-4 text-center text-muted small"><i class="fas fa-futbol fa-2x mb-2 opacity-25"></i><br>Chưa có trận đấu nội bộ nào trong tháng.</div>';
+                return;
+            }
 
             let html = '';
             matchesList.forEach(m => {
@@ -914,35 +1096,178 @@
             }
         };
 
-        // ================= TAB 3: CHI RA =================
+        // ================= CHUYỂN NHÁNH TRONG TAB ĐỘ & GIAO LƯU =================
+        window.state.cadoSubTab = 'giaoluu'; // Mặc định mở nhánh Giao Lưu & Thu Khác
+
+        window.switchCadoSubTab = (subTab) => {
+            window.state.cadoSubTab = subTab;
+            const viewCado = document.getElementById('subtab-cado-view');
+            const viewGiaoluu = document.getElementById('subtab-giaoluu-view');
+            const cardCado = document.getElementById('card-sub-cado');
+            const cardGiaoluu = document.getElementById('card-sub-giaoluu');
+            const iconCado = document.getElementById('icon-sub-cado');
+            const iconGiaoluu = document.getElementById('icon-sub-giaoluu');
+            const fab = document.getElementById('globalFabBtn');
+
+            if (subTab === 'cado') {
+                viewCado.classList.remove('d-none');
+                viewGiaoluu.classList.add('d-none');
+                cardCado.classList.add('active-cado');
+                cardGiaoluu.classList.remove('active-giaoluu');
+                iconCado.classList.remove('d-none');
+                iconGiaoluu.classList.add('d-none');
+                if (window.state.activeTab === 'cado') fab.className = 'fab-btn bg-success show';
+            } else {
+                viewCado.classList.add('d-none');
+                viewGiaoluu.classList.remove('d-none');
+                cardCado.classList.remove('active-cado');
+                cardGiaoluu.classList.add('active-giaoluu');
+                iconCado.classList.add('d-none');
+                iconGiaoluu.classList.remove('d-none');
+                if (window.state.activeTab === 'cado') fab.className = 'fab-btn bg-primary show';
+            }
+        };
+
+        // ================= GIAO LƯU & THU KHÁC (NẰM Ở TAB 2) =================
+        window.openAddIncomeModal = () => {
+            document.getElementById('editIncId').value = ''; 
+            document.getElementById('incModalTitle').innerHTML = '<i class="fas fa-plus-circle me-2"></i>Thêm Tiền Giao Lưu & Thu Khác';
+            document.getElementById('incDesc').value = ''; 
+            document.getElementById('incAmount').value = '';
+            document.getElementById('incDate').value = new Date().toISOString().slice(0, 10);
+            new bootstrap.Modal(document.getElementById('modalIncome')).show();
+        };
+
+        window.openEditIncomeModal = (incId) => {
+            const inc = window.state.monthData.expenses?.[incId]; if(!inc) return;
+            document.getElementById('editIncId').value = incId; 
+            document.getElementById('incModalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>Sửa Khoản Thu';
+            document.getElementById('incDesc').value = inc.desc || ''; 
+            document.getElementById('incAmount').value = inc.amount || '';
+            document.getElementById('incDate').value = inc.rawDate || new Date().toISOString().slice(0, 10);
+            new bootstrap.Modal(document.getElementById('modalIncome')).show();
+        };
+
+        window.saveIncome = () => {
+            const editId = document.getElementById('editIncId').value;
+            const desc = document.getElementById('incDesc').value.trim(); 
+            const amt = Number(document.getElementById('incAmount').value); 
+            const rawDate = document.getElementById('incDate').value;
+            
+            if(!desc || !amt) return alert("Vui lòng nhập nội dung và số tiền thu!"); 
+            const payload = { desc, amount: amt, type: 'thu', date: rawDate ? new Date(rawDate).toLocaleDateString('vi-VN') : new Date().toLocaleDateString('vi-VN'), rawDate };
+            
+            if(editId) update(ref(db, `funds/${window.state.currentMonth}/expenses/${editId}`), payload).then(() => bootstrap.Modal.getInstance(document.getElementById('modalIncome')).hide());
+            else push(ref(db, `funds/${window.state.currentMonth}/expenses`), payload).then(() => bootstrap.Modal.getInstance(document.getElementById('modalIncome')).hide());
+        };
+
+        // Hàm xóa khoản thu Giao lưu (Fix triệt để lỗi không xóa được)
+        window.deleteIncome = (incId) => {
+            if(confirm('Xóa khoản thu giao lưu này?')) {
+                remove(ref(db, `funds/${window.state.currentMonth}/expenses/${incId}`));
+            }
+        };
+
+        function renderGiaoLuu() {
+            const container = document.getElementById('giaoluu-container');
+            if(!container) return;
+            const allItems = window.state.monthData.expenses || {};
+            const incEntries = Object.entries(allItems).filter(([_, item]) => item.type === 'thu');
+            
+            let totalInc = 0;
+            incEntries.forEach(([_, inc]) => totalInc += (Number(inc.amount) || 0));
+
+            document.getElementById('giaoluu-thu-header').innerText = window.formatMoney(totalInc);
+            document.getElementById('giaoluu-sub-header').innerText = `${incEntries.length} khoản thu`;
+
+            if(incEntries.length === 0) {
+                container.innerHTML = '<div class="card-clean border p-4 text-center text-muted small"><i class="fas fa-handshake fa-2x mb-2 opacity-25"></i><br>Chưa có khoản thu giao lưu & thu khác.<br>Bấm (+) để thêm.</div>';
+                return;
+            }
+
+            let html = '<div class="timeline-container">';
+            incEntries.sort((a,b) => new Date(b[1].rawDate || 0) - new Date(a[1].rawDate || 0)).forEach(([incId, inc]) => {
+                // Nhận diện từ khóa để gán Icon phù hợp
+                let iconClass = 'icon-khac'; let iconItem = 'fa-handshake';
+                const descLower = inc.desc.toLowerCase();
+                if(descLower.includes('sân')) { iconClass = 'icon-san'; iconItem = 'fa-futbol'; }
+                else if(descLower.includes('nước')) { iconClass = 'icon-nuoc'; iconItem = 'fa-tint'; }
+                else if(descLower.includes('thưởng') || descLower.includes('giải')) { iconClass = 'icon-thuong'; iconItem = 'fa-trophy'; }
+                else if(descLower.includes('tài trợ')) { iconClass = 'icon-khac'; iconItem = 'fa-gem'; }
+
+                html += `
+                <div class="timeline-item">
+                    <div class="timeline-icon ${iconClass}"><i class="fas ${iconItem}"></i></div>
+                    <div class="timeline-content">
+                        <div class="timeline-title">${inc.desc}</div>
+                        <div class="timeline-date"><i class="far fa-calendar-check"></i> ${inc.date}</div>
+                        <div class="timeline-actions">
+                            <div class="tl-btn edit" onclick="openEditIncomeModal('${incId}')"><i class="fas fa-pen"></i></div>
+                            <div class="tl-btn delete" onclick="deleteIncome('${incId}')"><i class="fas fa-trash"></i></div>
+                        </div>
+                    </div>
+                    <div class="timeline-amount">+${window.formatShortMoney(inc.amount)}</div>
+                </div>`;
+            });
+            container.innerHTML = html + '</div>';
+        }
+
+        // ================= TAB 3: CHI QUỸ (CHỈ TRỪ TIỀN QUỸ) =================
         window.openAddExpenseModal = () => {
-            document.getElementById('editExpId').value = ''; document.getElementById('expModalTitle').innerText = 'Thêm Khoản Chi';
-            document.getElementById('expDesc').value = ''; document.getElementById('expAmount').value = '';
+            document.getElementById('editExpId').value = ''; 
+            document.getElementById('expModalTitle').innerHTML = '<i class="fas fa-minus-circle me-2"></i>Thêm Khoản Chi';
+            document.getElementById('expDesc').value = ''; 
+            document.getElementById('expAmount').value = '';
             document.getElementById('expDate').value = new Date().toISOString().slice(0, 10);
             new bootstrap.Modal(document.getElementById('modalExpense')).show();
         };
+
         window.openEditExpenseModal = (expId) => {
             const exp = window.state.monthData.expenses?.[expId]; if(!exp) return;
-            document.getElementById('editExpId').value = expId; document.getElementById('expModalTitle').innerText = 'Sửa Khoản Chi';
-            document.getElementById('expDesc').value = exp.desc || ''; document.getElementById('expAmount').value = exp.amount || '';
+            document.getElementById('editExpId').value = expId; 
+            document.getElementById('expModalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>Sửa Khoản Chi';
+            document.getElementById('expDesc').value = exp.desc || ''; 
+            document.getElementById('expAmount').value = exp.amount || '';
             document.getElementById('expDate').value = exp.rawDate || new Date().toISOString().slice(0, 10);
             new bootstrap.Modal(document.getElementById('modalExpense')).show();
         };
+
         window.saveExpense = () => {
             const editId = document.getElementById('editExpId').value;
-            const desc = document.getElementById('expDesc').value.trim(); const amt = Number(document.getElementById('expAmount').value); const rawDate = document.getElementById('expDate').value;
-            if(!desc || !amt) return; const payload = { desc, amount: amt, date: rawDate ? new Date(rawDate).toLocaleDateString('vi-VN') : new Date().toLocaleDateString('vi-VN'), rawDate };
+            const desc = document.getElementById('expDesc').value.trim(); 
+            const amt = Number(document.getElementById('expAmount').value); 
+            const rawDate = document.getElementById('expDate').value;
+            
+            if(!desc || !amt) return alert("Vui lòng nhập nội dung và số tiền chi!"); 
+            const payload = { desc, amount: amt, type: 'chi', date: rawDate ? new Date(rawDate).toLocaleDateString('vi-VN') : new Date().toLocaleDateString('vi-VN'), rawDate };
+            
             if(editId) update(ref(db, `funds/${window.state.currentMonth}/expenses/${editId}`), payload).then(() => bootstrap.Modal.getInstance(document.getElementById('modalExpense')).hide());
             else push(ref(db, `funds/${window.state.currentMonth}/expenses`), payload).then(() => bootstrap.Modal.getInstance(document.getElementById('modalExpense')).hide());
         };
+
+        // Hàm xóa khoản chi (Fix triệt để lỗi không xóa được)
+        window.deleteExpense = (expId) => {
+            if(confirm('Xóa khoản chi này?')) {
+                remove(ref(db, `funds/${window.state.currentMonth}/expenses/${expId}`));
+            }
+        };
+
         function renderChi() {
-            const container = document.getElementById('chi-container'); const expenses = window.state.monthData.expenses || {};
-            const expEntries = Object.entries(expenses); let totalExp = 0; expEntries.forEach(([_, exp]) => totalExp += (Number(exp.amount)||0));
-            document.getElementById('chi-total-header').innerText = window.formatMoney(totalExp); document.getElementById('chi-count-label').innerText = `${expEntries.length} khoản chi`;
-            if(expEntries.length === 0) return container.innerHTML = '<div class="text-center text-muted mt-5"><i class="fas fa-box-open fa-2x mb-2 opacity-25"></i></div>';
+            const container = document.getElementById('chi-container'); 
+            const allItems = window.state.monthData.expenses || {};
+            const expEntries = Object.entries(allItems).filter(([_, item]) => item.type !== 'thu'); 
+            
+            let totalExp = 0; 
+            expEntries.forEach(([_, exp]) => totalExp += (Number(exp.amount)||0));
+            
+            document.getElementById('chi-total-header').innerText = window.formatMoney(totalExp); 
+            document.getElementById('chi-count-label').innerText = `${expEntries.length} khoản chi`; 
+            
+            if(expEntries.length === 0) return container.innerHTML = '<div class="text-center text-muted mt-5"><i class="fas fa-box-open fa-2x mb-2 opacity-25"></i><br>Chưa có khoản chi nào trong tháng.</div>';
+            
             let html = '<div class="card-clean border">';
-            expEntries.forEach(([expId, exp]) => { 
-                html += `<div class="item-clean"><div class="text-truncate me-2"><div class="fw-bold text-dark text-truncate">${exp.desc}</div><small class="text-muted"><i class="far fa-calendar-alt me-1 text-info"></i>${exp.date}</small></div><div class="d-flex align-items-center gap-2 flex-shrink-0"><strong class="text-danger me-1">-${window.formatShortMoney(exp.amount)}</strong><button class="btn btn-sm btn-light text-primary border rounded-circle shadow-sm" style="width:30px;height:30px;padding:0" onclick="openEditExpenseModal('${expId}')"><i class="fas fa-pen"></i></button><button class="btn btn-sm btn-light text-danger border rounded-circle shadow-sm" style="width:30px;height:30px;padding:0" onclick="if(confirm('Xóa?')) remove(ref(db, 'funds/${window.state.currentMonth}/expenses/${expId}'))"><i class="fas fa-trash"></i></button></div></div>`; 
+            expEntries.sort((a,b) => new Date(b[1].rawDate || 0) - new Date(a[1].rawDate || 0)).forEach(([expId, exp]) => { 
+                html += `<div class="item-clean"><div class="text-truncate me-2"><div class="fw-bold text-dark text-truncate">${exp.desc}</div><small class="text-muted"><i class="far fa-calendar-alt me-1 text-info"></i>${exp.date}</small></div><div class="d-flex align-items-center gap-2 flex-shrink-0"><strong class="text-danger me-1">-${window.formatShortMoney(exp.amount)}</strong><button class="btn btn-sm btn-light text-primary border rounded-circle shadow-sm" style="width:30px;height:30px;padding:0" onclick="openEditExpenseModal('${expId}')"><i class="fas fa-pen"></i></button><button class="btn btn-sm btn-light text-danger border rounded-circle shadow-sm" style="width:30px;height:30px;padding:0" onclick="deleteExpense('${expId}')"><i class="fas fa-trash"></i></button></div></div>`; 
             });
             container.innerHTML = html + '</div>';
         }
@@ -971,18 +1296,45 @@
                 });
             });
             
-            Object.values(window.state.monthData.expenses || {}).forEach(exp => tongChi += (Number(exp.amount) || 0));
+            let thuKhac = 0;
+            Object.values(window.state.monthData.expenses || {}).forEach(exp => {
+                if (exp.type === 'thu') thuKhac += (Number(exp.amount) || 0);
+                else tongChi += (Number(exp.amount) || 0);
+            });
+
             const tonQuyThangTruoc = getCarryOverFund(window.state.currentMonth);
-            const tongHienTai = tonQuyThangTruoc + thuQuy + thuCaDo - tongChi;
+            const tongThu = thuQuy + thuCaDo + thuKhac;
+            const tongHienTai = tonQuyThangTruoc + tongThu - tongChi;
             
             const [y, m] = window.state.currentMonth.split('-');
+            
+            // Cập nhật Text
             document.getElementById('tk-month-badge').innerText = `Tháng ${m}/${y}`;
             document.getElementById('tk-tonquythangtruoc').innerText = window.formatMoney(tonQuyThangTruoc);
             document.getElementById('tk-thuquy').innerText = window.formatMoney(thuQuy);
             document.getElementById('tk-thucado').innerText = window.formatMoney(thuCaDo);
-            document.getElementById('tk-tongchi').innerText = window.formatMoney(tongChi);
+            document.getElementById('tk-thukhac').innerText = window.formatMoney(thuKhac);
             document.getElementById('tk-tonquy').innerText = window.formatMoney(tongHienTai);
             
+            document.getElementById('tk-tongthu-label').innerText = window.formatMoney(tongThu);
+            document.getElementById('tk-tongchi-label').innerText = window.formatMoney(tongChi);
+
+            // Xử lý vẽ biểu đồ tròn (Donut Chart)
+            const chart = document.getElementById('tk-chart');
+            if (chart) {
+                if (tongThu > 0) {
+                    const pctQuy = (thuQuy / tongThu) * 100;
+                    const pctDo = (thuCaDo / tongThu) * 100;
+                    const degQuy = pctQuy;
+                    const degDo = pctQuy + pctDo;
+                    // Tỷ lệ màu: Thu quỹ (#198754 - Xanh lá), Thu độ (#0d6efd - Xanh dương), Giao lưu (#0dcaf0 - Xanh lơ)
+                    chart.style.background = `conic-gradient(#198754 0% ${degQuy}%, #0d6efd ${degQuy}% ${degDo}%, #0dcaf0 ${degDo}% 100%)`;
+                } else {
+                    chart.style.background = `conic-gradient(#e9ecef 0% 100%)`;
+                }
+            }
+            
+            // Xử lý nợ
             const debtors = Object.entries(memberDebts).map(([mId, d]) => { if(d.cadoDebt > 0) unpaidCadoPeopleCount++; return { mId, ...d, totalDebt: d.quyDebt + d.cadoDebt }; }).filter(d => d.totalDebt > 0).sort((a, b) => b.totalDebt - a.totalDebt);
             document.getElementById('tk-tongno-badge').innerText = window.formatMoney(debtors.reduce((sum, d) => sum + d.totalDebt, 0));
             document.getElementById('tk-debt-sub').innerText = `Nợ quỹ: ${unpaidQuyCount} • Nợ độ: ${unpaidCadoPeopleCount}`;
@@ -999,16 +1351,6 @@
                 document.getElementById('tk-bangtongno').innerHTML = htmlDebt;
             }
         }
-
-        window.settleAllMemberDebt = (mId, mName, totalDebt) => {
-            if(!confirm(`Xác nhận đã thu ${window.formatMoney(totalDebt)} của ${mName}?`)) return;
-            const defaultFund = window.state.globalSettings.defaultFund || 100000; const updates = {};
-            if((Number(window.state.monthData.regular?.[mId]) || 0) <= 0) updates[`funds/${window.state.currentMonth}/regular/${mId}`] = Number(defaultFund);
-            Object.entries(window.state.monthData.betting || {}).forEach(([matchId, match]) => {
-                const matchTotal = Number(match.penalty_amount) || 0;
-                if(match.losers && match.losers[mId] !== undefined && Number(match.losers[mId]) < matchTotal) updates[`funds/${window.state.currentMonth}/betting/${matchId}/losers/${mId}`] = matchTotal;
-            }); update(ref(db), updates);
-        };
 
         // ================= TAB 5: THỐNG KÊ =================
         function renderThongKe() {
@@ -1115,8 +1457,14 @@
 
         // 3. Quản lý Thành viên (Giao diện mới)
         window.openMemberManager = () => {
+            // Sửa lỗi: Cần đảm bảo hàm render chạy trước khi mở Modal
             window.renderMemberManager();
-            new bootstrap.Modal(document.getElementById('modalMemberManager')).show();
+            const modalElement = document.getElementById('modalMemberManager');
+            if (modalElement) {
+                new bootstrap.Modal(modalElement).show();
+            } else {
+                alert("Lỗi: Không tìm thấy giao diện Quản lý Thành viên!");
+            }
         };
 
         // Hàm này bắt sự kiện click vào Tên Cầu Thủ để xổ Menu Sửa/Xóa
@@ -1258,7 +1606,7 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Đang vẽ Báo cáo...';
 
             const defaultFund = window.state.globalSettings.defaultFund || 100000;
-            let thuQuy = 0, thuCaDo = 0, tongChi = 0;
+            let thuQuy = 0, thuCaDo = 0, thuKhac = 0, tongChi = 0;
             
             // 1. Tạo bộ khung lưu trữ dữ liệu
             const reportData = {};
@@ -1278,7 +1626,7 @@
                 else if (reportData[mId]) { reportData[mId].quyDebt = defaultFund; }
             });
 
-            // Tiền Cá Độ (Sửa lỗi lặp ngày tháng)
+            // Tiền Cá Độ
             Object.entries(window.state.monthData.betting || {}).forEach(([matchId, match]) => {
                 const matchTotal = Number(match.penalty_amount) || 0;
                 
@@ -1290,16 +1638,20 @@
                         
                         if (paid < matchTotal) {
                             reportData[mId].cadoDebt += (matchTotal - paid);
-                            // SỬA: Chỉ lấy tên trận (vì tên trận thường đã có sẵn ngày tháng)
                             reportData[mId].owedMatches.push(match.name);
                         }
                     }
                 });
             });
 
-            Object.values(window.state.monthData.expenses || {}).forEach(exp => tongChi += (Number(exp.amount) || 0));
+            // Tiền Thu Khác & Tổng Chi
+            Object.values(window.state.monthData.expenses || {}).forEach(exp => {
+                if (exp.type === 'thu') thuKhac += (Number(exp.amount) || 0);
+                else tongChi += (Number(exp.amount) || 0);
+            });
+
             const tonQuyThangTruoc = getCarryOverFund(window.state.currentMonth);
-            const tongHienTai = tonQuyThangTruoc + thuQuy + thuCaDo - tongChi;
+            const tongHienTai = tonQuyThangTruoc + thuQuy + thuCaDo + thuKhac - tongChi;
 
             // 2. Phân loại
             const paidList = [];
@@ -1322,10 +1674,11 @@
             document.getElementById('exp-old').innerText = window.formatMoney(tonQuyThangTruoc);
             document.getElementById('exp-thuquy').innerText = window.formatMoney(thuQuy);
             document.getElementById('exp-thucado').innerText = window.formatMoney(thuCaDo);
+            document.getElementById('exp-thukhac').innerText = window.formatMoney(thuKhac);
             document.getElementById('exp-chi').innerText = window.formatMoney(tongChi);
             document.getElementById('exp-now').innerText = window.formatMoney(tongHienTai);
 
-            // Render ĐÃ NỘP (Thu gọn: Tên và Số tiền cùng 1 dòng)
+            // Render ĐÃ NỘP
             let paidHtml = '';
             if (paidList.length === 0) {
                 paidHtml = '<div style="color:#adb5bd; font-style:italic; text-align:center;">Chưa có thành viên nào nộp.</div>';
@@ -1347,7 +1700,7 @@
             }
             document.getElementById('exp-paid-list').innerHTML = paidHtml;
 
-            // Render NỢ (Thu gọn: Đưa Tag lên cạnh Tên, Giảm padding)
+            // Render NỢ
             let debtHtml = '';
             if (debtList.length === 0) {
                 debtHtml = '<div style="color:#198754; font-weight:bold; text-align:center; padding: 20px; font-size:16px;">Tuyệt vời! Tất cả đã hoàn thành. 🎉</div>';
@@ -1359,7 +1712,6 @@
                     
                     let matchDetails = '';
                     if (d.owedMatches.length > 0) {
-                        // SỬA: Chuỗi hiển thị ngắn gọn "⚠️ Trận: ..."
                         matchDetails = `<div style="font-size:11.5px; color:#b45309; margin-top:4px; font-style:italic; font-weight:500;">⚠️ Trận: ${d.owedMatches.join(', ')}</div>`;
                     }
                     
@@ -1381,15 +1733,14 @@
             const now = new Date();
             document.getElementById('exp-footer-time').innerText = `🕒 Trích xuất lúc ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')} ngày ${now.toLocaleDateString('vi-VN')} - Vui lòng hoàn thành quỹ cho Thủ quỹ nhé! ⚽❤️`;
 
-            // 3. Chụp Ảnh và Lưu thẳng bằng Native Share (Hỗ trợ iPhone lưu vào Thư Viện)
+            // 4. Chụp Ảnh và Lưu thẳng bằng Native Share
             setTimeout(() => {
                 const exportZone = document.getElementById('report-export-zone');
                 html2canvas(exportZone, { 
-                    scale: 10, // Độ nét x10 theo yêu cầu. (Nếu máy cấu hình yếu bị xuất ra ảnh trắng, hãy giảm xuống 4 hoặc 5)
+                    scale: 6,
                     useCORS: true, 
                     backgroundColor: '#f4f7f6' 
                 }).then(canvas => {
-                    // Đóng gói ảnh thành dạng Blob thay vì chuỗi DataURL để tránh tràn RAM iPhone
                     canvas.toBlob((blob) => {
                         if (!blob) {
                             alert('Lỗi: Bộ nhớ máy không đủ để xử lý scale: 10. Vui lòng giảm scale xuống 4 hoặc 5 trong code.');
@@ -1400,7 +1751,6 @@
                         const fileName = `Bao_Cao_FC_Thang_${m}_${y}.png`;
                         const file = new File([blob], fileName, { type: 'image/png' });
 
-                        // Nếu trình duyệt (iPhone/Android đời mới) hỗ trợ Web Share API
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
                             navigator.share({
                                 files: [file],
@@ -1413,7 +1763,6 @@
                                 btn.innerHTML = oldHtml;
                             });
                         } else {
-                            // Máy tính hoặc trình duyệt cũ không hỗ trợ Share thì tự động tải file xuống
                             const objUrl = URL.createObjectURL(blob);
                             const link = document.createElement('a');
                             link.download = fileName;
@@ -1447,8 +1796,8 @@
             } else if (tabId !== 'cai-dat') {
                 headerFull.style.display = 'none';
                 headerCompact.style.display = 'flex';
-                if(tabId === 'cado') titleElement.innerText = 'CÁ ĐỘ';
-                else if(tabId === 'chi') titleElement.innerText = 'CHI RA';
+                if(tabId === 'cado') titleElement.innerText = 'CÁ ĐỘ & GIAO LƯU';
+                else if(tabId === 'chi') titleElement.innerText = 'CHI QUỸ';
                 else if(tabId === 'tongket') titleElement.innerText = 'TỔNG KẾT';
                 else if(tabId === 'thongke') titleElement.innerText = 'THỐNG KÊ';
             } else {
@@ -1464,15 +1813,28 @@
                 element.classList.add('active');
             }
 
+            // Đổi màu nút (+) thông minh theo từng Tab và Sub-tab
             const fab = document.getElementById('globalFabBtn');
-            if(tabId === 'cado') { fab.className = 'fab-btn bg-success show'; fab.innerHTML = '<i class="fas fa-plus"></i>'; }
-            else if(tabId === 'chi') { fab.className = 'fab-btn bg-danger show'; fab.innerHTML = '<i class="fas fa-plus"></i>'; }
-            else { fab.className = 'fab-btn'; }
+            if(tabId === 'cado') {
+                const isGiaoLuu = window.state.cadoSubTab === 'giaoluu';
+                fab.className = isGiaoLuu ? 'fab-btn bg-primary show' : 'fab-btn bg-success show';
+                fab.innerHTML = '<i class="fas fa-plus"></i>';
+            } else if(tabId === 'chi') { 
+                fab.className = 'fab-btn bg-danger show'; 
+                fab.innerHTML = '<i class="fas fa-plus"></i>'; 
+            } else { 
+                fab.className = 'fab-btn'; 
+            }
         };
 
         window.handleFabClick = () => {
-            if(window.state.activeTab === 'cado') window.openAddMatchModal();
-            else if(window.state.activeTab === 'chi') window.openAddExpenseModal();
+            if(window.state.activeTab === 'cado') {
+                if(window.state.cadoSubTab === 'giaoluu') window.openAddIncomeModal();
+                else window.openAddMatchModal();
+            }
+            else if(window.state.activeTab === 'chi') {
+                window.openAddExpenseModal();
+            }
         };
         
         document.getElementById('monthSelectorMain').addEventListener('change', (e) => handleMonthChange(e.target.value));
