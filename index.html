@@ -462,7 +462,52 @@
 	<!-- CÁC MODAL QUẢN LÝ THÀNH VIÊN VÀ PHÂN ĐỘI (ĐÃ KHÔI PHỤC) -->
     <div class="modal fade" id="modalMemberManager" tabindex="-1"><div class="modal-dialog modal-fullscreen"><div class="modal-content bg-light"><div class="modal-header bg-primary text-white border-0"><h5 class="modal-title fw-bold"><i class="fas fa-users-cog me-2"></i>Thành Viên</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="bg-primary px-3 pb-3 pt-1 d-flex gap-2 shadow-sm"><button class="btn btn-light text-primary w-50 fw-bold rounded-pill shadow-sm" onclick="openMemberForm()"><i class="fas fa-user-plus me-1"></i> CẦU THỦ</button><button class="btn btn-info text-white w-50 fw-bold rounded-pill shadow-sm border border-light" onclick="openAddTeamForm()"><i class="fas fa-layer-group me-1"></i> PHÂN ĐỘI</button></div><div class="modal-body p-2"><div class="accordion" id="accMembers"></div></div></div></div></div>
     <div class="modal fade" id="modalAddTeam" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow"><div class="modal-header bg-info text-white border-0 rounded-top-4"><h6 class="modal-title fw-bold" id="teamModalTitle"><i class="fas fa-layer-group me-2"></i>Thêm phân đội mới</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><input type="hidden" id="editTeamId"><input type="text" id="newTeamName" class="form-control bg-light" placeholder="Tên phân đội..."></div><div class="modal-footer p-3 border-0"><button class="btn btn-info text-white w-100 rounded-pill fw-bold py-2" onclick="addTeam()">LƯU</button></div></div></div></div>
-    <div class="modal fade" id="modalMemberForm" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow"><div class="modal-header bg-primary text-white border-0 rounded-top-4"><h6 class="modal-title fw-bold" id="memFormTitle">Thêm cầu thủ</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><input type="hidden" id="editMemId"><div class="mb-3"><input type="text" id="memName" class="form-control bg-light" placeholder="Tên cầu thủ..."></div><div class="mb-3"><select id="memTeam" class="form-select bg-light"></select></div><div class="row g-2"><div class="col-6"><input type="date" id="memDOB" class="form-control bg-light"></div><div class="col-6"><input type="tel" id="memPhone" class="form-control bg-light" placeholder="SĐT..."></div></div></div><div class="modal-footer p-3 border-0"><button class="btn btn-primary w-100 rounded-pill fw-bold py-2" onclick="saveMember()">LƯU</button></div></div></div></div>
+    <!-- Modal THÊM/SỬA CẦU THỦ (Có tải Avatar) -->
+    <div class="modal fade" id="modalMemberForm" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 shadow">
+                <div class="modal-header bg-primary text-white border-0 rounded-top-4">
+                    <h6 class="modal-title fw-bold" id="memFormTitle">Thêm cầu thủ</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 pt-3">
+                    <input type="hidden" id="editMemId">
+                    <input type="hidden" id="tempAvatarBase64"> <!-- Lưu tạm mã ảnh -->
+                    
+                    <!-- Khu vực tải Avatar -->
+                    <div style="position: relative; text-align: center;">
+                        <input type="file" id="memAvatarInput" accept="image/*" class="d-none" onchange="handleAvatarUpload(event)">
+                        <div class="avatar-upload-zone" id="avatarUploadZone" onclick="document.getElementById('memAvatarInput').click()">
+                            <i class="fas fa-camera text-muted" style="font-size: 24px;" id="avatarCamIcon"></i>
+                            <img id="avatarPreview" src="" class="d-none">
+                            <div class="avatar-upload-overlay">Đổi ảnh</div>
+                        </div>
+                        <div class="btn-remove-avatar" id="btnRemoveAvatar" onclick="removeAvatarSelection(event)"><i class="fas fa-times"></i></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <input type="text" id="memName" class="form-control bg-light fw-bold text-center" placeholder="Tên cầu thủ (Bắt buộc)">
+                    </div>
+                    <div class="mb-3">
+                        <select id="memTeam" class="form-select bg-light fw-bold"></select>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label class="form-label small text-muted fw-bold mb-1 ps-1">Ngày sinh:</label>
+                            <input type="date" id="memDOB" class="form-control bg-light">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small text-muted fw-bold mb-1 ps-1">Điện thoại:</label>
+                            <input type="tel" id="memPhone" class="form-control bg-light" placeholder="09xxxx...">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer p-3 border-0">
+                    <button class="btn btn-primary w-100 rounded-pill fw-bold py-2 shadow-sm" onclick="saveMember()">LƯU CẦU THỦ</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Các thư viện hỗ trợ -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
