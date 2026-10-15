@@ -354,14 +354,11 @@
                 <i class="fas fa-camera-retro me-2"></i> XUẤT ẢNH BÁO CÁO NHÓM
             </button>
 
-            <!-- BẢN THIẾT KẾ ẨN DÙNG ĐỂ CHỤP ẢNH (BỔ SUNG THU QUỸ, THU ĐỘ) -->
+            <!-- BẢN THIẾT KẾ ẨN DÙNG ĐỂ CHỤP ẢNH (Giữ nguyên) -->
             <div id="report-export-zone" style="position: fixed; left: -9999px; top: 0; width: 800px; background: #f4f7f6; padding: 24px; font-family: system-ui, -apple-system, sans-serif; z-index: -1;">
-                <!-- Header Ảnh -->
                 <div style="background: white; border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
                     <div style="font-size: 28px; font-weight: 900; color: #198754; text-transform: uppercase;">BẢNG VÀNG QUỸ FC THẬP CẨM</div>
                     <div style="font-size: 18px; color: #6c757d; font-weight: bold; margin-top: 8px;" id="exp-month">Tổng kết Tháng...</div>
-                    
-                    <!-- Lưới 6 Cột Tổng Kết (3x2) -->
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 24px;">
                         <div style="background: #fff3cd; padding: 12px 6px; border-radius: 12px; border: 1px solid #ffe69c;">
                             <div style="font-size: 11px; color: #664d03; font-weight: bold;">TỒN ĐẦU KỲ</div>
@@ -375,7 +372,6 @@
                             <div style="font-size: 11px; color: #055160; font-weight: bold;">+ THU ĐỘ</div>
                             <div style="font-size: 17px; font-weight: 900; color: #087990; margin-top: 4px;" id="exp-thucado">0đ</div>
                         </div>
-                        
                         <div style="background: #d1e7dd; padding: 12px 6px; border-radius: 12px; border: 1px solid #badbcc;">
                             <div style="font-size: 11px; color: #0f5132; font-weight: bold;">+ GIAO LƯU</div>
                             <div style="font-size: 17px; font-weight: 900; color: #198754; margin-top: 4px;" id="exp-thukhac">0đ</div>
@@ -390,15 +386,11 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- Body Ảnh Lưỡng Cực -->
                 <div style="display: flex; gap: 16px; align-items: flex-start;">
-                    <!-- Cột Đã Nộp -->
                     <div style="flex: 1; background: white; border-radius: 16px; padding: 20px; border-top: 6px solid #198754; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
                         <h4 style="color: #198754; font-weight: 800; margin-top: 0; margin-bottom: 16px; font-size: 18px;"><i class="fas fa-check-circle"></i> ĐÃ NỘP QUỸ & ĐỘ</h4>
                         <div id="exp-paid-list"></div>
                     </div>
-                    <!-- Cột Nợ -->
                     <div style="flex: 1; background: white; border-radius: 16px; padding: 20px; border-top: 6px solid #dc3545; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
                         <h4 style="color: #dc3545; font-weight: 800; margin-top: 0; margin-bottom: 16px; font-size: 18px;"><i class="fas fa-exclamation-triangle"></i> CẦN THU (NỢ)</h4>
                         <div id="exp-debt-list"></div>
@@ -406,12 +398,11 @@
                 </div>
                 <div style="margin-top: 20px; text-align: center; font-size: 14px; color: #6c757d; font-style: italic;" id="exp-footer-time"></div>
             </div>
-            <!-- DASHBOARD TỔNG KẾT (CHỦ ĐỀ SÂN CỎ & QUẢ BÓNG) -->
+
+            <!-- DASHBOARD TỔNG KẾT (SÂN CỎ & QUẢ BÓNG) -->
             <div class="card p-4 mb-3 shadow border-0" style="border-radius: 20px; background: linear-gradient(135deg, #2b9348, #155d27); color: white; position: relative; overflow: hidden;">
                 <!-- Họa tiết vạch cắt cỏ sân bóng in chìm -->
                 <div style="position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent, transparent 24px, rgba(255,255,255,0.04) 24px, rgba(255,255,255,0.04) 48px); pointer-events: none; z-index: 0;"></div>
-                
-                <!-- Biểu tượng Quả bóng khổng lồ in chìm -->
                 <i class="fas fa-futbol" style="position: absolute; right: -25px; bottom: -25px; font-size: 150px; opacity: 0.15; transform: rotate(-15deg); z-index: 0;"></i>
                 
                 <div class="d-flex justify-content-between align-items-start mb-4 position-relative z-1">
@@ -422,67 +413,70 @@
                     <span class="badge bg-white text-success fw-bold px-3 py-2 rounded-pill shadow-sm" id="tk-month-badge">Tháng</span>
                 </div>
 
-                <!-- Biểu đồ + Dòng tiền -->
+                <!-- Cải tiến: Thanh phân tích Tỷ lệ Thu/Chi (Burn Rate) -->
+                <div class="position-relative z-1 mb-3">
+                    <div class="d-flex justify-content-between mb-1" style="font-size: 10px; color: #a3e6b4; font-weight: bold;">
+                        <span><i class="fas fa-arrow-down text-danger me-1"></i>Đã Chi: <span id="tk-tongchi-label">0 ₫</span></span>
+                        <span><i class="fas fa-arrow-up text-info me-1"></i>Tổng Thu: <span id="tk-tongthu-label">0 ₫</span></span>
+                    </div>
+                    <div class="progress shadow-sm" style="height: 6px; background: rgba(255,255,255,0.2); border-radius: 3px;">
+                        <div id="tk-burn-rate-bar" class="progress-bar bg-danger" role="progressbar" style="width: 0%;"></div>
+                    </div>
+                </div>
+
                 <div class="d-flex align-items-center gap-3 p-3 bg-white bg-opacity-10 rounded-4 position-relative z-1 border border-white border-opacity-25" style="backdrop-filter: blur(4px);">
                     <div class="donut-chart-container">
                         <div id="tk-chart" class="donut-chart" style="box-shadow: 0 2px 8px rgba(0,0,0,0.2);"></div>
                         <div class="donut-inner" style="background: #1b7031;"><i class="fas fa-futbol opacity-75" style="font-size: 18px;"></i></div>
                     </div>
-                    <div class="flex-grow-1">
-                        <div class="d-flex justify-content-between align-items-center mb-2 border-bottom border-white border-opacity-25 pb-2">
-                            <span class="small fw-bold"><i class="fas fa-arrow-up text-info me-1"></i> Tổng Thu</span>
-                            <span class="fw-bold" id="tk-tongthu-label">0 ₫</span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="small fw-bold" style="color: #ff9999;"><i class="fas fa-arrow-down me-1"></i> Đã Chi</span>
-                            <span class="fw-bold" style="color: #ff9999;" id="tk-tongchi-label">0 ₫</span>
+                    <div class="row g-2 flex-grow-1" style="font-size: 12px; font-weight: 700;">
+                        <div class="col-6"><i class="fas fa-circle text-success me-1" style="font-size:8px;"></i>Quỹ: <span id="tk-pct-quy">0%</span></div>
+                        <div class="col-6"><i class="fas fa-circle text-primary me-1" style="font-size:8px;"></i>Độ: <span id="tk-pct-do">0%</span></div>
+                        <div class="col-12"><i class="fas fa-circle text-info me-1" style="font-size:8px;"></i>Giao lưu: <span id="tk-pct-gl">0%</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VỊ TRÍ 1 MỚI: LƯỚI 4 Ô CHI TIẾT DÒNG TIỀN (Grid) -->
+            <div class="row g-2 mb-4">
+                <div class="col-6"><div class="bg-white p-2 rounded-4 shadow-sm border border-light position-relative overflow-hidden h-100"><i class="fas fa-history position-absolute text-muted" style="right:-5px; bottom:-5px; font-size: 40px; opacity: 0.05;"></i><span class="text-muted small fw-bold text-uppercase d-block mb-1" style="font-size:10px;">Dư Cũ</span><div class="fw-bold text-dark m-0" id="tk-tonquythangtruoc">0 ₫</div></div></div>
+                <div class="col-6"><div class="bg-white p-2 rounded-4 shadow-sm border border-light position-relative overflow-hidden h-100"><i class="fas fa-wallet position-absolute text-success" style="right:-5px; bottom:-5px; font-size: 40px; opacity: 0.05;"></i><span class="text-success small fw-bold text-uppercase d-block mb-1" style="font-size:10px;">Thu Quỹ</span><div class="fw-bold text-success m-0" id="tk-thuquy">0 ₫</div></div></div>
+                <div class="col-6"><div class="bg-white p-2 rounded-4 shadow-sm border border-light position-relative overflow-hidden h-100"><i class="fas fa-dice position-absolute text-primary" style="right:-5px; bottom:-5px; font-size: 40px; opacity: 0.05;"></i><span class="text-primary small fw-bold text-uppercase d-block mb-1" style="font-size:10px;">Thu Độ</span><div class="fw-bold text-primary m-0" id="tk-thucado">0 ₫</div></div></div>
+                <div class="col-6"><div class="bg-white p-2 rounded-4 shadow-sm border border-light position-relative overflow-hidden h-100"><i class="fas fa-handshake position-absolute text-info" style="right:-5px; bottom:-5px; font-size: 40px; opacity: 0.05;"></i><span class="text-info small fw-bold text-uppercase d-block mb-1" style="font-size:10px;">Giao Lưu</span><div class="fw-bold text-info m-0" id="tk-thukhac">0 ₫</div></div></div>
+            </div>
+
+            <!-- VỊ TRÍ 2 MỚI: BẢNG NỢ ACCORDION (GẬP MỞ THÔNG MINH - MẶC ĐỊNH ẨN) -->
+            <div class="accordion shadow-sm rounded-4 overflow-hidden mb-4 border border-danger border-opacity-25" id="accDebt">
+                <div class="accordion-item border-0">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed p-3 bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDebt">
+                            <div class="d-flex justify-content-between align-items-center w-100 pe-2">
+                                <div>
+                                    <h6 class="text-danger m-0 fw-bold"><i class="fas fa-user-clock me-1"></i> CẦN THU (NỢ)</h6>
+                                    <small class="text-muted" style="font-size: 11px;" id="tk-debt-sub">0 người</small>
+                                </div>
+                                <span class="badge bg-danger rounded-pill px-3 py-2 fs-6 shadow-sm" id="tk-tongno-badge">0 ₫</span>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapseDebt" class="accordion-collapse collapse bg-light" data-bs-parent="#accDebt">
+                        <div class="accordion-body p-0" id="tk-bangtongno">
+                            <!-- Danh sách con nợ render vào đây -->
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- LƯỚI 4 Ô CHI TIẾT DÒNG TIỀN (Grid) -->
-            <div class="row g-3 mb-4">
-                <div class="col-6">
-                    <div class="bg-white p-3 rounded-4 shadow-sm border border-light position-relative overflow-hidden h-100">
-                        <i class="fas fa-history position-absolute text-muted" style="right:-10px; bottom:-10px; font-size: 50px; opacity: 0.05;"></i>
-                        <span class="text-muted small fw-bold text-uppercase d-block mb-1">Dư Cũ</span>
-                        <h5 class="fw-bold text-dark m-0" id="tk-tonquythangtruoc">0 ₫</h5>
-                    </div>
+            <!-- VỊ TRÍ 3 MỚI: BẢNG PHONG THẦN "MVP ĐÓNG GÓP" (NẰM DƯỚI CÙNG) -->
+            <div class="card border-0 shadow-sm mb-3 rounded-4 overflow-hidden bg-white">
+                <div class="bg-warning bg-opacity-10 p-2 text-center border-bottom border-warning border-opacity-25">
+                    <h6 class="m-0 fw-bold text-dark" style="font-size: 13px;"><i class="fas fa-crown text-warning me-1"></i> TOP 3 GÁNH QUỸ THÁNG NÀY</h6>
                 </div>
-                <div class="col-6">
-                    <div class="bg-white p-3 rounded-4 shadow-sm border border-light position-relative overflow-hidden h-100">
-                        <i class="fas fa-wallet position-absolute text-success" style="right:-10px; bottom:-10px; font-size: 50px; opacity: 0.05;"></i>
-                        <span class="text-success small fw-bold text-uppercase d-block mb-1">Thu Quỹ</span>
-                        <h5 class="fw-bold text-success m-0" id="tk-thuquy">0 ₫</h5>
-                    </div>
-                </div>
-                <div class="col-6">
-                    <div class="bg-white p-3 rounded-4 shadow-sm border border-light position-relative overflow-hidden h-100">
-                        <i class="fas fa-dice position-absolute text-primary" style="right:-10px; bottom:-10px; font-size: 50px; opacity: 0.05;"></i>
-                        <span class="text-primary small fw-bold text-uppercase d-block mb-1">Thu Độ</span>
-                        <h5 class="fw-bold text-primary m-0" id="tk-thucado">0 ₫</h5>
-                    </div>
-                </div>
-                <div class="col-6">
-                    <div class="bg-white p-3 rounded-4 shadow-sm border border-light position-relative overflow-hidden h-100">
-                        <i class="fas fa-handshake position-absolute text-info" style="right:-10px; bottom:-10px; font-size: 50px; opacity: 0.05;"></i>
-                        <span class="text-info small fw-bold text-uppercase d-block mb-1">Giao Lưu</span>
-                        <h5 class="fw-bold text-info m-0" id="tk-thukhac">0 ₫</h5>
-                    </div>
+                <div class="d-flex justify-content-center align-items-end p-3 gap-2" id="tk-mvp-board">
+                    <!-- Sẽ render Top 3 vào đây -->
                 </div>
             </div>
             
-            <div class="card border border-danger border-opacity-25 shadow-sm overflow-hidden mb-4">
-                <div class="d-flex justify-content-between align-items-center p-3 bg-white border-bottom">
-                    <div>
-                        <h6 class="text-danger m-0 fw-bold"><i class="fas fa-user-clock me-1"></i> TỔNG NỢ CẦN THU</h6>
-                        <small class="text-muted" id="tk-debt-sub">0 người nợ</small>
-                    </div>
-                    <span class="badge bg-danger rounded-pill px-3 py-2 fs-6 shadow-sm" id="tk-tongno-badge">0 ₫</span>
-                </div>
-                <div id="tk-bangtongno" class="bg-light"></div>
-            </div>
         </div>
 
         <!-- TAB 5: THỐNG KÊ KẾT QUẢ -->
@@ -1278,24 +1272,43 @@
             let thuQuy = 0, thuCaDo = 0, tongChi = 0; 
             
             const memberDebts = {};
+            const memberContributions = {}; // Lưu trữ tổng tiền đã nộp để tính MVP
+            
             Object.entries(window.state.members).forEach(([mId, m]) => {
                 memberDebts[mId] = { name: m.name, teamName: window.state.teams[m.teamId]?.name || '', quyDebt: 0, cadoDebt: 0, cadoCount: 0 };
+                memberContributions[mId] = { name: m.name, totalPaid: 0 };
             });
 
             let unpaidQuyCount = 0; let unpaidCadoPeopleCount = 0;
-            Object.values(window.state.monthData.regular || {}).forEach(amt => thuQuy += (Number(amt) || 0));
+            
+            // Xử lý Thu Quỹ
             Object.entries(window.state.members).forEach(([mId, _]) => { 
-                if((Number(window.state.monthData.regular?.[mId]) || 0) <= 0 && memberDebts[mId]) { memberDebts[mId].quyDebt = defaultFund; unpaidQuyCount++; }
+                const paid = Number(window.state.monthData.regular?.[mId]) || 0;
+                if(paid > 0) { 
+                    thuQuy += paid; 
+                    if(memberContributions[mId]) memberContributions[mId].totalPaid += paid;
+                } else if(memberDebts[mId]) { 
+                    memberDebts[mId].quyDebt = defaultFund; 
+                    unpaidQuyCount++; 
+                }
             });
             
+            // Xử lý Thu Cá Độ
             Object.entries(window.state.monthData.betting || {}).forEach(([_, match]) => {
                 const matchTotal = Number(match.penalty_amount) || 0;
                 Object.entries(match.losers || {}).forEach(([mId, amt]) => {
-                    const paid = Number(amt) || 0; thuCaDo += paid;
-                    if (paid < matchTotal && memberDebts[mId]) { memberDebts[mId].cadoDebt += (matchTotal - paid); memberDebts[mId].cadoCount += 1; }
+                    const paid = Number(amt) || 0; 
+                    thuCaDo += paid;
+                    if(memberContributions[mId]) memberContributions[mId].totalPaid += paid;
+
+                    if (paid < matchTotal && memberDebts[mId]) { 
+                        memberDebts[mId].cadoDebt += (matchTotal - paid); 
+                        memberDebts[mId].cadoCount += 1; 
+                    }
                 });
             });
             
+            // Xử lý Chi Quỹ & Thu Giao Lưu
             let thuKhac = 0;
             Object.values(window.state.monthData.expenses || {}).forEach(exp => {
                 if (exp.type === 'thu') thuKhac += (Number(exp.amount) || 0);
@@ -1308,7 +1321,7 @@
             
             const [y, m] = window.state.currentMonth.split('-');
             
-            // Cập nhật Text
+            // Cập nhật Số liệu chữ
             document.getElementById('tk-month-badge').innerText = `Tháng ${m}/${y}`;
             document.getElementById('tk-tonquythangtruoc').innerText = window.formatMoney(tonQuyThangTruoc);
             document.getElementById('tk-thuquy').innerText = window.formatMoney(thuQuy);
@@ -1319,34 +1332,104 @@
             document.getElementById('tk-tongthu-label').innerText = window.formatMoney(tongThu);
             document.getElementById('tk-tongchi-label').innerText = window.formatMoney(tongChi);
 
-            // Xử lý vẽ biểu đồ tròn (Donut Chart)
+            // Cập nhật Thanh Tỷ lệ Tiêu Quỹ (Burn Rate)
+            const burnRateBar = document.getElementById('tk-burn-rate-bar');
+            if (burnRateBar && tongThu > 0) {
+                let burnPct = (tongChi / tongThu) * 100;
+                if(burnPct > 100) burnPct = 100;
+                burnRateBar.style.width = `${burnPct}%`;
+                // Đổi màu cảnh báo nếu tiêu quá 75%
+                if (burnPct > 75) { burnRateBar.classList.replace('bg-success', 'bg-danger'); burnRateBar.classList.replace('bg-warning', 'bg-danger'); }
+                else if (burnPct > 50) { burnRateBar.classList.replace('bg-success', 'bg-warning'); burnRateBar.classList.replace('bg-danger', 'bg-warning'); }
+                else { burnRateBar.classList.replace('bg-danger', 'bg-success'); burnRateBar.classList.replace('bg-warning', 'bg-success'); }
+            }
+
+            // Vẽ biểu đồ tròn (Donut Chart) và Tính %
             const chart = document.getElementById('tk-chart');
             if (chart) {
                 if (tongThu > 0) {
-                    const pctQuy = (thuQuy / tongThu) * 100;
-                    const pctDo = (thuCaDo / tongThu) * 100;
+                    const pctQuy = Math.round((thuQuy / tongThu) * 100);
+                    const pctDo = Math.round((thuCaDo / tongThu) * 100);
+                    const pctKhac = 100 - pctQuy - pctDo; // Khớp phần trăm
+                    
+                    document.getElementById('tk-pct-quy').innerText = `${pctQuy}%`;
+                    document.getElementById('tk-pct-do').innerText = `${pctDo}%`;
+                    document.getElementById('tk-pct-gl').innerText = `${pctKhac}%`;
+
                     const degQuy = pctQuy;
                     const degDo = pctQuy + pctDo;
-                    // Tỷ lệ màu: Thu quỹ (#198754 - Xanh lá), Thu độ (#0d6efd - Xanh dương), Giao lưu (#0dcaf0 - Xanh lơ)
                     chart.style.background = `conic-gradient(#198754 0% ${degQuy}%, #0d6efd ${degQuy}% ${degDo}%, #0dcaf0 ${degDo}% 100%)`;
                 } else {
+                    document.getElementById('tk-pct-quy').innerText = `0%`;
+                    document.getElementById('tk-pct-do').innerText = `0%`;
+                    document.getElementById('tk-pct-gl').innerText = `0%`;
                     chart.style.background = `conic-gradient(#e9ecef 0% 100%)`;
                 }
             }
+
+            // ================= MVP BẢNG PHONG THẦN =================
+            const mvpList = Object.values(memberContributions)
+                .filter(c => c.totalPaid > 0)
+                .sort((a,b) => b.totalPaid - a.totalPaid)
+                .slice(0, 3); // Lấy Top 3
+
+            const mvpBoard = document.getElementById('tk-mvp-board');
+            if (mvpList.length === 0) {
+                mvpBoard.innerHTML = '<div class="text-muted small fst-italic">Chưa có ai đóng góp quỹ tháng này.</div>';
+            } else {
+                let mvpHtml = '';
+                // Sắp xếp thứ tự lên bục: 2 - 1 - 3
+                const podiumOrder = [1, 0, 2];
+                podiumOrder.forEach(idx => {
+                    if (mvpList[idx]) {
+                        const m = mvpList[idx];
+                        const isTop1 = idx === 0;
+                        const height = isTop1 ? '100px' : (idx === 1 ? '85px' : '75px');
+                        const color = isTop1 ? '#ffc107' : (idx === 1 ? '#adb5bd' : '#cd7f32'); // Vàng - Bạc - Đồng
+                        const medal = isTop1 ? '🥇' : (idx === 1 ? '🥈' : '🥉');
+                        
+                        mvpHtml += `
+                        <div class="d-flex flex-column align-items-center justify-content-end" style="width: 30%;">
+                            <div class="fw-bold text-dark text-truncate w-100 text-center mb-1" style="font-size: 11px;">${m.name}</div>
+                            <div class="badge bg-light text-dark border mb-2 shadow-sm">${window.formatShortMoney(m.totalPaid)}</div>
+                            <div class="w-100 rounded-top-3 d-flex align-items-start justify-content-center pt-2 shadow-sm" style="height: ${height}; background: linear-gradient(180deg, ${color}33, transparent); border-top: 3px solid ${color};">
+                                <span style="font-size: ${isTop1 ? '24px' : '18px'};">${medal}</span>
+                            </div>
+                        </div>`;
+                    } else {
+                        mvpHtml += `<div style="width: 30%;"></div>`; // Cột trống nếu chưa đủ 3 người
+                    }
+                });
+                mvpBoard.innerHTML = mvpHtml;
+            }
             
-            // Xử lý nợ
+            // ================= XỬ LÝ BẢNG NỢ =================
             const debtors = Object.entries(memberDebts).map(([mId, d]) => { if(d.cadoDebt > 0) unpaidCadoPeopleCount++; return { mId, ...d, totalDebt: d.quyDebt + d.cadoDebt }; }).filter(d => d.totalDebt > 0).sort((a, b) => b.totalDebt - a.totalDebt);
             document.getElementById('tk-tongno-badge').innerText = window.formatMoney(debtors.reduce((sum, d) => sum + d.totalDebt, 0));
             document.getElementById('tk-debt-sub').innerText = `Nợ quỹ: ${unpaidQuyCount} • Nợ độ: ${unpaidCadoPeopleCount}`;
 
-            if(debtors.length === 0) document.getElementById('tk-bangtongno').innerHTML = '<div class="text-success fw-bold p-3 text-center"><i class="fas fa-check-circle me-1"></i> Xong! Không còn ai nợ.</div>';
-            else {
+            if(debtors.length === 0) {
+                document.getElementById('tk-bangtongno').innerHTML = '<div class="text-success fw-bold p-4 text-center"><i class="fas fa-check-circle me-1"></i> Xong! Không còn ai nợ.</div>';
+                // Đã xóa lệnh tự động mở Accordion ở đây để nó luôn gập lại theo yêu cầu.
+            } else {
                 let htmlDebt = '';
                 debtors.forEach(d => {
                     let tagsHtml = '';
                     if(d.quyDebt > 0) tagsHtml += `<span class="debt-tag debt-tag-quy">Quỹ ${window.formatShortMoney(d.quyDebt)}</span>`;
                     if(d.cadoDebt > 0) tagsHtml += `<span class="debt-tag debt-tag-cado">Độ ${window.formatShortMoney(d.cadoDebt)} (${d.cadoCount}t)</span>`;
-                    htmlDebt += `<div class="debt-item bg-white"><div class="text-truncate flex-grow-1 me-2"><div class="fw-bold text-dark text-truncate" style="font-size:14px;">${d.name} <small class="text-muted fw-normal">(${d.teamName})</small></div><div class="debt-tags">${tagsHtml}</div></div><div class="d-flex align-items-center gap-2 flex-shrink-0"><span class="fw-bold text-danger">${window.formatShortMoney(d.totalDebt)}</span><button class="btn btn-success btn-settle shadow-sm" onclick="settleAllMemberDebt('${d.mId}', '${d.name}', ${d.totalDebt})">Thu</button></div></div>`;
+                    
+                    htmlDebt += `
+                    <div class="debt-item bg-white">
+                        <div class="text-truncate flex-grow-1 me-2">
+                            <div class="fw-bold text-dark text-truncate" style="font-size:14px;">${d.name} <small class="text-muted fw-normal">(${d.teamName})</small></div>
+                            <div class="debt-tags">${tagsHtml}</div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                            <span class="fw-bold text-danger">${window.formatShortMoney(d.totalDebt)}</span>
+                            <!-- Đổi nút Thu thành hình dáng Pill tinh tế hơn -->
+                            <button class="btn btn-outline-success btn-sm rounded-pill fw-bold shadow-sm" style="font-size:11px; padding: 2px 12px;" onclick="settleAllMemberDebt('${d.mId}', '${d.name}', ${d.totalDebt})">Thu</button>
+                        </div>
+                    </div>`;
                 });
                 document.getElementById('tk-bangtongno').innerHTML = htmlDebt;
             }
