@@ -980,14 +980,58 @@ window.state = {
             }
         };
 
+        // Hàm nén và xử lý ảnh Avatar ngay trên trình duyệt
+        window.handleAvatarUpload = (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_SIZE = 150; // Nén ảnh nhỏ lại (tối đa 150px) để không làm nặng DB
+                    let width = img.width; let height = img.height;
+                    
+                    if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } 
+                    else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
+                    
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // Xuất ra Base64 định dạng JPEG chất lượng 70% (siêu nhẹ)
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                    
+                    document.getElementById('tempAvatarBase64').value = dataUrl;
+                    document.getElementById('avatarPreview').src = dataUrl;
+                    document.getElementById('avatarPreview').classList.remove('d-none');
+                    document.getElementById('avatarUploadZone').classList.add('has-img');
+                    document.getElementById('btnRemoveAvatar').style.display = 'flex';
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.removeAvatarSelection = (e) => {
+            if(e) e.stopPropagation();
+            document.getElementById('memAvatarInput').value = '';
+            document.getElementById('tempAvatarBase64').value = '';
+            document.getElementById('avatarPreview').src = '';
+            document.getElementById('avatarPreview').classList.add('d-none');
+            document.getElementById('avatarUploadZone').classList.remove('has-img');
+            document.getElementById('btnRemoveAvatar').style.display = 'none';
+        };
+
+        // Giao diện danh bạ kiểu mới
         window.renderMemberManager = () => {
             let html = '';
             const accMembers = document.getElementById('accMembers');
             if(!accMembers) return;
 
             Object.entries(window.state.teams).sort((a,b) => (a[1].order||0) - (b[1].order||0)).forEach(([tId, t], index) => {
-                let memHtml = '';
-                let count = 0;
+                let memHtml = ''; let count = 0;
                 
                 Object.entries(window.state.members).forEach(([mId, m]) => {
                     if(m.teamId === tId) {
@@ -995,10 +1039,14 @@ window.state = {
                         const dobStr = m.dob ? new Date(m.dob).toLocaleDateString('vi-VN') : '---';
                         const phoneStr = m.phone || 'Chưa có SĐT';
                         
+                        // Xử lý hiển thị Avatar cá nhân hoặc Chữ cái đầu
+                        let avatarContent = m.avatar ? `<img src="${m.avatar}">` : window.getInitials(m.name);
+                        
                         memHtml += `
                         <div class="mem-item" id="mem_item_${mId}" onclick="toggleMemberActions('${mId}')">
                             <div class="mem-info-row">
-                                <div>
+                                <div class="mem-avatar-wrap">${avatarContent}</div>
+                                <div class="flex-grow-1">
                                     <div class="mem-name-text">${m.name}</div>
                                     <div class="mem-meta">
                                         <span><i class="fas fa-phone-alt text-success opacity-75"></i> ${phoneStr}</span>
@@ -1020,14 +1068,14 @@ window.state = {
 
                 html += `
                 <div class="team-group">
-                    <div class="team-header" onclick="toggleTeamGroup('${tId}')">
+                    <div class="team-header shadow-sm" onclick="toggleTeamGroup('${tId}')">
                         <div class="team-header-title">
-                            <i class="fas fa-shield-alt"></i> ${t.name} <span class="badge bg-secondary rounded-pill ms-1" style="font-size:10px;">${count}</span>
+                            <i class="fas fa-shield-alt text-warning"></i> ${t.name} <span class="badge bg-white text-success rounded-pill ms-2" style="font-size:10px;">${count}</span>
                         </div>
                         <div class="d-flex align-items-center gap-3">
-                            <i class="fas fa-pen text-secondary" style="font-size:14px; padding:4px;" onclick="openEditTeam(event, '${tId}')"></i>
-                            <i class="fas fa-trash text-danger opacity-75" style="font-size:14px; padding:4px;" onclick="deleteTeam(event, '${tId}')"></i>
-                            <i class="fas ${iconClass} text-muted ms-2" id="team_icon_${tId}"></i>
+                            <i class="fas fa-pen text-white opacity-75" style="font-size:14px; padding:4px;" onclick="openEditTeam(event, '${tId}')"></i>
+                            <i class="fas fa-trash text-white opacity-75" style="font-size:14px; padding:4px;" onclick="deleteTeam(event, '${tId}')"></i>
+                            <i class="fas ${iconClass} text-white ms-2" id="team_icon_${tId}"></i>
                         </div>
                     </div>
                     <div class="mem-list ${isShow}" id="team_list_${tId}">
@@ -1041,19 +1089,28 @@ window.state = {
         window.openMemberForm = (e, mId = '') => {
             if(e) e.stopPropagation();
             document.getElementById('editMemId').value = mId;
+            window.removeAvatarSelection(); // Xóa ảnh tạm trước khi mở
+            
             if(mId && window.state.members[mId]) {
                 const m = window.state.members[mId];
-                document.getElementById('memFormTitle').innerText = 'Sửa Cầu Thủ';
+                document.getElementById('memFormTitle').innerText = 'Sửa Thông Tin';
                 document.getElementById('memName').value = m.name || '';
                 document.getElementById('memTeam').value = m.teamId || '';
                 document.getElementById('memDOB').value = m.dob || '';
                 document.getElementById('memPhone').value = m.phone || '';
+                
+                if (m.avatar) {
+                    document.getElementById('tempAvatarBase64').value = m.avatar;
+                    document.getElementById('avatarPreview').src = m.avatar;
+                    document.getElementById('avatarPreview').classList.remove('d-none');
+                    document.getElementById('avatarUploadZone').classList.add('has-img');
+                    document.getElementById('btnRemoveAvatar').style.display = 'flex';
+                }
             } else {
-                document.getElementById('memFormTitle').innerText = 'Thêm Cầu Thủ';
+                document.getElementById('memFormTitle').innerText = 'Thêm Cầu Thủ Mới';
                 document.getElementById('memName').value = '';
                 document.getElementById('memDOB').value = '';
                 document.getElementById('memPhone').value = '';
-                
                 const select = document.getElementById('memTeam');
                 if(select.options.length > 0) select.selectedIndex = 0;
             }
@@ -1066,9 +1123,12 @@ window.state = {
             const teamId = document.getElementById('memTeam').value;
             const dob = document.getElementById('memDOB').value;
             const phone = document.getElementById('memPhone').value;
+            const avatar = document.getElementById('tempAvatarBase64').value; // Lấy ảnh
             
             if(!name || !teamId) return alert('Vui lòng nhập tên và chọn phân đội!');
-            const payload = { name, teamId, dob, phone };
+            
+            // Nếu không có ảnh thì để null, không lưu chuỗi rỗng làm nặng DB
+            const payload = { name, teamId, dob, phone, avatar: avatar || null };
             
             if(id) {
                 db.ref(`members/${id}`).update(payload).then(() => bootstrap.Modal.getInstance(document.getElementById('modalMemberForm')).hide());
