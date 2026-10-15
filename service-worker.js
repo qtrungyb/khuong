@@ -1,5 +1,5 @@
 // ĐỔI TÊN BIẾN NÀY MỖI KHI BẠN CẬP NHẬT CODE MỚI (VD: v1.1, v1.2...)
-const CACHE_NAME = 'fc-thapcam-v1.0';
+const CACHE_NAME = 'ver1.0';
 
 const urlsToCache = [
     './',
