@@ -2,6 +2,7 @@ window.state = {
             members: {}, teams: {}, 
             monthData: { regular: {}, regular_notes: {}, betting: {}, expenses: {} },
             allFundsData: {}, globalSettings: { defaultFund: 100000 },
+            adminProfile: { name: 'Quản lý', avatar: null }, // <-- THÊM DÒNG NÀY
             currentMonth: new Date().toISOString().slice(0, 7),
             activeTab: 'thu', currentFilter: 'all',
             bsMatchId: null 
@@ -18,7 +19,8 @@ window.state = {
         };
         window.getInitials = (name) => {
             if(!name) return '?';
-            const words = name.trim().split(' ');
+            // Lấy từ cuối cùng của tên (Xóa khoảng trắng thừa)
+            const words = name.trim().split(/\s+/); 
             return words.pop().charAt(0).toUpperCase();
         };
 		// ================= HÀM XỬ LÝ DẤU CHẤM KHI NHẬP TIỀN =================
@@ -52,8 +54,15 @@ window.state = {
 
         function initApp() {
             db.ref('settings').on('value', (snapshot) => {
-                if (snapshot.exists()) window.state.globalSettings = snapshot.val();
-                document.getElementById('displayDefaultFund').innerText = window.formatMoney(window.state.globalSettings.defaultFund || 100000);
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    window.state.globalSettings.defaultFund = data.defaultFund || 100000;
+                    if (data.adminProfile) window.state.adminProfile = data.adminProfile;
+                }
+                
+                // Đã gỡ bỏ dòng lệnh tìm kiếm element 'displayDefaultFund' gây crash app
+                
+                window.renderAdminProfile(); // Vẽ Avatar Admin
                 renderAll();
             });
             db.ref('teams').on('value', (snapshot) => {
@@ -171,8 +180,9 @@ window.state = {
                         html += `<div class="avatar-grid">`;
                         dispUnpaid.forEach(m => {
                             let avatarContent = m.avatar ? `<img src="${m.avatar}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : window.getInitials(m.name);
+                            // THAY ĐỔI: Chỉ dùng 1 sự kiện onclick mở Modal, bỏ ấn giữ
                             html += `
-                            <div class="avatar-item" onclick="toggleRegularFund('${m.id}', ${defaultFund}, true)" oncontextmenu="handleLongPress(event, '${m.id}', '${m.name}', ${defaultFund})">
+                            <div class="avatar-item" onclick="openCustomFund('${m.id}', '${m.name}', 0, ${defaultFund})">
                                 <div class="avatar-circle avatar-unpaid">${avatarContent}</div>
                                 <span class="avatar-name">${m.name}</span>
                             </div>`;
@@ -185,7 +195,7 @@ window.state = {
                             html += `<div class="avatar-grid">`;
                             dispPaid.forEach(m => {
                                 let avatarContent = m.avatar ? `<img src="${m.avatar}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : window.getInitials(m.name);
-                                html += `<div class="avatar-item" onclick="toggleRegularFund('${m.id}', null, false)" oncontextmenu="handleLongPress(event, '${m.id}', '${m.name}', ${m.amt})"><div class="avatar-circle avatar-paid">${avatarContent}${(m.note || m.amt !== defaultFund) ? '<div class="avatar-badge-edit"><i class="fas fa-pen"></i></div>' : ''}</div><span class="avatar-name">${m.name}</span></div>`;
+                                html += `<div class="avatar-item" onclick="openCustomFund('${m.id}', '${m.name}', ${m.amt}, ${defaultFund})"><div class="avatar-circle avatar-paid">${avatarContent}${(m.note || m.amt !== defaultFund) ? '<div class="avatar-badge-edit"><i class="fas fa-pen"></i></div>' : ''}</div><span class="avatar-name">${m.name}</span></div>`;
                             });
                             html += `</div>`;
                         } else {
@@ -196,7 +206,7 @@ window.state = {
                             <div class="avatar-grid d-none">`;
                             dispPaid.forEach(m => {
                                 let avatarContent = m.avatar ? `<img src="${m.avatar}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : window.getInitials(m.name);
-                                html += `<div class="avatar-item" onclick="toggleRegularFund('${m.id}', null, false)" oncontextmenu="handleLongPress(event, '${m.id}', '${m.name}', ${m.amt})"><div class="avatar-circle avatar-paid">${avatarContent}${(m.note || m.amt !== defaultFund) ? '<div class="avatar-badge-edit"><i class="fas fa-pen"></i></div>' : ''}</div><span class="avatar-name">${m.name}</span></div>`;
+                                html += `<div class="avatar-item" onclick="openCustomFund('${m.id}', '${m.name}', ${m.amt}, ${defaultFund})"><div class="avatar-circle avatar-paid">${avatarContent}${(m.note || m.amt !== defaultFund) ? '<div class="avatar-badge-edit"><i class="fas fa-pen"></i></div>' : ''}</div><span class="avatar-name">${m.name}</span></div>`;
                             });
                             html += `</div>`;
                         }
@@ -208,35 +218,67 @@ window.state = {
             container.innerHTML = html || '<div class="text-center text-muted mt-5">Không có dữ liệu.</div>';
         };
 
-        window.handleLongPress = (e, mId, mName, amt) => {
-            e.preventDefault(); 
-            window.openCustomFund(mId, mName, amt);
-        };
-
-        window.toggleRegularFund = (mId, amt, isAdding) => {
-            if (isAdding) {
-                db.ref(`funds/${window.state.currentMonth}/regular/${mId}`).set(amt);
+        // ================= HÀM XỬ LÝ THU QUỸ MỚI (CHỐNG CHẠM NHẦM) =================
+        window.openCustomFund = (mId, mName, currentPaid, defaultFund) => {
+            document.getElementById('customFundMemId').value = mId; 
+            document.getElementById('customFundMemName').innerText = mName;
+            
+            const amtInput = document.getElementById('inputCustomFund');
+            const noteInput = document.getElementById('inputCustomNote');
+            const btnQuick = document.getElementById('btnQuickCollect');
+            const btnCancel = document.getElementById('btnCancelFund');
+            const divider = document.getElementById('cfDivider');
+            
+            document.getElementById('quickFundAmount').innerText = window.formatShortMoney(defaultFund);
+            noteInput.value = window.state.monthData.regular_notes?.[mId] || '';
+            
+            if (currentPaid > 0) {
+                // Nếu ĐÃ NỘP: Ẩn nút thu nhanh, hiện nút Hủy, điền sẵn số tiền đã nộp
+                btnQuick.style.display = 'none';
+                divider.style.display = 'none';
+                btnCancel.style.display = 'block';
+                amtInput.value = new Intl.NumberFormat('vi-VN').format(currentPaid);
+                document.getElementById('cfModalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>Sửa Khoản Thu';
             } else {
-                db.ref(`funds/${window.state.currentMonth}/regular/${mId}`).remove();
-                db.ref(`funds/${window.state.currentMonth}/regular_notes/${mId}`).remove();
+                // Nếu CHƯA NỘP: Hiện nút thu nhanh, ẩn nút Hủy, điền sẵn mức mặc định
+                btnQuick.style.display = 'block';
+                divider.style.display = 'flex';
+                btnCancel.style.display = 'none';
+                amtInput.value = new Intl.NumberFormat('vi-VN').format(defaultFund);
+                document.getElementById('cfModalTitle').innerHTML = '<i class="fas fa-wallet me-2"></i>Thu Quỹ';
             }
+
+            new bootstrap.Modal(document.getElementById('modalCustomFund')).show();
         };
 
-        window.openCustomFund = (mId, mName, amt) => {
-            document.getElementById('customFundMemId').value = mId; document.getElementById('customFundMemName').innerText = mName;
-            document.getElementById('inputCustomFund').value = amt;
-            document.getElementById('inputCustomNote').value = window.state.monthData.regular_notes?.[mId] || '';
-            new bootstrap.Modal(document.getElementById('modalCustomFund')).show();
+        window.quickCollectFund = () => {
+            const mId = document.getElementById('customFundMemId').value;
+            const defaultFund = window.state.globalSettings.defaultFund || 100000;
+            db.ref(`funds/${window.state.currentMonth}/regular/${mId}`).set(defaultFund)
+                .then(() => bootstrap.Modal.getInstance(document.getElementById('modalCustomFund')).hide());
         };
 
         window.saveCustomFund = () => {
             const mId = document.getElementById('customFundMemId').value;
             const amt = window.getRealNumber('inputCustomFund');
             const note = document.getElementById('inputCustomNote').value.trim();
+            
             if(amt > 0) {
                 db.ref().update({
                     [`funds/${window.state.currentMonth}/regular/${mId}`]: amt,
                     [`funds/${window.state.currentMonth}/regular_notes/${mId}`]: note || null
+                }).then(() => bootstrap.Modal.getInstance(document.getElementById('modalCustomFund')).hide());
+            } else {
+                alert("Vui lòng nhập số tiền hợp lệ!");
+            }
+        };
+
+        window.cancelFund = () => {
+            const mId = document.getElementById('customFundMemId').value;
+            if(confirm('Xác nhận HỦY khoản thu của thành viên này?')) {
+                db.ref().update({
+                    [`funds/${window.state.currentMonth}/regular/${mId}`]: null,
+                    [`funds/${window.state.currentMonth}/regular_notes/${mId}`]: null
                 }).then(() => bootstrap.Modal.getInstance(document.getElementById('modalCustomFund')).hide());
             }
         };
@@ -754,36 +796,6 @@ window.state = {
                 }
             }
 
-            const logContainer = document.getElementById('tk-recent-log');
-            if (logContainer) {
-                miniLogs.sort((a,b) => new Date(b.date || 0) - new Date(a.date || 0));
-                const recentLogs = miniLogs.slice(0, 4);
-
-                if (recentLogs.length === 0) {
-                    logContainer.innerHTML = '<div class="p-4 text-center text-muted small fst-italic">Chưa có giao dịch phát sinh.</div>';
-                } else {
-                    let htmlLog = '';
-                    recentLogs.forEach(lg => {
-                        let icon, color, sign, bg;
-                        if(lg.type === 'giaoluu') { icon = 'fa-handshake'; color = 'text-primary'; bg = 'bg-primary'; sign = '+'; }
-                        else if(lg.type === 'chi') { icon = 'fa-receipt'; color = 'text-danger'; bg = 'bg-danger'; sign = '-'; }
-                        else { icon = 'fa-dice'; color = 'text-success'; bg = 'bg-success'; sign = '+'; }
-                        
-                        htmlLog += `
-                        <div class="d-flex justify-content-between align-items-center p-3 border-bottom" style="background: white;">
-                            <div class="d-flex align-items-center gap-3 text-truncate">
-                                <div class="${bg} bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:36px; height:36px;"><i class="fas ${icon} ${color}"></i></div>
-                                <div class="text-truncate">
-                                    <div class="fw-bold text-dark text-truncate" style="font-size:13px;">${lg.desc}</div>
-                                    <div class="text-muted" style="font-size:10px;"><i class="far fa-calendar-alt"></i> ${lg.date || 'Trong tháng'}</div>
-                                </div>
-                            </div>
-                            <div class="fw-bold ${color} flex-shrink-0 ms-2" style="font-size: 14px;">${sign}${window.formatShortMoney(lg.amt)}</div>
-                        </div>`;
-                    });
-                    logContainer.innerHTML = htmlLog;
-                }
-            }
 
             const mvpList = Object.values(memberContributions).filter(c => c.totalPaid > 0).sort((a,b) => b.totalPaid - a.totalPaid).slice(0, 3);
             const mvpBoard = document.getElementById('tk-mvp-board');
@@ -839,8 +851,22 @@ window.state = {
                 });
                 document.getElementById('tk-bangtongno').innerHTML = htmlDebt;
             }
-        }
 
+		// ================= ĐỔ DỮ LIỆU VÀO MINI DASHBOARD =================
+            const miniFund = document.getElementById('miniDashFund');
+            const miniDebt = document.getElementById('miniDashDebt');
+            
+            if (miniFund) miniFund.innerText = window.formatMoney(tongHienTai);
+            
+            if (miniDebt) {
+                const totalDebtAmount = debtors.reduce((sum, d) => sum + d.totalDebt, 0);
+                if (totalDebtAmount > 0) {
+                    miniDebt.innerHTML = `<span class="text-danger">${window.formatShortMoney(totalDebtAmount)}</span> <span class="text-muted fw-normal" style="font-size:10px;">(${debtors.length} ng)</span>`;
+                } else {
+                    miniDebt.innerHTML = '<span class="text-success"><i class="fas fa-check"></i> Hoàn tất</span>';
+                }
+            }
+		 }	
         window.settleAllMemberDebt = (mId, mName, totalDebt) => {
             if(!confirm(`Xác nhận đã thu ${window.formatMoney(totalDebt)} của ${mName}?`)) return;
             const defaultFund = window.state.globalSettings.defaultFund || 100000; const updates = {};
@@ -1314,7 +1340,84 @@ window.state = {
                 });
             }, 300);
         };
+		// ================= HỒ SƠ QUẢN LÝ (ADMIN PROFILE) =================
+        window.renderAdminProfile = () => {
+            const profile = window.state.adminProfile;
+            const nameStr = profile.name || 'Quản lý';
+            
+            // Lấy từ cuối cùng của tên (Ví dụ: "Phạm Quang Trung" -> "Trung" -> Lấy chữ "T")
+            const avatarContent = profile.avatar ? `<img src="${profile.avatar}">` : window.getInitials(nameStr);
+            
+            const wrap1 = document.getElementById('adminAvatarWrap1');
+            if (wrap1) wrap1.innerHTML = avatarContent;
+            
+            const txt1 = document.getElementById('adminNameTxt1');
+            if (txt1) txt1.innerText = nameStr;
+        };
+        window.openAdminProfile = () => {
+            const profile = window.state.adminProfile;
+            document.getElementById('adminNameInput').value = profile.name || '';
+            
+            window.removeAdminAvatarSelection(); // Xóa ảnh tạm trước khi mở
+            if (profile.avatar) {
+                document.getElementById('tempAdminAvatarBase64').value = profile.avatar;
+                document.getElementById('adminAvatarPreview').src = profile.avatar;
+                document.getElementById('adminAvatarPreview').classList.remove('d-none');
+                document.getElementById('adminAvatarUploadZone').classList.add('has-img');
+                document.getElementById('btnRemoveAdminAvatar').style.display = 'flex';
+            }
+            new bootstrap.Modal(document.getElementById('modalAdminProfile')).show();
+        };
 
+        // Hàm nén ảnh cho Admin (Tương tự ảnh thành viên)
+        window.handleAdminAvatarUpload = (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_SIZE = 150;
+                    let width = img.width; let height = img.height;
+                    if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } 
+                    else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                    
+                    document.getElementById('tempAdminAvatarBase64').value = dataUrl;
+                    document.getElementById('adminAvatarPreview').src = dataUrl;
+                    document.getElementById('adminAvatarPreview').classList.remove('d-none');
+                    document.getElementById('adminAvatarUploadZone').classList.add('has-img');
+                    document.getElementById('btnRemoveAdminAvatar').style.display = 'flex';
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.removeAdminAvatarSelection = (e) => {
+            if(e) e.stopPropagation();
+            document.getElementById('adminAvatarInput').value = '';
+            document.getElementById('tempAdminAvatarBase64').value = '';
+            document.getElementById('adminAvatarPreview').src = '';
+            document.getElementById('adminAvatarPreview').classList.add('d-none');
+            document.getElementById('adminAvatarUploadZone').classList.remove('has-img');
+            document.getElementById('btnRemoveAdminAvatar').style.display = 'none';
+        };
+
+        window.saveAdminProfile = () => {
+            const name = document.getElementById('adminNameInput').value.trim();
+            const avatar = document.getElementById('tempAdminAvatarBase64').value;
+            if(!name) return alert('Vui lòng nhập tên hiển thị!');
+            
+            // Lưu vào Firebase
+            db.ref('settings/adminProfile').set({ name, avatar: avatar || null })
+                .then(() => bootstrap.Modal.getInstance(document.getElementById('modalAdminProfile')).hide());
+        };
+        // ================= HEADER & CHUYỂN TAB =================
         window.switchTab = (tabId, element) => {
             window.state.activeTab = tabId;
             
@@ -1325,16 +1428,13 @@ window.state = {
             if(tabId === 'thu') {
                 headerFull.style.display = 'flex';
                 headerCompact.style.display = 'none';
-            } else if (tabId !== 'cai-dat') {
+            } else {
                 headerFull.style.display = 'none';
                 headerCompact.style.display = 'flex';
-                if(tabId === 'cado') titleElement.innerText = 'CÁ ĐỘ & GIAO LƯU';
+                if(tabId === 'cado') titleElement.innerText = 'GIAO LƯU';
                 else if(tabId === 'chi') titleElement.innerText = 'CHI QUỸ';
                 else if(tabId === 'tongket') titleElement.innerText = 'TỔNG KẾT';
                 else if(tabId === 'thongke') titleElement.innerText = 'THỐNG KÊ';
-            } else {
-                headerFull.style.display = 'none';
-                headerCompact.style.display = 'none';
             }
 
             document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
