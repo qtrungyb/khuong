@@ -21,7 +21,7 @@
 
     <!-- Header Đồng Bộ & Chống Tràn -->
     <div class="header-bar" id="mainHeader">
-        <!-- Layout cho Tab Thu Quỹ (Header Full) -->
+        <!-- Layout cho Tab Thu Quỹ (Header Full - CÓ AVATAR) -->
         <div class="header-full" id="headerFull">
             <div class="header-full-top">
                 <div class="brand-box">
@@ -30,10 +30,34 @@
                         <h4 class="brand-title">FC THẬP CẨM</h4>
                     </div>
                 </div>
-                <button class="btn-settings" onclick="switchTab('cai-dat', null)">
-                    <i class="fas fa-cog"></i>
-                </button>
-            </div>
+                <!-- Avatar Admin Dropdown & Mini Dashboard -->
+                <div class="dropdown">
+                    <div class="admin-avatar-wrap dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="adminAvatarWrap1">Q</div>
+                    <ul class="dropdown-menu dropdown-menu-end admin-dropdown-menu">
+                        <!-- Header & Mini Dashboard -->
+                        <li class="px-3 py-2 border-bottom mb-2 text-center">
+                            <div class="fw-bold text-dark mb-2" style="font-size: 16px;" id="adminNameTxt1">Quản lý</div>
+                            
+                            <!-- Bảng Tóm Tắt (Mini Dashboard) -->
+                            <div class="bg-light rounded-3 p-2 text-start shadow-sm border border-white">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="small text-muted fw-bold"><i class="fas fa-wallet me-1"></i>Quỹ hiện tại:</span>
+                                    <span class="small fw-black text-success" style="font-size: 13px;" id="miniDashFund">0đ</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="small text-muted fw-bold"><i class="fas fa-exclamation-triangle me-1"></i>Đang nợ:</span>
+                                    <span class="small fw-bold text-danger" style="font-size: 13px;" id="miniDashDebt">0đ</span>
+                                </div>
+                            </div>
+                        </li>
+                        
+                        <!-- Các nút công cụ -->
+                        <li><a class="dropdown-item admin-dropdown-item" onclick="openAdminProfile()"><i class="fas fa-user-circle text-success"></i>Hồ Sơ Quản Lý</a></li>
+                        <li><a class="dropdown-item admin-dropdown-item" onclick="openMemberManager()"><i class="fas fa-users text-primary"></i>Thành Viên & Phân Đội</a></li>
+                        <li><a class="dropdown-item admin-dropdown-item" onclick="openFundSettings()"><i class="fas fa-coins text-warning"></i>Mức Quỹ Mặc Định</a></li>
+                    </ul>
+                </div>
+            </div> <!-- Đã sửa lỗi thiếu thẻ đóng div ở đây -->
             <div class="header-controls">
                 <div class="month-selector-wrapper">
                     <input type="month" id="monthSelectorMain" class="month-selector">
@@ -41,13 +65,12 @@
             </div>
         </div>
 
-        <!-- Layout cho các Tab khác (Header Gọn) -->
+        <!-- Layout cho các Tab khác (Header Gọn - KHÔNG AVATAR) -->
         <div class="header-compact" id="headerCompact">
             <div class="header-compact-top">
                 <h4 class="tab-title" id="headerTabTitle">CÁ ĐỘ</h4>
-                <button class="btn-settings" onclick="switchTab('cai-dat', null)" style="visibility: hidden;"> <!-- Giữ cân bằng layout, ẩn đi nút setting thừa -->
-                    <i class="fas fa-cog"></i>
-                </button>
+                <!-- Một thẻ div trống để cân bằng khoảng cách (Thay thế nút cài đặt và avatar cũ) -->
+                <div style="width: 38px; height: 38px;"></div>
             </div>
             <div class="header-controls">
                 <div class="month-selector-wrapper">
@@ -75,7 +98,7 @@
             </div>
             
             <div class="d-flex justify-content-between align-items-center mb-1 px-1 mt-2">
-                <small class="text-muted fst-italic" style="font-size:11px;">💡 Chạm thu tiền. Nhấn giữ để sửa.</small>
+                <small class="text-muted fst-italic" style="font-size:11px;">💡 Chạm vào từng người để Thu / Chỉnh sửa</small>
                 <span class="badge bg-white text-success border shadow-sm fw-bold" id="thu-summary-badge">0/0 Đã nộp</span>
             </div>
             <div id="thu-container">
@@ -236,15 +259,7 @@
                 <div class="col-6"><div class="bg-white p-2 rounded-4 shadow-sm border border-light position-relative overflow-hidden h-100"><i class="fas fa-dice position-absolute text-primary" style="right:-5px; bottom:-5px; font-size: 40px; opacity: 0.05;"></i><span class="text-primary small fw-bold text-uppercase d-block mb-1" style="font-size:10px;">Thu Độ</span><div class="fw-bold text-primary m-0" id="tk-thucado">0 ₫</div></div></div>
                 <div class="col-6"><div class="bg-white p-2 rounded-4 shadow-sm border border-light position-relative overflow-hidden h-100"><i class="fas fa-handshake position-absolute text-info" style="right:-5px; bottom:-5px; font-size: 40px; opacity: 0.05;"></i><span class="text-info small fw-bold text-uppercase d-block mb-1" style="font-size:10px;">Giao Lưu</span><div class="fw-bold text-info m-0" id="tk-thukhac">0 ₫</div></div></div>
             </div>
-			<!-- VỊ TRÍ 2: LỊCH SỬ GIAO DỊCH GẦN ĐÂY (MINI-LOG) -->
-            <div class="card border-0 shadow-sm mb-4 rounded-4 overflow-hidden bg-white">
-                <div class="bg-info bg-opacity-10 p-2 text-center border-bottom border-info border-opacity-25">
-                    <h6 class="m-0 fw-bold text-dark" style="font-size: 13px;"><i class="fas fa-bolt text-info me-1"></i> HOẠT ĐỘNG GẦN ĐÂY</h6>
-                </div>
-                <div class="p-0" id="tk-recent-log">
-                    <!-- Sẽ render Log giao dịch vào đây -->
-                </div>
-            </div>
+			
             <!-- VỊ TRÍ 2 MỚI: BẢNG NỢ ACCORDION (GẬP MỞ THÔNG MINH - MẶC ĐỊNH ẨN) -->
             <div class="accordion shadow-sm rounded-4 overflow-hidden mb-4 border border-danger border-opacity-25" id="accDebt">
                 <div class="accordion-item border-0">
@@ -293,34 +308,7 @@
                 <div class="text-center text-muted p-4">Đang tính toán...</div>
             </div>
         </div>
-
-        <!-- TAB ẨN: CÀI ĐẶT -->
-        <div id="tab-cai-dat" class="tab-pane">
-            <div class="d-flex align-items-center mb-3 mt-2">
-                <button class="btn btn-sm btn-light border shadow-sm rounded-circle me-2" style="width:36px; height:36px;" onclick="switchTab('thu', document.querySelector('.nav-item'))"><i class="fas fa-arrow-left"></i></button>
-                <h6 class="text-muted text-uppercase small fw-bold m-0 ps-1">Cài đặt hệ thống</h6>
-            </div>
-            <div class="list-group shadow-sm mb-3" style="border-radius: 16px; border:none; background:white;">
-                <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 border-0 border-bottom" onclick="openMemberManager()">
-                    <div class="d-flex align-items-center">
-                        <div class="bg-primary bg-opacity-10 p-2 rounded-circle text-primary me-3" style="width:38px; height:38px; display:flex; align-items:center; justify-content:center;"><i class="fas fa-users"></i></div>
-                        <span class="fw-bold text-dark">Thành Viên & Phân Đội</span>
-                    </div>
-                    <i class="fas fa-chevron-right text-muted small"></i>
-                </button>
-                <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 border-0" onclick="openFundSettings()">
-                    <div class="d-flex align-items-center">
-                        <div class="bg-warning bg-opacity-10 p-2 rounded-circle text-warning me-3" style="width:38px; height:38px; display:flex; align-items:center; justify-content:center;"><i class="fas fa-coins"></i></div>
-                        <span class="fw-bold text-dark">Mức Quỹ Mặc Định</span>
-                    </div>
-                    <div class="d-flex align-items-center">
-                        <span class="text-primary fw-bold small me-2" id="displayDefaultFund">...</span>
-                        <i class="fas fa-chevron-right text-muted small"></i>
-                    </div>
-                </button>
-            </div>
-        </div>
-    </div>
+	</div>
 
     <!-- Nút Dấu Cộng Nổi (FAB) - Nằm Độc lập ngoài tab để chống lỗi -->
     <button id="globalFabBtn" class="fab-btn bg-success" onclick="handleFabClick()">
@@ -360,8 +348,44 @@
         </div>
     </div>
 
-    <!-- ================= MODALS TÙY CHỈNH ================= -->
-    <div class="modal fade" id="modalCustomFund" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow"><div class="modal-header bg-success text-white border-0 rounded-top-4"><h6 class="modal-title fw-bold">Thu quỹ & Ghi chú</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><input type="hidden" id="customFundMemId"><div class="text-center mb-3"><h5 id="customFundMemName" class="text-dark fw-bold m-0"></h5></div><label class="form-label small fw-bold text-muted">Số tiền đóng:</label><div class="input-group mb-3"><input type="text" inputmode="numeric" oninput="window.formatInputMoney(this)" id="inputCustomFund" class="form-control form-control-lg fw-bold text-success text-center"><span class="input-group-text bg-light">VNĐ</span></div><label class="form-label small fw-bold text-muted">Ghi chú (Tùy chọn):</label><input type="text" id="inputCustomNote" class="form-control bg-light" placeholder="VD: Đóng trước, nợ lại..."></div><div class="modal-footer p-3 border-0"><button class="btn btn-success w-100 rounded-pill fw-bold py-2 shadow-sm" onclick="saveCustomFund()">CẬP NHẬT</button></div></div></div></div>
+   <!-- Modal THU QUỸ (Mới - Chống chạm nhầm) -->
+    <div class="modal fade" id="modalCustomFund" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 rounded-4 shadow">
+                <div class="modal-header bg-success text-white border-0 rounded-top-4">
+                    <h6 class="modal-title fw-bold" id="cfModalTitle"><i class="fas fa-wallet me-2"></i>Thu Quỹ</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <input type="hidden" id="customFundMemId">
+                    <h5 id="customFundMemName" class="text-dark fw-bold mb-4">Tên Cầu Thủ</h5>
+                    
+                    <!-- Nút Thu Nhanh (Chỉ hiện khi chưa nộp) -->
+                    <button class="btn btn-success w-100 rounded-pill fw-bold py-3 mb-3 shadow-sm" id="btnQuickCollect" onclick="quickCollectFund()" style="font-size: 15px;">
+                        THU MẶC ĐỊNH (<span id="quickFundAmount">100k</span>)
+                    </button>
+                    
+                    <div class="d-flex align-items-center mb-3" id="cfDivider">
+                        <hr class="flex-grow-1"><span class="mx-2 text-muted small">hoặc nhập tùy chỉnh</span><hr class="flex-grow-1">
+                    </div>
+
+                    <!-- Khu vực nhập số khác & Ghi chú -->
+                    <div class="input-group mb-2">
+                        <input type="text" inputmode="numeric" id="inputCustomFund" class="form-control form-control-lg fw-bold text-success text-center" oninput="window.formatInputMoney(this)">
+                        <span class="input-group-text bg-light fw-bold">VNĐ</span>
+                    </div>
+                    <input type="text" id="inputCustomNote" class="form-control bg-light mb-3 text-center" placeholder="Ghi chú (VD: Chuyển khoản, nợ...)">
+                    
+                    <button class="btn btn-outline-success w-100 rounded-pill fw-bold py-2 mb-2" onclick="saveCustomFund()">LƯU KHOẢN THU NÀY</button>
+                    
+                    <!-- Nút Hủy (Chỉ hiện khi đã nộp) -->
+                    <button class="btn btn-danger w-100 rounded-pill fw-bold py-2 mt-2" id="btnCancelFund" style="display:none;" onclick="cancelFund()">
+                        <i class="fas fa-undo me-1"></i> HỦY BỎ ĐÃ THU
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="modal fade" id="modalFundSettings" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow"><div class="modal-header bg-warning border-0 rounded-top-4"><h6 class="modal-title text-dark fw-bold"><i class="fas fa-coins me-2"></i>Mức quỹ mặc định</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-4 text-center"><p class="text-muted small mb-3">Mức tiền tự động điền khi 1 chạm thu quỹ.</p><div class="input-group"><input type="text" inputmode="numeric" oninput="window.formatInputMoney(this)" id="inputDefaultFund" class="form-control form-control-lg fw-bold text-primary text-center"><span class="input-group-text bg-light">VNĐ</span></div></div><div class="modal-footer p-3 border-0"><button class="btn btn-warning w-100 rounded-pill fw-bold py-2 text-dark shadow-sm" onclick="saveFundSettings()">LƯU MỨC QUỸ</button></div></div></div></div>
 
     <!-- Modal CẬP NHẬT KẾT QUẢ TRẬN ĐẤU -->
@@ -459,8 +483,61 @@
             </div>
         </div>
     </div>
+	<!-- Modal HỒ SƠ QUẢN LÝ -->
+    <div class="modal fade" id="modalAdminProfile" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 shadow">
+                <div class="modal-header bg-success text-white border-0 rounded-top-4">
+                    <h6 class="modal-title fw-bold"><i class="fas fa-user-circle me-2"></i>Hồ Sơ Quản Lý</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 pt-3 text-center">
+                    <input type="hidden" id="tempAdminAvatarBase64">
+                    
+                    <div style="position: relative; display: inline-block;">
+                        <input type="file" id="adminAvatarInput" accept="image/*" class="d-none" onchange="handleAdminAvatarUpload(event)">
+                        <div class="avatar-upload-zone" id="adminAvatarUploadZone" onclick="document.getElementById('adminAvatarInput').click()">
+                            <i class="fas fa-camera text-muted" style="font-size: 24px;" id="adminAvatarCamIcon"></i>
+                            <img id="adminAvatarPreview" src="" class="d-none">
+                            <div class="avatar-upload-overlay">Đổi ảnh</div>
+                        </div>
+                        <div class="btn-remove-avatar" id="btnRemoveAdminAvatar" onclick="removeAdminAvatarSelection(event)"><i class="fas fa-times"></i></div>
+                    </div>
+
+                    <div class="mb-3 text-start">
+                        <label class="form-label small text-muted fw-bold mb-1 ps-1">Tên Hiển Thị:</label>
+                        <input type="text" id="adminNameInput" class="form-control bg-light fw-bold text-center" placeholder="Nhập tên của bạn...">
+                    </div>
+                </div>
+                <div class="modal-footer p-3 border-0">
+                    <button class="btn btn-success w-100 rounded-pill fw-bold py-2 shadow-sm" onclick="saveAdminProfile()">LƯU HỒ SƠ</button>
+                </div>
+            </div>
+        </div>
+    </div>
 	<!-- CÁC MODAL QUẢN LÝ THÀNH VIÊN VÀ PHÂN ĐỘI (ĐÃ KHÔI PHỤC) -->
-    <div class="modal fade" id="modalMemberManager" tabindex="-1"><div class="modal-dialog modal-fullscreen"><div class="modal-content bg-light"><div class="modal-header bg-primary text-white border-0"><h5 class="modal-title fw-bold"><i class="fas fa-users-cog me-2"></i>Thành Viên</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="bg-primary px-3 pb-3 pt-1 d-flex gap-2 shadow-sm"><button class="btn btn-light text-primary w-50 fw-bold rounded-pill shadow-sm" onclick="openMemberForm()"><i class="fas fa-user-plus me-1"></i> CẦU THỦ</button><button class="btn btn-info text-white w-50 fw-bold rounded-pill shadow-sm border border-light" onclick="openAddTeamForm()"><i class="fas fa-layer-group me-1"></i> PHÂN ĐỘI</button></div><div class="modal-body p-2"><div class="accordion" id="accMembers"></div></div></div></div></div>
+    <div class="modal fade" id="modalMemberManager" tabindex="-1">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content bg-light">
+                <!-- Sticky Header xịn xò, kéo xuống không bị mất -->
+                <div class="mem-modal-header shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="modal-title fw-bold text-dark m-0"><i class="fas fa-users-cog text-primary me-2"></i>Thành Viên & Phân Đội</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <!-- Nút bấm pastel nổi -->
+                    <div class="d-flex gap-2">
+                        <button class="btn-modern btn-modern-primary w-50 shadow-sm" onclick="openMemberForm()"><i class="fas fa-user-plus"></i> CẦU THỦ</button>
+                        <button class="btn-modern btn-modern-info w-50 shadow-sm" onclick="openAddTeamForm()"><i class="fas fa-layer-group"></i> PHÂN ĐỘI</button>
+                    </div>
+                </div>
+                <!-- Body danh sách -->
+                <div class="modal-body p-3 pt-4">
+                    <div class="accordion" id="accMembers"></div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="modal fade" id="modalAddTeam" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow"><div class="modal-header bg-info text-white border-0 rounded-top-4"><h6 class="modal-title fw-bold" id="teamModalTitle"><i class="fas fa-layer-group me-2"></i>Thêm phân đội mới</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><input type="hidden" id="editTeamId"><input type="text" id="newTeamName" class="form-control bg-light" placeholder="Tên phân đội..."></div><div class="modal-footer p-3 border-0"><button class="btn btn-info text-white w-100 rounded-pill fw-bold py-2" onclick="addTeam()">LƯU</button></div></div></div></div>
     <!-- Modal THÊM/SỬA CẦU THỦ (Có tải Avatar) -->
     <div class="modal fade" id="modalMemberForm" tabindex="-1">
