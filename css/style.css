@@ -233,11 +233,59 @@
         .mem-name-text { font-weight: 800; color: #212529; font-size: 15px; margin-bottom: 3px; }
         .mem-meta { font-size: 11px; color: #868e96; display: flex; gap: 10px; align-items: center; font-weight: 500;}
         
-        .mem-actions { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #e9ecef; justify-content: flex-end; gap: 8px; }
-        .mem-item.expanded { border-color: #0d6efd; box-shadow: 0 4px 15px rgba(13,110,253,0.1); }
+        /* Khu vực nút bấm gập mở */
+        .mem-actions { 
+            display: none; 
+            margin-top: 12px; 
+            padding-top: 12px; 
+            border-top: 1px solid #f0f2f5; 
+            justify-content: flex-end; 
+            gap: 10px; 
+        }
+        
+        /* Hiệu ứng thẻ khi được bấm mở ra */
+        .mem-item.expanded { 
+            border-color: transparent; 
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08); 
+            transform: scale(1.02); 
+            z-index: 10;
+        }
         .mem-item.expanded .mem-actions { display: flex; }
-        .mem-item.expanded .chevron-icon { transform: rotate(180deg); color: #0d6efd;}
+        .mem-item.expanded .chevron-icon { transform: rotate(180deg); color: #212529;}
         .chevron-icon { transition: transform 0.3s ease; color: #ced4da; font-size: 14px; margin-left: auto;}
+        
+        /* Thiết kế lại Nút Sửa / Xóa (Pill Button Pastel) */
+        .btn-action-sm { 
+            border-radius: 20px; 
+            padding: 6px 16px; 
+            font-size: 12.5px; 
+            font-weight: 700; 
+            border: none; 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+            transition: all 0.2s;
+        }
+        
+        /* Nút Sửa - Xanh dương nhạt */
+        .btn-action-sm.edit { 
+            background: #e7f1ff; 
+            color: #0d6efd; 
+        }
+        .btn-action-sm.edit:active { 
+            background: #cfe2ff; 
+            transform: scale(0.95);
+        }
+        
+        /* Nút Xóa - Đỏ nhạt */
+        .btn-action-sm.delete { 
+            background: #f8d7da; 
+            color: #dc3545; 
+        }
+        .btn-action-sm.delete:active { 
+            background: #f1b0b7; 
+            transform: scale(0.95);
+        }
         
         /* CSS cho khu vực tải Avatar trong Modal */
         .avatar-upload-zone { width: 90px; height: 90px; border-radius: 50%; background: #f8f9fa; border: 2px dashed #ced4da; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; flex-direction: column; cursor: pointer; position: relative; overflow: hidden; transition: border-color 0.2s;}
@@ -276,3 +324,23 @@
         .donut-chart-container { position: relative; width: 66px; height: 66px; flex-shrink: 0;}
         .donut-chart { width: 100%; height: 100%; border-radius: 50%; background: conic-gradient(#e9ecef 0% 100%); transition: background 0.5s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.1);}
         .donut-inner { position: absolute; top: 14px; left: 14px; width: 38px; height: 38px; background: #157347; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);}
+		/* /* --- CSS CHO AVATAR ADMIN & MENU XỔ XUỐNG --- */
+        .admin-avatar-wrap { width: 38px; height: 38px; border-radius: 50%; background: #198754; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border: 2px solid #e9ecef; overflow: hidden; flex-shrink: 0; user-select: none; }
+        .admin-avatar-wrap img { width: 100%; height: 100%; object-fit: cover; }
+        .admin-avatar-wrap:active { transform: scale(0.9); border-color: #198754; }
+        .admin-dropdown-menu { border: none; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); padding: 8px; margin-top: 12px !important; min-width: 220px; animation: fadeIn 0.2s ease; }
+        .admin-dropdown-item { border-radius: 10px; padding: 12px 15px; font-weight: 600; color: #495057; display: flex; align-items: center; gap: 12px; transition: background 0.2s; cursor: pointer; margin-bottom: 2px;}
+        .admin-dropdown-item:active { background: #f8f9fa; color: #198754; }
+        .admin-dropdown-item i { font-size: 16px; width: 20px; text-align: center; }
+		/* Ẩn mũi tên xổ xuống mặc định của Avatar */
+        .admin-avatar-wrap.dropdown-toggle::after {
+            display: none !important;
+        }
+
+        /* --- CSS CHO GIAO DIỆN MODAL THÀNH VIÊN MỚI --- */
+        .mem-modal-header { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid #f0f2f5; z-index: 10; position: sticky; top: 0; padding: 16px; }
+        .btn-modern { border-radius: 20px; font-weight: 800; font-size: 13px; padding: 10px 16px; display: flex; align-items: center; justify-content: center; gap: 8px; border: none; transition: transform 0.2s; }
+        .btn-modern:active { transform: scale(0.95); }
+        .btn-modern-primary { background: #e8f5e9; color: #198754; }
+        .btn-modern-info { background: #e0f7fa; color: #087990; }
+		
