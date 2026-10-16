@@ -152,8 +152,8 @@ window.state = {
                         const note = window.state.monthData.regular_notes?.[mId] || '';
                         tCount++; totalMembers++;
                         if(searchKeyword && !m.name.toLowerCase().includes(searchKeyword)) return;
-                        if(paidAmt > 0) { totalPaid++; tMoney += paidAmt; paids.push({id: mId, name: m.name, amt: paidAmt, note}); } 
-                        else unpaids.push({id: mId, name: m.name});
+                        if(paidAmt > 0) { totalPaid++; tMoney += paidAmt; paids.push({id: mId, name: m.name, amt: paidAmt, note, avatar: m.avatar}); } 
+                        else unpaids.push({id: mId, name: m.name, avatar: m.avatar});
                     }
                 });
 
@@ -170,9 +170,10 @@ window.state = {
                     if(dispUnpaid.length > 0) {
                         html += `<div class="avatar-grid">`;
                         dispUnpaid.forEach(m => {
+                            let avatarContent = m.avatar ? `<img src="${m.avatar}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : window.getInitials(m.name);
                             html += `
                             <div class="avatar-item" onclick="toggleRegularFund('${m.id}', ${defaultFund}, true)" oncontextmenu="handleLongPress(event, '${m.id}', '${m.name}', ${defaultFund})">
-                                <div class="avatar-circle avatar-unpaid">${window.getInitials(m.name)}</div>
+                                <div class="avatar-circle avatar-unpaid">${avatarContent}</div>
                                 <span class="avatar-name">${m.name}</span>
                             </div>`;
                         });
@@ -183,7 +184,8 @@ window.state = {
                         if(filter === 'paid' || searchKeyword) {
                             html += `<div class="avatar-grid">`;
                             dispPaid.forEach(m => {
-                                html += `<div class="avatar-item" onclick="toggleRegularFund('${m.id}', null, false)" oncontextmenu="handleLongPress(event, '${m.id}', '${m.name}', ${m.amt})"><div class="avatar-circle avatar-paid">${window.getInitials(m.name)}${(m.note || m.amt !== defaultFund) ? '<div class="avatar-badge-edit"><i class="fas fa-pen"></i></div>' : ''}</div><span class="avatar-name">${m.name}</span></div>`;
+                                let avatarContent = m.avatar ? `<img src="${m.avatar}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : window.getInitials(m.name);
+                                html += `<div class="avatar-item" onclick="toggleRegularFund('${m.id}', null, false)" oncontextmenu="handleLongPress(event, '${m.id}', '${m.name}', ${m.amt})"><div class="avatar-circle avatar-paid">${avatarContent}${(m.note || m.amt !== defaultFund) ? '<div class="avatar-badge-edit"><i class="fas fa-pen"></i></div>' : ''}</div><span class="avatar-name">${m.name}</span></div>`;
                             });
                             html += `</div>`;
                         } else {
@@ -193,7 +195,8 @@ window.state = {
                             </div>
                             <div class="avatar-grid d-none">`;
                             dispPaid.forEach(m => {
-                                html += `<div class="avatar-item" onclick="toggleRegularFund('${m.id}', null, false)" oncontextmenu="handleLongPress(event, '${m.id}', '${m.name}', ${m.amt})"><div class="avatar-circle avatar-paid">${window.getInitials(m.name)}${(m.note || m.amt !== defaultFund) ? '<div class="avatar-badge-edit"><i class="fas fa-pen"></i></div>' : ''}</div><span class="avatar-name">${m.name}</span></div>`;
+                                let avatarContent = m.avatar ? `<img src="${m.avatar}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : window.getInitials(m.name);
+                                html += `<div class="avatar-item" onclick="toggleRegularFund('${m.id}', null, false)" oncontextmenu="handleLongPress(event, '${m.id}', '${m.name}', ${m.amt})"><div class="avatar-circle avatar-paid">${avatarContent}${(m.note || m.amt !== defaultFund) ? '<div class="avatar-badge-edit"><i class="fas fa-pen"></i></div>' : ''}</div><span class="avatar-name">${m.name}</span></div>`;
                             });
                             html += `</div>`;
                         }
