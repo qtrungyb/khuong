@@ -877,42 +877,123 @@ window.state = {
             }); db.ref().update(updates);
         };
 
-        // ================= THỐNG KÊ =================
+        // ================= THỐNG KÊ (RADAR & H2H) =================
+        window.currentStats = {};
+        window.radarChartObj = null;
+
         function renderThongKe() {
-            const container = document.getElementById('stat-container');
             const betting = window.state.monthData.betting || {};
             const matchIds = Object.keys(betting);
+            const totalMatches = matchIds.length;
             
-            document.getElementById('stat-total-matches').innerText = `${matchIds.length} trận đấu`;
-            if(matchIds.length === 0) return container.innerHTML = '<div class="text-center text-muted p-4"><i class="fas fa-box-open fa-2x mb-2 opacity-25"></i><br>Chưa có dữ liệu thi đấu tháng này.</div>';
-
-            const stats = {};
-            Object.keys(window.state.members).forEach(mId => { stats[mId] = { name: window.state.members[mId].name, win: 0, lose: 0, skip: 0 }; });
+            window.currentStats = {};
+            Object.entries(window.state.members).forEach(([mId, m]) => { 
+                window.currentStats[mId] = { name: m.name, win: 0, lose: 0, skip: 0, tongDongGop: (Number(window.state.monthData.regular?.[mId]) || 0) }; 
+            });
 
             matchIds.forEach(mId => {
                 const match = betting[mId];
-                Object.keys(stats).forEach(memId => {
-                    if((match.winners||{})[memId]) stats[memId].win++;
-                    else if((match.losers||{})[memId] !== undefined) stats[memId].lose++;
-                    else stats[memId].skip++;
+                Object.keys(window.currentStats).forEach(memId => {
+                    if((match.winners||{})[memId]) window.currentStats[memId].win++;
+                    else if((match.losers||{})[memId] !== undefined) {
+                        window.currentStats[memId].lose++;
+                        window.currentStats[memId].tongDongGop += (Number(match.losers[memId]) || 0);
+                    }
+                    else window.currentStats[memId].skip++;
                 });
             });
 
-            const activeStats = Object.values(stats).filter(s => (s.win + s.lose) > 0).sort((a, b) => b.win - a.win || a.lose - b.lose);
-            if(activeStats.length === 0) return container.innerHTML = '<div class="text-center text-muted p-4">Chưa có ai tham gia thi đấu.</div>';
+            let maxPlayed = 1; let maxDongGop = 1;
+            Object.values(window.currentStats).forEach(s => {
+                s.played = s.win + s.lose;
+                s.winRate = s.played > 0 ? (s.win / s.played) * 100 : 0;
+                s.attendance = totalMatches > 0 ? (s.played / totalMatches) * 100 : 0;
+                
+                if(s.played > maxPlayed) maxPlayed = s.played;
+                if(s.tongDongGop > maxDongGop) maxDongGop = s.tongDongGop;
+            });
+
+            Object.values(window.currentStats).forEach(s => {
+                s.scoreWinRate = s.winRate; s.scoreAttendance = s.attendance;
+                s.scoreFinance = maxDongGop > 0 ? (s.tongDongGop / maxDongGop) * 100 : 0;
+                s.scoreDedication = maxPlayed > 0 ? (s.played / maxPlayed) * 100 : 0;
+                s.ovr = Math.round((s.scoreWinRate + s.scoreAttendance + s.scoreFinance + s.scoreDedication) / 4);
+            });
+
+            const radarSel = document.getElementById('radarPlayerSelect');
+            const h2hA = document.getElementById('h2hPlayerA');
+            const h2hB = document.getElementById('h2hPlayerB');
+            
+            let opts = '<option value="">Chọn cầu thủ...</option>';
+            Object.entries(window.currentStats).sort((a,b) => a[1].name.localeCompare(b[1].name)).forEach(([mId, s]) => { opts += `<option value="${mId}">${s.name}</option>`; });
+            
+            if (radarSel) radarSel.innerHTML = opts;
+            if (h2hA) h2hA.innerHTML = opts;
+            if (h2hB) h2hB.innerHTML = opts;
+
+            const memIds = Object.keys(window.currentStats);
+            if(memIds.length >= 2) {
+                if(radarSel) radarSel.value = memIds[0];
+                if(h2hA) h2hA.value = memIds[0];
+                if(h2hB) h2hB.value = memIds[1];
+            }
+            updateRadarChart(); updateH2H();
+        }
+
+        window.updateRadarChart = () => {
+            const mId = document.getElementById('radarPlayerSelect')?.value;
+            const ctx = document.getElementById('statRadarChart');
+            if(!ctx) return;
+            if(!mId || !window.currentStats[mId]) { if(window.radarChartObj) window.radarChartObj.destroy(); return; }
+
+            const s = window.currentStats[mId];
+            document.getElementById('radarOvr').innerText = s.ovr;
+            document.getElementById('radarWin').innerText = s.win;
+            document.getElementById('radarLose').innerText = s.lose;
+
+            if(window.radarChartObj) window.radarChartObj.destroy();
+            window.radarChartObj = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Tỷ lệ Thắng', 'Chăm chỉ', 'Tài chính', 'Trận tham gia'],
+                    datasets: [{ label: s.name, data: [s.scoreWinRate, s.scoreAttendance, s.scoreFinance, s.scoreDedication], backgroundColor: 'rgba(13, 110, 253, 0.2)', borderColor: 'rgba(13, 110, 253, 1)', pointBackgroundColor: 'rgba(13, 110, 253, 1)', borderWidth: 2 }]
+                },
+                options: { scales: { r: { angleLines: { display: true }, suggestedMin: 0, suggestedMax: 100, ticks: { display: false } } }, plugins: { legend: { display: false } }, maintainAspectRatio: false }
+            });
+        };
+
+        window.updateH2H = () => {
+            const idA = document.getElementById('h2hPlayerA')?.value;
+            const idB = document.getElementById('h2hPlayerB')?.value;
+            const cont = document.getElementById('h2hBarsContainer');
+            if(!idA || !idB || !cont) return;
+            const sA = window.currentStats[idA]; const sB = window.currentStats[idB];
+            
+            const metrics = [
+                { label: 'Số trận tham gia', vA: sA.played, vB: sB.played, unit: ' trận' },
+                { label: 'Tỷ lệ thắng', vA: Math.round(sA.winRate), vB: Math.round(sB.winRate), unit: '%' },
+                { label: 'Tài chính', vA: sA.tongDongGop, vB: sB.tongDongGop, unit: 'đ', format: true }
+            ];
 
             let html = '';
-            activeStats.forEach((s, index) => {
-                const totalPlayed = s.win + s.lose; const winRate = Math.round((s.win / totalPlayed) * 100);
-                let rankHtml = `<span class="text-muted fw-bold" style="width:20px;">#${index+1}</span>`;
-                if(index === 0) rankHtml = `<i class="fas fa-medal text-warning" style="font-size:18px; width:20px;"></i>`;
-                else if(index === 1) rankHtml = `<i class="fas fa-medal text-secondary" style="font-size:18px; width:20px;"></i>`;
-                else if(index === 2) rankHtml = `<i class="fas fa-medal" style="color: #cd7f32; font-size:18px; width:20px;"></i>`;
-
-                html += `<div class="stat-item bg-white"><div class="d-flex justify-content-between align-items-center mb-1"><div class="d-flex align-items-center gap-2">${rankHtml}<span class="fw-bold text-dark">${s.name}</span></div><div class="d-flex gap-2 text-center" style="font-size:11px;"><div class="bg-success bg-opacity-10 text-success rounded px-2 py-1"><strong>${s.win}</strong> T</div><div class="bg-danger bg-opacity-10 text-danger rounded px-2 py-1"><strong>${s.lose}</strong> B</div><div class="bg-secondary bg-opacity-10 text-secondary rounded px-2 py-1"><strong>${s.skip}</strong> N</div></div></div><div class="d-flex align-items-center gap-2 mt-1"><span class="small text-muted fw-bold" style="font-size:10px; width:25px;">${winRate}%</span><div class="stat-bar flex-grow-1"><div class="bg-success" style="width: ${winRate}%"></div><div class="bg-danger" style="width: ${100 - winRate}%"></div></div></div></div>`;
-            });
-            container.innerHTML = html;
-        }
+            metrics.forEach(m => {
+                const sum = m.vA + m.vB;
+                const pctA = sum === 0 ? 50 : (m.vA / sum) * 100;
+                const pctB = sum === 0 ? 50 : (m.vB / sum) * 100;
+                const dispA = m.format ? window.formatShortMoney(m.vA) : m.vA + m.unit;
+                const dispB = m.format ? window.formatShortMoney(m.vB) : m.vB + m.unit;
+                
+                html += `
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between small fw-bold mb-1 text-muted" style="font-size:10px;">
+                        <span class="text-primary">${dispA}</span><span class="text-uppercase">${m.label}</span><span class="text-success">${dispB}</span>
+                    </div>
+                    <div class="h2h-bar-bg shadow-sm">
+                        <div class="h2h-bar-a" style="width: ${pctA}%"></div><div class="h2h-bar-b" style="width: ${pctB}%"></div>
+                    </div>
+                </div>`;
+            }); cont.innerHTML = html;
+        };
 
         // ================= CÀI ĐẶT =================
         window.openFundSettings = () => {
@@ -1420,21 +1501,23 @@ window.state = {
         // ================= HEADER & CHUYỂN TAB =================
         window.switchTab = (tabId, element) => {
             window.state.activeTab = tabId;
-            
             const headerFull = document.getElementById('headerFull');
             const headerCompact = document.getElementById('headerCompact');
             const titleElement = document.getElementById('headerTabTitle');
 
-            if(tabId === 'thu') {
-                headerFull.style.display = 'flex';
-                headerCompact.style.display = 'none';
+            if(tabId === 'thu') { 
+                headerFull.style.display = 'flex'; 
+                headerCompact.style.display = 'none'; 
             } else {
-                headerFull.style.display = 'none';
+                headerFull.style.display = 'none'; 
                 headerCompact.style.display = 'flex';
                 if(tabId === 'cado') titleElement.innerText = 'GIAO LƯU';
                 else if(tabId === 'chi') titleElement.innerText = 'CHI QUỸ';
                 else if(tabId === 'tongket') titleElement.innerText = 'TỔNG KẾT';
-                else if(tabId === 'thongke') titleElement.innerText = 'THỐNG KÊ';
+                else if(tabId === 'thongke') {
+                    titleElement.innerText = 'THỐNG KÊ';
+                    setTimeout(() => { updateRadarChart(); updateH2H(); }, 50);
+                }
             }
 
             document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
@@ -1444,6 +1527,19 @@ window.state = {
                 document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
                 element.classList.add('active');
             }
+
+            // --- VIÊN THUỐC TRƯỢT DOCK ---
+            const tabs = ['thu', 'cado', 'chi', 'tongket', 'thongke'];
+            const idx = tabs.indexOf(tabId);
+            const indicator = document.getElementById('dockIndicator');
+            if(indicator && idx !== -1) { 
+                indicator.style.transform = `translateX(${idx * 100}%)`; 
+            }
+
+            // Luôn hiện lại thanh Dock và cuộn lên đầu khi vừa chuyển sang tab mới
+            const nav = document.getElementById('mainBottomNav');
+            if(nav) nav.classList.remove('dock-hidden');
+            window.scrollTo({ top: 0, behavior: 'instant' });
 
             const fab = document.getElementById('globalFabBtn');
             if(tabId === 'cado') {
@@ -1479,4 +1575,31 @@ window.state = {
             renderAll();
         }
 
+        // ================= TỰ ĐỘNG ẨN THANH DOCK KHI CUỘN (CHỐNG GIẬT) =================
+        let lastScrollY = window.scrollY;
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('mainBottomNav');
+            const fab = document.getElementById('globalFabBtn');
+            if (!nav) return;
+
+            const currentScrollY = window.scrollY;
+            const scrollDiff = currentScrollY - lastScrollY;
+
+            // Bỏ qua các dao động nhỏ hơn 10px để chống giật trên màn hình cảm ứng
+            if (Math.abs(scrollDiff) < 10) return;
+
+            if (scrollDiff > 0 && currentScrollY > 60) {
+                // Đang vuốt xuống sâu -> Ẩn Dock
+                nav.classList.add('dock-hidden');
+                if (fab) fab.classList.add('dock-hidden');
+            } else if (scrollDiff < 0 || currentScrollY <= 60) {
+                // Đang vuốt ngược lên hoặc ở sát đầu trang -> Hiện lại Dock
+                nav.classList.remove('dock-hidden');
+                if (fab) fab.classList.remove('dock-hidden');
+            }
+            
+            lastScrollY = currentScrollY;
+        }, { passive: true });
+
         initApp();
+		
