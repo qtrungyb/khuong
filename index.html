@@ -296,20 +296,60 @@
 
         <!-- TAB 5: THỐNG KÊ KẾT QUẢ -->
         <div id="tab-thongke" class="tab-pane">
-            <div class="card p-3 mb-3 bg-info bg-opacity-10 border border-info border-opacity-25 shadow-sm">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="text-info small fw-bold text-uppercase d-block" style="color: #087990 !important;"><i class="fas fa-chart-line me-1"></i>Thống kê phong độ</span>
-                        <small class="text-muted" id="stat-total-matches">0 trận đấu</small>
+            <!-- Khu vực Radar Chart -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white overflow-hidden">
+                <div class="bg-primary bg-opacity-10 p-3 d-flex justify-content-between align-items-center border-bottom border-primary border-opacity-25">
+                    <h6 class="m-0 fw-bold text-primary"><i class="fas fa-spider me-1"></i> BIỂU ĐỒ CHỈ SỐ FIFA</h6>
+                    <select id="radarPlayerSelect" class="form-select form-select-sm fw-bold bg-white text-primary" style="width: auto; max-width: 140px; border-color: #b6d4fe;" onchange="updateRadarChart()">
+                        <option value="">Chọn cầu thủ...</option>
+                    </select>
+                </div>
+                <div class="p-3 d-flex justify-content-center" style="position: relative; height: 260px; width: 100%;">
+                    <canvas id="statRadarChart"></canvas>
+                </div>
+                <div class="row g-0 text-center border-top">
+                    <div class="col-4 p-2 border-end">
+                        <div class="small text-muted fw-bold" style="font-size: 10px;">ĐIỂM TỔNG</div>
+                        <div class="fw-black text-primary fs-4" id="radarOvr">0</div>
+                    </div>
+                    <div class="col-4 p-2 border-end">
+                        <div class="small text-muted fw-bold" style="font-size: 10px;">THẮNG (W)</div>
+                        <div class="fw-black text-success fs-4" id="radarWin">0</div>
+                    </div>
+                    <div class="col-4 p-2">
+                        <div class="small text-muted fw-bold" style="font-size: 10px;">THUA (L)</div>
+                        <div class="fw-black text-danger fs-4" id="radarLose">0</div>
                     </div>
                 </div>
             </div>
-            <div class="card-clean border shadow-sm" id="stat-container">
-                <div class="text-center text-muted p-4">Đang tính toán...</div>
+
+            <!-- Khu vực So sánh H2H -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white overflow-hidden">
+                <div class="bg-warning bg-opacity-10 p-3 text-center border-bottom border-warning border-opacity-25">
+                    <h6 class="m-0 fw-bold text-dark"><i class="fas fa-fist-raised text-warning me-1"></i> SO SÁNH TRỰC DIỆN (H2H)</h6>
+                </div>
+                <div class="p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-4 position-relative">
+                        <div class="w-50 pe-2">
+                            <select id="h2hPlayerA" class="form-select form-select-sm fw-bold bg-light text-primary text-center" onchange="updateH2H()">
+                                <option value="">Cầu thủ A</option>
+                            </select>
+                        </div>
+                        <div class="vs-badge position-absolute top-50 start-50 translate-middle">VS</div>
+                        <div class="w-50 ps-2">
+                            <select id="h2hPlayerB" class="form-select form-select-sm fw-bold bg-light text-success text-center" onchange="updateH2H()">
+                                <option value="">Cầu thủ B</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Các thanh so sánh -->
+                    <div id="h2hBarsContainer">
+                        <div class="text-center text-muted small fst-italic">Đang tải dữ liệu...</div>
+                    </div>
+                </div>
             </div>
         </div>
 	</div>
-
     <!-- Nút Dấu Cộng Nổi (FAB) - Nằm Độc lập ngoài tab để chống lỗi -->
     <button id="globalFabBtn" class="fab-btn bg-success" onclick="handleFabClick()">
         <i class="fas fa-plus"></i>
@@ -317,6 +357,7 @@
 
     <!-- Bottom Navigation -->
     <div class="bottom-nav" id="mainBottomNav">
+        <div class="dock-indicator" id="dockIndicator"></div>
         <div class="nav-item active" onclick="switchTab('thu', this)"><i class="fas fa-wallet"></i>Thu Quỹ</div>
         <div class="nav-item" onclick="switchTab('cado', this)"><i class="fas fa-dice"></i>Giao Lưu</div>
         <div class="nav-item" onclick="switchTab('chi', this)"><i class="fas fa-receipt"></i>Chi Quỹ</div>
@@ -588,7 +629,7 @@
     <!-- Các thư viện hỗ trợ -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Thư viện Firebase Compat (Bản đặc biệt dùng để chạy file trực tiếp trên máy tính) -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
