@@ -1,5 +1,5 @@
 // ĐỔI TÊN BIẾN NÀY MỖI KHI BẠN CẬP NHẬT CODE MỚI (VD: v1.1, v1.2...)
-const CACHE_NAME = 'ver1.3';
+const CACHE_NAME = 'ver1.4';
 
 const urlsToCache = [
     './',
