@@ -296,18 +296,35 @@
 
         <!-- TAB 5: THỐNG KÊ KẾT QUẢ -->
         <div id="tab-thongke" class="tab-pane">
-            <!-- Khu vực Radar Chart -->
-            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white overflow-hidden">
+            
+            <!-- Nút xuất thẻ Cầu thủ -->
+            <button class="btn w-100 mb-3 btn-capture-card" id="btnExportCard" onclick="exportPlayerCard()"><i class="fas fa-camera-retro me-2"></i> XUẤT ẢNH THẺ CẦU THỦ</button>
+
+            <!-- KHU VỰC 1: BẢNG XẾP HẠNG & PHONG ĐỘ (BỊ THIẾU LÀM LỖI TRANG ĐÃ ĐƯỢC THÊM LẠI) -->
+            <div class="card p-3 mb-3 bg-info bg-opacity-10 border border-info border-opacity-25 shadow-sm">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-info small fw-bold text-uppercase d-block" style="color: #087990 !important;"><i class="fas fa-chart-line me-1"></i>Phong độ chuỗi trận</span>
+                        <small class="text-muted" id="stat-total-matches">0 trận đấu</small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-clean border shadow-sm mb-4" id="stat-container">
+                <div class="text-center text-muted p-4">Đang tính toán...</div>
+            </div>
+
+            <!-- KHU VỰC 2: BIỂU ĐỒ RADAR CHỈ SỐ -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white overflow-hidden" id="player-card-export-zone">
                 <div class="bg-primary bg-opacity-10 p-3 d-flex justify-content-between align-items-center border-bottom border-primary border-opacity-25">
-                    <h6 class="m-0 fw-bold text-primary"><i class="fas fa-spider me-1"></i> BIỂU ĐỒ CHỈ SỐ</h6>
+                    <h6 class="m-0 fw-bold text-primary"><i class="fas fa-spider me-1"></i> CHỈ SỐ CẦU THỦ</h6>
                     <select id="radarPlayerSelect" class="form-select form-select-sm fw-bold bg-white text-primary" style="width: auto; max-width: 140px; border-color: #b6d4fe;" onchange="updateRadarChart()">
                         <option value="">Chọn cầu thủ...</option>
                     </select>
                 </div>
-                <div class="p-3 d-flex justify-content-center" style="position: relative; height: 260px; width: 100%;">
+                <div class="p-3 d-flex justify-content-center" style="position: relative; height: 260px; width: 100%; background: #ffffff;">
                     <canvas id="statRadarChart"></canvas>
                 </div>
-                <div class="row g-0 text-center border-top">
+                <div class="row g-0 text-center border-top bg-white">
                     <div class="col-4 p-2 border-end">
                         <div class="small text-muted fw-bold" style="font-size: 10px;">ĐIỂM TỔNG</div>
                         <div class="fw-black text-primary fs-4" id="radarOvr">0</div>
@@ -323,7 +340,7 @@
                 </div>
             </div>
 
-            <!-- Khu vực So sánh H2H -->
+            <!-- KHU VỰC 3: SO SÁNH TRỰC DIỆN (H2H) -->
             <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white overflow-hidden">
                 <div class="bg-warning bg-opacity-10 p-3 text-center border-bottom border-warning border-opacity-25">
                     <h6 class="m-0 fw-bold text-dark"><i class="fas fa-fist-raised text-warning me-1"></i> SO SÁNH TRỰC DIỆN (H2H)</h6>
@@ -348,6 +365,18 @@
                     </div>
                 </div>
             </div>
+
+            <!-- KHU VỰC 4: BIỂU ĐỒ DÒNG TIỀN -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white overflow-hidden">
+                <div class="bg-success bg-opacity-10 p-3 text-center border-bottom border-success border-opacity-25">
+                    <h6 class="m-0 fw-bold text-success"><i class="fas fa-chart-pie me-1"></i> TỶ LỆ CỐNG HIẾN TÀI CHÍNH</h6>
+                    <small class="text-muted" style="font-size: 10px;">(Gồm Thu Quỹ & Đóng Phạt)</small>
+                </div>
+                <div class="p-3 d-flex justify-content-center" style="position: relative; height: 220px; width: 100%;">
+                    <canvas id="financeDoughnutChart"></canvas>
+                </div>
+            </div>
+
         </div>
 	</div>
     <!-- Nút Dấu Cộng Nổi (FAB) - Nằm Độc lập ngoài tab để chống lỗi -->
@@ -415,7 +444,15 @@
                         <input type="text" inputmode="numeric" id="inputCustomFund" class="form-control form-control-lg fw-bold text-success text-center" oninput="window.formatInputMoney(this)">
                         <span class="input-group-text bg-light fw-bold">VNĐ</span>
                     </div>
-                    <input type="text" id="inputCustomNote" class="form-control bg-light mb-3 text-center" placeholder="Ghi chú (VD: Chuyển khoản, nợ...)">
+                    
+                    <!-- GỢI Ý NHẬP 0đ (MIỄN PHÍ) -->
+                    <div class="mb-3 d-flex gap-2 justify-content-center">
+                        <span class="badge bg-secondary p-2 shadow-sm" style="cursor:pointer;" onclick="document.getElementById('inputCustomFund').value='0';">Miễn phí (0đ)</span>
+                        <span class="badge bg-secondary p-2 shadow-sm" style="cursor:pointer;" onclick="document.getElementById('inputCustomFund').value='50.000';">50k</span>
+                        <span class="badge bg-secondary p-2 shadow-sm" style="cursor:pointer;" onclick="document.getElementById('inputCustomFund').value='200.000';">200k</span>
+                    </div>
+
+                    <input type="text" id="inputCustomNote" class="form-control bg-light mb-3 text-center" placeholder="Ghi chú (VD: Miễn phí cho Quản lý...)">
                     
                     <button class="btn btn-outline-success w-100 rounded-pill fw-bold py-2 mb-2" onclick="saveCustomFund()">LƯU KHOẢN THU NÀY</button>
                     
@@ -474,7 +511,8 @@
         </div>
         <label class="form-label small text-muted fw-bold mb-1">Số tiền trừ quỹ (VNĐ):</label>
         <!-- Đổi sang type text để có dấu chấm -->
-        <input type="text" inputmode="numeric" id="expAmount" class="form-control bg-light text-danger fw-bold mb-2" oninput="window.formatInputMoney(this)">
+        <input type="text" inputmode="numeric" id="expAmount" class="form-control bg-light text-danger fw-bold mb-2" oninput="window.formatInputMoney(this)" onkeyup="window.checkFundBalance()">
+        <div id="expWarning" class="expense-warning"><i class="fas fa-exclamation-triangle"></i> Cảnh báo: Vượt quá số dư quỹ hiện tại!</div>
         <!-- Gợi ý nhanh Số tiền (Đã thêm dấu chấm) -->
         <div class="mb-3">
             <span class="quick-chip quick-chip-amt" onclick="document.getElementById('expAmount').value = '50.000'">50k</span>
