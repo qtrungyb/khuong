@@ -399,9 +399,9 @@
 		/* --- HIỆU ỨNG THẺ CHUYỂN TAB GIAO LƯU & CÁ ĐỘ --- */
         .subtab-card { 
             cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); user-select: none; 
-            /* Trạng thái mặc định (CHƯA CHỌN): Mờ 40%, đen trắng, chìm xuống, viền trong suốt */
-            opacity: 0.4; filter: grayscale(100%); transform: scale(0.95); 
-            background: #f8f9fa !important; border: 2px solid transparent !important; 
+            /* CHƯA CHỌN: Tăng opacity lên một chút và đổi viền thành màu xám mờ (#dee2e6) */
+            opacity: 0.45; filter: grayscale(100%); transform: scale(0.95); 
+            background: #f8f9fa !important; border: 2px solid #dee2e6 !important; 
         }
         
         /* Trạng thái ĐƯỢC CHỌN: Sáng 100%, to lên, có viền và đổ bóng */
