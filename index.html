@@ -108,41 +108,46 @@
 
         <!-- TAB 2: CÁ ĐỘ & GIAO LƯU -->
         <div id="tab-cado" class="tab-pane">
-            <div class="d-flex justify-content-between align-items-center mb-2 px-1">
-            </div>
-            <!-- 2 Thẻ Thống Kê kiêm Nút chuyển Sub-tab (Giao lưu mặc định bên trái & active) -->
+            <!-- 4 Thẻ Điều Hướng (Giao Lưu, Cá Độ, Kỷ Luật, Liên Hoan) -->
             <div class="row g-2 mb-3">
                 <div class="col-6" onclick="switchCadoSubTab('giaoluu')">
-                    <div id="card-sub-giaoluu" class="card p-2 bg-primary bg-opacity-10 subtab-card active-giaoluu h-100" style="border-radius: 14px;">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="text-primary small fw-bold text-uppercase"><i class="fas fa-handshake me-1"></i>Giao Lưu</span>
-                            <i class="fas fa-check-circle text-primary small" id="icon-sub-giaoluu"></i>
-                        </div>
-                        <h5 class="text-primary fw-bold m-0 mt-1" id="giaoluu-thu-header">0 ₫</h5>
-                        <small class="text-muted d-block mt-1" style="font-size: 11px;" id="giaoluu-sub-header">0 khoản thu</small>
+                    <div id="card-sub-giaoluu" class="card p-2 subtab-card active-giaoluu h-100" style="border-radius: 12px;">
+                        <span class="small fw-bold text-primary text-uppercase mb-1"><i class="fas fa-handshake me-1"></i>Giao lưu</span>
+                        <h6 class="fw-black text-primary m-0" id="giaoluu-thu-header">0 ₫</h6>
+                        <small class="text-muted d-block mt-1" style="font-size: 10.5px;" id="giaoluu-sub-header">0 khoản thu</small>
                     </div>
                 </div>
                 <div class="col-6" onclick="switchCadoSubTab('cado')">
-                    <div id="card-sub-cado" class="card p-2 bg-success bg-opacity-10 subtab-card h-100" style="border-radius: 14px;">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="text-success small fw-bold text-uppercase"><i class="fas fa-dice me-1"></i>Cá Độ</span>
-                            <i class="fas fa-check-circle text-success small d-none" id="icon-sub-cado"></i>
-                        </div>
-                        <h5 class="text-success fw-bold m-0 mt-1" id="cado-thu-header">0 ₫</h5>
-                        <small class="text-muted d-block mt-1" style="font-size: 11px;" id="cado-sub-header">0 trận • Nợ: 0 ₫</small>
+                    <div id="card-sub-cado" class="card p-2 subtab-card h-100" style="border-radius: 12px;">
+                        <span class="small fw-bold text-success text-uppercase mb-1"><i class="fas fa-dice me-1"></i>Cá Độ</span>
+                        <h6 class="fw-black text-success m-0" id="cado-thu-header">0 ₫</h6>
+                        <small class="text-muted d-block mt-1" style="font-size: 10.5px;" id="cado-sub-header">0 trận • Nợ: 0đ</small>
+                    </div>
+                </div>
+                <div class="col-6" onclick="switchCadoSubTab('kyluat')">
+                    <div id="card-sub-kyluat" class="card p-2 subtab-card h-100" style="border-radius: 12px;">
+                        <span class="small fw-bold text-uppercase mb-1" style="color:#fd7e14;"><i class="fas fa-gavel me-1"></i>Phạt</span>
+                        <h6 class="fw-black m-0" style="color:#fd7e14;" id="kyluat-thu-header">0 vi phạm</h6>
+                        <small class="text-muted d-block mt-1" style="font-size: 10.5px;" id="kyluat-sub-header">Nợ: 0đ</small>
+                    </div>
+                </div>
+                <div class="col-6" onclick="switchCadoSubTab('lienhoan')">
+                    <div id="card-sub-lienhoan" class="card p-2 subtab-card h-100" style="border-radius: 12px;">
+                        <span class="small fw-bold text-uppercase mb-1" style="color:#6f42c1;"><i class="fas fa-beer me-1"></i>Nhậu</span>
+                        <h6 class="fw-black m-0" style="color:#6f42c1;" id="lienhoan-thu-header">0 chầu</h6>
+                        <small class="text-muted d-block mt-1" style="font-size: 10.5px;" id="lienhoan-sub-header">Cần thu: 0đ</small>
                     </div>
                 </div>
             </div>
 
-            <!-- Nhánh 1 (Mặc định hiện): Danh sách Giao lưu & Thu khác -->
-            <div id="subtab-giaoluu-view">
-                <div id="giaoluu-container"></div>
-            </div>
-
-            <!-- Nhánh 2 (Mặc định ẩn): Danh sách Trận đấu & Cá độ -->
-            <div id="subtab-cado-view" class="d-none">
-                <div id="cado-container" style="display: flex; flex-direction: column;"></div>
-            </div>
+            <!-- NHÁNH 1: GIAO LƯU TÀI TRỢ -->
+            <div id="subtab-giaoluu-view"><div id="giaoluu-container"></div></div>
+            <!-- NHÁNH 2: CÁ ĐỘ -->
+            <div id="subtab-cado-view" class="d-none"><div id="cado-container" style="display: flex; flex-direction: column;"></div></div>
+            <!-- NHÁNH 3: KỶ LUẬT -->
+            <div id="subtab-kyluat-view" class="d-none"><div id="kyluat-container"></div></div>
+            <!-- NHÁNH 4: LIÊN HOAN (QUỸ RIÊNG) -->
+            <div id="subtab-lienhoan-view" class="d-none"><div id="lienhoan-container"></div></div>
         </div>
 
         <!-- TAB 3: CHI QUỸ (CHỈ TRỪ TIỀN QUỸ) -->
@@ -525,27 +530,30 @@
         </div>
         <label class="form-label small text-muted fw-bold mb-1">Ngày chi:</label><input type="date" id="expDate" class="form-control bg-light"></div><div class="modal-footer p-3 border-0"><button type="button" class="btn btn-danger w-100 rounded-pill fw-bold py-2 shadow-sm" onclick="saveExpense()">LƯU KHOẢN CHI</button></div></div></div></div>
 
-    <!-- Modal THU GIAO LƯU / THU KHÁC (Tích hợp Định dạng tiền) -->
+    <!-- Modal THU GIAO LƯU / THU KHÁC (Phiên bản cũ chuẩn gọn) -->
     <div class="modal fade" id="modalIncome" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 rounded-4 shadow">
                 <div class="modal-header bg-primary text-white border-0 rounded-top-4">
-                    <h6 class="modal-title fw-bold" id="incModalTitle"><i class="fas fa-plus-circle me-2"></i>Thu Giao Lưu / Thu Khác</h6>
+                    <h6 class="modal-title fw-bold" id="incModalTitle"><i class="fas fa-plus-circle me-2"></i>Thêm Tiền Giao Lưu & Thu Khác</h6>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
                     <input type="hidden" id="editIncId">
+                    
                     <label class="form-label small text-muted fw-bold mb-1">Nội dung thu:</label>
                     <input type="text" id="incDesc" class="form-control bg-light mb-2" placeholder="VD: Đội bạn chia tiền sân nhà...">
+                    
                     <div class="mb-3">
                         <span class="quick-chip" onclick="document.getElementById('incDesc').value = '⚽ Đối tác trả tiền sân'"><i class="fas fa-futbol text-primary me-1"></i>Tiền sân</span>
                         <span class="quick-chip" onclick="document.getElementById('incDesc').value = '🤝 Đội bạn gửi tiền nước'"><i class="fas fa-tint text-info me-1"></i>Tiền nước</span>
                         <span class="quick-chip" onclick="document.getElementById('incDesc').value = '🏆 Thưởng / Quỹ thừa giải đấu'"><i class="fas fa-trophy text-warning me-1"></i>Thưởng giải</span>
                         <span class="quick-chip" onclick="document.getElementById('incDesc').value = '💎 Tài trợ đội bóng'"><i class="fas fa-gem text-danger me-1"></i>Tài trợ</span>
                     </div>
+
                     <label class="form-label small text-muted fw-bold mb-1">Số tiền (VNĐ):</label>
-                    <!-- Đổi sang type text để có dấu chấm -->
                     <input type="text" inputmode="numeric" id="incAmount" class="form-control bg-light text-primary fw-bold mb-2" oninput="window.formatInputMoney(this)">
+                    
                     <div class="mb-3">
                         <span class="quick-chip quick-chip-amt" onclick="document.getElementById('incAmount').value = '50.000'">50k</span>
                         <span class="quick-chip quick-chip-amt" onclick="document.getElementById('incAmount').value = '100.000'">100k</span>
@@ -554,12 +562,142 @@
                         <span class="quick-chip quick-chip-amt" onclick="document.getElementById('incAmount').value = '300.000'">300k</span>
                         <span class="quick-chip quick-chip-amt" onclick="document.getElementById('incAmount').value = '500.000'">500k</span>
                     </div>
-                    <label class="form-label small text-muted fw-bold mb-1">Ngày thu:</label><input type="date" id="incDate" class="form-control bg-light">
+
+                    <label class="form-label small text-muted fw-bold mb-1">Ngày thu:</label>
+                    <input type="date" id="incDate" class="form-control bg-light">
                 </div>
                 <div class="modal-footer p-3 border-0">
                     <button type="button" class="btn btn-primary w-100 rounded-pill fw-bold py-2 shadow-sm" onclick="saveIncome()">CỘNG VÀO QUỸ</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal KỶ LUẬT / ĐÓNG PHẠT (Gắn theo Trận đấu) -->
+    <div class="modal fade" id="modalPenalty" tabindex="-1">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content bg-light">
+                <div class="modal-header text-white border-0" style="background:#fd7e14;">
+                    <h6 class="modal-title fw-bold"><i class="fas fa-gavel me-2"></i>Thêm Vi Phạm Kỷ Luật Theo Trận</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="p-3 bg-white shadow-sm border-bottom">
+                        <!-- CHỌN NGÀY VI PHẠM -->
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold mb-1 text-success"><i class="fas fa-calendar-alt me-1"></i>Ngày diễn ra vi phạm:</label>
+                            <input type="date" id="penDate" class="form-control bg-light fw-bold text-success">
+                        </div>
+
+                        <label class="form-label small fw-bold mb-1">Lỗi vi phạm chung:</label>
+                        <input type="text" id="penDesc" class="form-control bg-light mb-2" placeholder="VD: Đi muộn, Bình chọn nhưng không đi...">
+                        <div class="mb-2">
+                            <span class="quick-chip" onclick="document.getElementById('penDesc').value='⏰ Đi muộn'"><i class="fas fa-clock text-warning me-1"></i>Đi muộn</span>
+                            <span class="quick-chip" onclick="document.getElementById('penDesc').value='🗳️ Bình chọn nhưng không đi'"><i class="fas fa-user-slash text-danger me-1"></i>Bình chọn nhưng không đi</span>
+                        </div>
+                        <label class="form-label small fw-bold mb-1 text-danger">Tiền phạt mỗi người (₫):</label>
+                        <input type="text" inputmode="numeric" oninput="window.formatInputMoney(this)" id="penAmount" class="form-control bg-light text-danger fw-bold" value="50.000">
+                    </div>
+                    
+                    <div class="p-2 bg-light fw-bold text-muted small text-center">CHỌN CÁC CẦU THỦ VI PHẠM TRONG TRẬN NÀY</div>
+                    <div class="flex-grow-1 overflow-auto p-2" id="penalty-members-container">
+                        <!-- Danh sách checkbox thành viên render ở đây -->
+                    </div>
+                </div>
+                <div class="modal-footer p-3 border-0 bg-white shadow-lg">
+                    <button type="button" class="btn w-100 rounded-pill fw-bold py-2 text-white shadow-sm" style="background:#fd7e14;" onclick="savePenalty()">LƯU VI PHẠM THEO TRẬN</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal TẠO BUỔI LIÊN HOAN -->
+    <div class="modal fade" id="modalParty" tabindex="-1">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content bg-light">
+                <div class="modal-header text-white border-0" style="background:#6f42c1;">
+                    <h6 class="modal-title fw-bold"><i class="fas fa-beer me-2"></i>Tạo Bill Liên Hoan / Nhậu</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0 d-flex flex-column">
+                    <div class="p-3 bg-white shadow-sm border-bottom">
+                        <input type="hidden" id="editPartyId">
+                        <label class="form-label small fw-bold mb-1">Tên buổi nhậu:</label>
+                        <input type="text" id="partyName" class="form-control bg-light mb-2" placeholder="VD: Bia hơi Hải Xồm sau trận">
+                        <div class="row g-2 mb-2">
+                            <div class="col-6"><label class="form-label small fw-bold mb-1">Ngày:</label><input type="date" id="partyDate" class="form-control bg-light"></div>
+                            <div class="col-6"><label class="form-label small fw-bold mb-1 text-danger">Tổng Bill (₫):</label><input type="text" inputmode="numeric" oninput="window.formatInputMoney(this); window.calculatePartySplit()" id="partyTotalBill" class="form-control bg-light text-danger fw-bold" value="0"></div>
+                        </div>
+
+                        <!-- KHU VỰC TẢI ẢNH HÓA ĐƠN -->
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold mb-1 text-primary"><i class="fas fa-receipt me-1"></i>Ảnh hóa đơn (Bằng chứng):</label>
+                            <input type="file" id="partyBillInput" accept="image/*" class="d-none" onchange="handlePartyBillUpload(event)">
+                            <input type="hidden" id="tempPartyBillBase64">
+                            <div class="party-bill-img-box" onclick="document.getElementById('partyBillInput').click()">
+                                <div id="partyBillPlaceholder" class="text-center text-muted small">
+                                    <i class="fas fa-camera fa-lg mb-1"></i><br>Chạm để tải ảnh hóa đơn
+                                </div>
+                                <img id="partyBillPreview" class="d-none" src="">
+                            </div>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 p-2 rounded-3 text-center mt-2 border border-primary border-opacity-25">
+                            <span class="small fw-bold text-primary">Chia đều mỗi người: </span>
+                            <span class="fw-black text-primary fs-5" id="partyPerPerson">0đ</span>
+                        </div>
+                    </div>
+                    <div class="p-2 bg-light fw-bold text-muted small text-center">CHỌN NGƯỜI THAM GIA ĐỂ CHIA TIỀN</div>
+                    <div class="flex-grow-1 overflow-auto p-2" id="party-members-container">
+                        <!-- Checkbox danh sách thành viên -->
+                    </div>
+                </div>
+                <div class="modal-footer p-3 border-0 bg-white shadow-lg">
+                    <button type="button" class="btn w-100 rounded-pill fw-bold py-2 text-white" style="background:#6f42c1;" onclick="saveParty()">TẠO BILL CHIA TIỀN</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTTOM SHEET CHI TIẾT BILL LIÊN HOAN -->
+    <div class="bottom-sheet" id="bsParty">
+        <div class="bs-header w-100">
+            <div class="bs-drag-handle"></div>
+            <div class="d-flex justify-content-between align-items-center w-100 mb-2">
+                <div class="text-truncate flex-grow-1 pe-2">
+                    <h5 class="fw-bold text-dark m-0 text-truncate" id="bsPartyTitle">Tên bữa nhậu</h5>
+                    <small style="color:#6f42c1; font-weight:800;" id="bsPartyPerPerson">Mỗi người: 0đ</small>
+                </div>
+                <div class="text-end flex-shrink-0">
+                    <span class="badge bg-danger rounded-pill fs-6 shadow-sm" id="bsPartyDebt">Cần thu: 0đ</span>
+                </div>
+            </div>
+            <!-- CÁC NÚT THao TÁC TRONG BOTTOM SHEET -->
+           <div class="d-flex gap-2 w-100 mt-2">
+                <button class="btn btn-sm btn-light border fw-bold flex-grow-1 shadow-sm" style="color:#6f42c1;" onclick="openEditParty()"><i class="fas fa-pen me-1"></i>Sửa</button>
+                <button class="btn btn-sm btn-light border fw-bold shadow-sm text-primary" id="btnViewBillImg" style="display:none;" onclick="openBillImageViewer()"><i class="fas fa-image me-1"></i>Xem Hóa Đơn</button>
+                <button class="btn btn-sm btn-light border fw-bold shadow-sm text-success" id="btnExportPartyCard" onclick="exportPartyCard()"><i class="fas fa-camera-retro me-1"></i>Xuất Ảnh</button>
+                <button class="btn btn-sm btn-light border fw-bold text-danger px-2 shadow-sm" onclick="deletePartyFromSheet()"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>
+        <div class="bs-body" id="bsPartyContent"></div>
+    </div>
+
+    <!-- MẪU THIẾT KẾ ẨN DÙNG ĐỂ CHỤP ẢNH BILL NHẬU -->
+    <div id="party-card-export-zone" style="position: fixed; left: -9999px; top: 0; width: 600px; background: #ffffff; padding: 24px; font-family: system-ui, -apple-system, sans-serif; z-index: -1; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+        <div style="text-align: center; border-bottom: 2px dashed #6f42c1; padding-bottom: 16px; margin-bottom: 16px;">
+            <div style="font-size: 22px; font-weight: 900; color: #6f42c1; text-transform: uppercase;"><i class="fas fa-beer"></i> BILL LIÊN HOAN - FC THẬP CẨM</div>
+            <div style="font-size: 18px; font-weight: 800; color: #212529; margin-top: 6px;" id="exp-party-name">Tên bữa nhậu</div>
+            <div style="font-size: 12px; color: #6c757d; font-weight: 600; margin-top: 4px;" id="exp-party-date">Ngày: ---</div>
+        </div>
+        <div style="display: flex; justify-content: space-between; background: #f8f9fa; padding: 12px 16px; border-radius: 12px; margin-bottom: 16px; font-weight: bold;">
+            <div>Tổng Bill: <span style="color: #dc3545;" id="exp-party-total">0đ</span></div>
+            <div>Mỗi người: <span style="color: #6f42c1;" id="exp-party-per">0đ</span></div>
+        </div>
+        <div style="font-size: 13px; font-weight: 800; color: #495057; margin-bottom: 8px; text-transform: uppercase;">DANH SÁCH THÀNH VIÊN THAM GIA:</div>
+        <div id="exp-party-member-list" style="margin-bottom: 16px;">
+            <!-- Danh sách thành viên đóng tiền render vào đây -->
+        </div>
+        <div style="text-align: center; font-size: 11px; color: #adb5bd; font-style: italic; border-top: 1px solid #e9ecef; pt-12px; margin-top: 12px;">
+            🍺 Đề nghị anh em nhanh chóng chuyển khoản Campuchia cho thủ quỹ nhé! ❤️
         </div>
     </div>
 	<!-- Modal HỒ SƠ QUẢN LÝ -->
@@ -660,6 +798,20 @@
                 </div>
                 <div class="modal-footer p-3 border-0">
                     <button class="btn btn-primary w-100 rounded-pill fw-bold py-2 shadow-sm" onclick="saveMember()">LƯU CẦU THỦ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+	<!-- Modal XEM ẢNH HÓA ĐƠN PHÓNG TO -->
+    <div class="modal fade" id="modalViewBillImg" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-dark border-0 rounded-4 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h6 class="modal-title text-white fw-bold"><i class="fas fa-receipt me-2"></i>Ảnh Hóa Đơn Chi Tiết</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center p-3">
+                    <img id="modalBillImageFull" class="party-bill-preview-modal" src="">
                 </div>
             </div>
         </div>
