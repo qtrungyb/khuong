@@ -131,8 +131,11 @@ window.state = {
         }
 
         function renderAll() { 
-            renderThuQuy(); renderCaDo(); renderGiaoLuu(); renderChi(); renderTongKet(); renderThongKe();
+            renderThuQuy(); renderCaDo(); renderGiaoLuu(); 
+            renderKyLuat(); renderLienHoan(); // <--- 2 DÒNG MỚI ĐỂ VẼ TAB
+            renderChi(); renderTongKet(); renderThongKe();
             if(window.state.bsMatchId) renderBottomSheetContent(); 
+            if(document.getElementById('bsParty').classList.contains('show')) window.openPartySheet(window.state.bsPartyId);
         }
 
         // ================= TAB 1: THU QUỸ =================
@@ -375,6 +378,7 @@ window.state = {
             window.state.bsMatchId = null;
             document.getElementById('bsOverlay').classList.remove('show');
             document.getElementById('bsMatch').classList.remove('show');
+			document.getElementById('bsParty')?.classList.remove('show');
         };
         window.deleteMatchFromSheet = () => {
             if(confirm("Xóa toàn bộ dữ liệu trận đấu này?")) {
@@ -519,39 +523,32 @@ window.state = {
             }
         };
 
-        // ================= CHUYỂN NHÁNH TRONG TAB ĐỘ & GIAO LƯU =================
+        // ================= CÁC TAB GIAO LƯU / CÁ ĐỘ / KỶ LUẬT / LIÊN HOAN =================
         window.state.cadoSubTab = 'giaoluu'; 
 
         window.switchCadoSubTab = (subTab) => {
             window.state.cadoSubTab = subTab;
-            const viewCado = document.getElementById('subtab-cado-view');
-            const viewGiaoluu = document.getElementById('subtab-giaoluu-view');
-            const cardCado = document.getElementById('card-sub-cado');
-            const cardGiaoluu = document.getElementById('card-sub-giaoluu');
-            const iconCado = document.getElementById('icon-sub-cado');
-            const iconGiaoluu = document.getElementById('icon-sub-giaoluu');
+            const tabs = ['giaoluu', 'cado', 'kyluat', 'lienhoan'];
             const fab = document.getElementById('globalFabBtn');
 
-            if (subTab === 'cado') {
-                viewCado.classList.remove('d-none');
-                viewGiaoluu.classList.add('d-none');
-                cardCado.classList.add('active-cado');
-                cardGiaoluu.classList.remove('active-giaoluu');
-                iconCado.classList.remove('d-none');
-                iconGiaoluu.classList.add('d-none');
-                if (window.state.activeTab === 'cado') fab.className = 'fab-btn bg-success show';
-            } else {
-                viewCado.classList.add('d-none');
-                viewGiaoluu.classList.remove('d-none');
-                cardCado.classList.remove('active-cado');
-                cardGiaoluu.classList.add('active-giaoluu');
-                iconCado.classList.add('d-none');
-                iconGiaoluu.classList.remove('d-none');
-                if (window.state.activeTab === 'cado') fab.className = 'fab-btn bg-primary show';
+            tabs.forEach(t => {
+                const viewEl = document.getElementById(`subtab-${t}-view`);
+                const cardEl = document.getElementById(`card-sub-${t}`);
+                if (viewEl) viewEl.classList.add('d-none');
+                if (cardEl) cardEl.classList.remove(`active-${t}`);
+            });
+
+            const activeView = document.getElementById(`subtab-${subTab}-view`);
+            const activeCard = document.getElementById(`card-sub-${subTab}`);
+            if (activeView) activeView.classList.remove('d-none');
+            if (activeCard) activeCard.classList.add(`active-${subTab}`);
+
+            if (window.state.activeTab === 'cado' && fab) {
+                fab.className = 'fab-btn show ' + (subTab === 'giaoluu' ? 'bg-primary' : (subTab === 'kyluat' ? 'bg-warning' : (subTab === 'lienhoan' ? 'bg-info' : 'bg-success')));
             }
         };
 
-        // ================= GIAO LƯU & THU KHÁC =================
+        // --- GIAO LƯU & THU KHÁC (Phiên bản cũ) ---
         window.openAddIncomeModal = () => {
             document.getElementById('editIncId').value = ''; 
             document.getElementById('incModalTitle').innerHTML = '<i class="fas fa-plus-circle me-2"></i>Thêm Tiền Giao Lưu & Thu Khác';
@@ -599,8 +596,10 @@ window.state = {
             let totalInc = 0;
             incEntries.forEach(([_, inc]) => totalInc += (Number(inc.amount) || 0));
 
-            document.getElementById('giaoluu-thu-header').innerText = window.formatMoney(totalInc);
-            document.getElementById('giaoluu-sub-header').innerText = `${incEntries.length} khoản thu`;
+            const headerEl = document.getElementById('giaoluu-thu-header');
+            const subEl = document.getElementById('giaoluu-sub-header');
+            if (headerEl) headerEl.innerText = window.formatMoney(totalInc);
+            if (subEl) subEl.innerText = `${incEntries.length} khoản thu`;
 
             if(incEntries.length === 0) {
                 container.innerHTML = '<div class="card-clean border p-4 text-center text-muted small"><i class="fas fa-handshake fa-2x mb-2 opacity-25"></i><br>Chưa có khoản thu giao lưu & thu khác.<br>Bấm (+) để thêm.</div>';
@@ -632,6 +631,352 @@ window.state = {
             });
             container.innerHTML = html + '</div>';
         }
+
+        // --- 2. KỶ LUẬT (PHẠT THEO NGÀY TÙY CHỌN) ---
+        window.openAddPenaltyModal = () => {
+            document.getElementById('penDesc').value = ''; 
+            document.getElementById('penAmount').value = '20.000';
+            
+            // Mặc định điền ngày hôm nay
+            const todayStr = new Date().toISOString().slice(0, 10);
+            document.getElementById('penDate').value = todayStr;
+
+            // Đổ danh sách cầu thủ dạng checkbox
+            let chkHtml = '<div class="row g-2 m-0">';
+            Object.entries(window.state.teams).sort((a,b)=>(a[1].order||0)-(b[1].order||0)).forEach(([tId, t]) => {
+                chkHtml += `<div class="col-12 mt-2 mb-1 fw-bold text-primary small text-uppercase">${t.name}</div>`;
+                Object.entries(window.state.members).forEach(([mId, m]) => {
+                    if(m.teamId === tId) {
+                        chkHtml += `<div class="col-6"><div class="form-check bg-white border rounded p-2 ps-4 shadow-sm mb-1"><input class="form-check-input penalty-checkbox" type="checkbox" value="${mId}" id="pen_chk_${mId}"><label class="form-check-label fw-bold text-dark w-100 text-truncate" for="pen_chk_${mId}" style="font-size:12px;">${m.name}</label></div></div>`;
+                    }
+                });
+            });
+            chkHtml += '</div>';
+            document.getElementById('penalty-members-container').innerHTML = chkHtml;
+            
+            new bootstrap.Modal(document.getElementById('modalPenalty')).show();
+        };
+
+        window.savePenalty = () => {
+            const rawDate = document.getElementById('penDate').value;
+            const desc = document.getElementById('penDesc').value.trim(); 
+            const amt = window.getRealNumber('penAmount');
+            const checkedBoxes = document.querySelectorAll('.penalty-checkbox:checked');
+            
+            if(!desc || amt <= 0) return alert("Vui lòng nhập lý do phạt và số tiền hợp lệ!");
+            if(!rawDate) return alert("Vui lòng chọn ngày vi phạm!");
+            if(checkedBoxes.length === 0) return alert("Vui lòng chọn ít nhất 1 cầu thủ vi phạm!");
+
+            const updates = {};
+            const displayDate = new Date(rawDate).toLocaleDateString('vi-VN');
+
+            checkedBoxes.forEach(chk => {
+                const mId = chk.value;
+                const newRef = db.ref(`funds/${window.state.currentMonth}/penalties`).push();
+                updates[newRef.key] = { 
+                    memberId: mId, 
+                    customDate: rawDate, 
+                    reason: desc, 
+                    amount: amt, 
+                    isPaid: false, 
+                    date: displayDate 
+                };
+            });
+
+            db.ref(`funds/${window.state.currentMonth}/penalties`).update(updates).then(() => {
+                const modalEl = document.getElementById('modalPenalty');
+                const modalInst = bootstrap.Modal.getInstance(modalEl);
+                if (modalInst) modalInst.hide();
+            });
+        };
+
+        function renderKyLuat() {
+            const container = document.getElementById('kyluat-container'); if(!container) return;
+            const pens = window.state.monthData.penalties || {};
+            
+            let totalNo = 0; let totalThu = 0; let totalPhat = 0;
+            
+            // Gom nhóm phạt theo Ngày tháng
+            const grouped = {};
+
+            Object.entries(pens).forEach(([pId, p]) => {
+                totalPhat++;
+                if(!p.isPaid) totalNo += (Number(p.amount) || 0);
+                else totalThu += (Number(p.amount) || 0);
+
+                const groupKey = p.customDate || p.date || 'Khác';
+                const groupTitle = '📌 Vi phạm ngày ' + (p.date || '---');
+
+                if (!grouped[groupKey]) {
+                    grouped[groupKey] = { title: groupTitle, rawDate: p.customDate || p.date || '', items: [] };
+                }
+                grouped[groupKey].items.push({ pId, ...p });
+            });
+
+            let html = '';
+            
+            // Sắp xếp các nhóm theo ngày (mới nhất lên trên)
+            const sortedGroups = Object.values(grouped).sort((a,b) => new Date(b.rawDate || 0) - new Date(a.rawDate || 0));
+
+            sortedGroups.forEach(group => {
+                html += `
+                <div class="fw-bold text-success text-uppercase border-start border-success border-4 ps-2 mt-4 mb-2">
+                    ${group.title}
+                </div>
+                <div class="card-clean border mb-3">`;
+                
+                group.items.forEach(p => {
+                    const memName = window.state.members[p.memberId]?.name || 'Không rõ';
+                    let tickClass = p.isPaid ? 'tick-btn active' : 'tick-btn unpaid';
+                    let tickIcon = p.isPaid ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>';
+                    
+                    html += `
+                    <div class="item-clean ${p.isPaid ? 'member-paid' : 'member-unpaid'}" onclick="togglePenaltyStatus('${p.pId}', ${p.isPaid})">
+                        <div class="flex-grow-1">
+                            <div class="fw-bold ${p.isPaid?'text-muted text-decoration-line-through':'text-dark'}">${memName}</div>
+                            <div class="small text-danger">${p.reason} • Phạt: ${window.formatShortMoney(p.amount)}</div>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="fas fa-trash text-muted p-2" onclick="event.stopPropagation(); deletePenalty('${p.pId}')"></i>
+                            <div class="${tickClass}">${tickIcon}</div>
+                        </div>
+                    </div>`;
+                });
+                html += `</div>`;
+            });
+
+            container.innerHTML = html !== '' ? html : '<div class="card-clean border p-4 text-center text-muted small"><i class="fas fa-gavel fa-2x mb-2 opacity-25"></i><br>Đội bóng gương mẫu, chưa ai bị phạt!</div>';
+            
+            const headerEl = document.getElementById('kyluat-thu-header');
+            const subEl = document.getElementById('kyluat-sub-header');
+            if (headerEl) headerEl.innerText = window.formatMoney(totalThu);
+            if (subEl) subEl.innerText = `${totalPhat} lỗi • Nợ: ${window.formatShortMoney(totalNo)}`;
+        }
+        // --- 3. LIÊN HOAN (CHIA BILL QUỸ RIÊNG & ẢNH HÓA ĐƠN) ---
+        window.openAddPartyModal = () => {
+            document.getElementById('editPartyId').value = ''; 
+            document.getElementById('partyName').value = ''; 
+            document.getElementById('partyTotalBill').value = '0';
+            document.getElementById('partyDate').value = new Date().toISOString().slice(0, 10);
+            
+            // Gọi hàm reset ảnh hóa đơn về trạng thái trống khi tạo bill mới
+            window.resetPartyBillModal(''); 
+
+            let chkHtml = '<div class="row g-2 m-0">';
+            Object.entries(window.state.teams).sort((a,b)=>(a[1].order||0)-(b[1].order||0)).forEach(([tId, t]) => {
+                chkHtml += `<div class="col-12 mt-2 mb-1 fw-bold text-primary small text-uppercase">${t.name}</div>`;
+                Object.entries(window.state.members).forEach(([mId, m]) => {
+                    if(m.teamId === tId) {
+                        chkHtml += `<div class="col-6"><div class="form-check bg-white border rounded p-2 ps-4 shadow-sm mb-1"><input class="form-check-input party-checkbox" type="checkbox" value="${mId}" id="chk_${mId}" onchange="window.calculatePartySplit()" checked><label class="form-check-label fw-bold text-dark w-100 text-truncate" for="chk_${mId}" style="font-size:12px;">${m.name}</label></div></div>`;
+                    }
+                });
+            });
+            chkHtml += '</div>';
+            document.getElementById('party-members-container').innerHTML = chkHtml;
+            window.calculatePartySplit();
+            new bootstrap.Modal(document.getElementById('modalParty')).show();
+        };
+
+        window.openEditParty = () => {
+            const pId = window.state.bsPartyId;
+            const p = window.state.monthData.parties?.[pId]; if(!p) return;
+            window.closePartySheet();
+            
+            document.getElementById('editPartyId').value = pId;
+            document.getElementById('partyName').value = p.name || '';
+            document.getElementById('partyTotalBill').value = new Intl.NumberFormat('vi-VN').format(p.bill || 0);
+            document.getElementById('partyDate').value = p.rawDate || new Date().toISOString().slice(0, 10);
+
+            // Nạp lại ảnh hóa đơn cũ (nếu có) khi mở form sửa bill[cite: 10]
+            window.resetPartyBillModal(p.billImage || '');
+
+            let chkHtml = '<div class="row g-2 m-0">';
+            Object.entries(window.state.teams).sort((a,b)=>(a[1].order||0)-(b[1].order||0)).forEach(([tId, t]) => {
+                chkHtml += `<div class="col-12 mt-2 mb-1 fw-bold text-primary small text-uppercase">${t.name}</div>`;
+                Object.entries(window.state.members).forEach(([mId, m]) => {
+                    if(m.teamId === tId) {
+                        const isChecked = p.members && p.members[mId] !== undefined;
+                        chkHtml += `<div class="col-6"><div class="form-check bg-white border rounded p-2 ps-4 shadow-sm mb-1"><input class="form-check-input party-checkbox" type="checkbox" value="${mId}" id="chk_${mId}" onchange="window.calculatePartySplit()" ${isChecked ? 'checked' : ''}><label class="form-check-label fw-bold text-dark w-100 text-truncate" for="chk_${mId}" style="font-size:12px;">${m.name}</label></div></div>`;
+                    }
+                });
+            });
+            chkHtml += '</div>';
+            document.getElementById('party-members-container').innerHTML = chkHtml;
+            window.calculatePartySplit();
+            new bootstrap.Modal(document.getElementById('modalParty')).show();
+        };
+
+        window.saveParty = () => {
+            const editId = document.getElementById('editPartyId').value;
+            const name = document.getElementById('partyName').value.trim(); 
+            const bill = window.getRealNumber('partyTotalBill');
+            const rawDate = document.getElementById('partyDate').value; 
+            const perPerson = window.calculatePartySplit();
+            
+            // Lấy chuỗi ảnh hóa đơn (nếu có)
+            const billImage = document.getElementById('tempPartyBillBase64')?.value || '';
+
+            if(!name) {
+                alert("Vui lòng nhập tên buổi nhậu!");
+                return;
+            }
+            if(bill <= 0) {
+                alert("Vui lòng nhập tổng số tiền bill hợp lệ!");
+                return;
+            }
+            
+            const oldMembers = (editId && window.state.monthData.parties?.[editId]?.members) || {};
+            const members = {};
+            const checkboxes = document.querySelectorAll('.party-checkbox:checked');
+            
+            checkboxes.forEach(chk => {
+                const mId = chk.value;
+                members[mId] = oldMembers[mId] !== undefined ? oldMembers[mId] : 0;
+            });
+            
+            if(Object.keys(members).length === 0) {
+                alert("Hãy chọn ít nhất 1 người tham gia chia tiền!");
+                return;
+            }
+
+            const payload = { 
+                name: name, 
+                bill: bill, 
+                rawDate: rawDate || '', 
+                date: rawDate ? new Date(rawDate).toLocaleDateString('vi-VN') : '', 
+                perPerson: perPerson, 
+                members: members, 
+                billImage: billImage ? billImage : null 
+            };
+
+            // Thực hiện đẩy dữ liệu lên Firebase
+            let savePromise;
+            if (editId) {
+                savePromise = db.ref(`funds/${window.state.currentMonth}/parties/${editId}`).set(payload);
+            } else {
+                savePromise = db.ref(`funds/${window.state.currentMonth}/parties`).push(payload);
+            }
+
+            savePromise.then(() => {
+                // Đóng modal thủ công trực tiếp bằng cách xóa class và lớp nền mờ
+                const modalEl = document.getElementById('modalParty');
+                if (modalEl) {
+                    modalEl.classList.remove('show');
+                    modalEl.style.display = 'none';
+                    modalEl.setAttribute('aria-hidden', 'true');
+                    modalEl.removeAttribute('aria-modal');
+                    modalEl.removeAttribute('role');
+                }
+
+                // Dọn dẹp hoàn toàn backdrop và trạng thái khóa cuộn của Bootstrap
+                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+                
+                // Reset lại form
+                document.getElementById('editPartyId').value = '';
+                document.getElementById('partyName').value = '';
+                document.getElementById('partyTotalBill').value = '0';
+                if(typeof window.resetPartyBillModal === 'function') {
+                    window.resetPartyBillModal('');
+                }
+
+                console.log("Lưu bill nhậu thành công!");
+            }).catch(error => {
+                console.error("Lỗi Firebase khi lưu bill nhậu:", error);
+                alert("Lỗi khi lưu dữ liệu lên Firebase: " + error.message);
+            });
+        };
+
+        function renderLienHoan() {
+            const container = document.getElementById('lienhoan-container'); if(!container) return;
+            const parties = window.state.monthData.parties || {};
+            const partyKeys = Object.keys(parties);
+            let html = ''; let totalPartyDebt = 0;
+            
+            Object.entries(parties).forEach(([pId, p]) => {
+                const memIds = Object.keys(p.members || {});
+                let col = 0;
+                memIds.forEach(mId => { col += (Number(p.members[mId]) || 0); });
+                const debt = Math.max(0, (memIds.length * p.perPerson) - col);
+                totalPartyDebt += debt;
+
+                html += `
+                <div class="party-card" onclick="window.openPartySheet('${pId}')">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="fw-bold text-dark fs-6 text-truncate pe-2">${p.name}</div>
+                        <!-- LÀM NỔI BẬT SỐ TIỀN MỖI NGƯỜI Ở ĐÂY -->
+                        <div class="party-per-person-badge flex-shrink-0">
+                            <i class="fas fa-user-tag"></i> ${window.formatMoney(p.perPerson)}/ng
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted"><i class="fas fa-calendar-day me-1"></i>${p.date} • ${memIds.length} tham gia (Tổng: ${window.formatShortMoney(p.bill)})</small>
+                        ${debt > 0 ? `<span class="badge bg-warning text-dark shadow-sm">Cần thu: ${window.formatShortMoney(debt)}</span>` : `<span class="badge bg-success shadow-sm"><i class="fas fa-check"></i> Xong bill</span>`}
+                    </div>
+                </div>`;
+            });
+            
+            container.innerHTML = partyKeys.length > 0 ? html : '<div class="card-clean border p-4 text-center text-muted small"><i class="fas fa-beer fa-2x mb-2 opacity-25"></i><br>Tháng này chưa có chầu nhậu nào!</div>';
+            
+            const headerEl = document.getElementById('lienhoan-thu-header');
+            const subEl = document.getElementById('lienhoan-sub-header');
+            if (headerEl) headerEl.innerText = `${partyKeys.length} chầu`;
+            if (subEl) subEl.innerText = `Cần thu: ${window.formatShortMoney(totalPartyDebt)}`;
+        }
+
+        window.openPartySheet = (pId) => {
+            window.state.bsPartyId = pId;
+            const p = window.state.monthData.parties?.[pId]; if(!p) return;
+            
+            document.getElementById('bsPartyTitle').innerText = p.name;
+            document.getElementById('bsPartyPerPerson').innerText = `Campuchia: ${window.formatMoney(p.perPerson)} / người`;
+            
+            // --- KIỂM TRA VÀ ẨN/HIỆN NÚT XEM HÓA ĐƠN ---
+            const btnViewImg = document.getElementById('btnViewBillImg');
+            if (btnViewImg) {
+                // Nếu bill có lưu ảnh hóa đơn thì hiện nút, ngược lại thì ẩn đi
+                btnViewImg.style.display = p.billImage ? 'block' : 'none';
+            }
+            // ---------------------------------------------
+            
+            let debtTotal = 0; let html = '<div class="card-clean border">';
+            
+            Object.entries(window.state.teams).sort((a,b)=>(a[1].order||0)-(b[1].order||0)).forEach(([tId, t]) => {
+                let teamHtml = '';
+                Object.keys(p.members||{}).forEach(mId => {
+                    const m = window.state.members[mId];
+                    if(m && m.teamId === tId) {
+                        const paidAmt = Number(p.members[mId]) || 0;
+                        const isPaid = paidAmt >= p.perPerson;
+                        if(!isPaid) debtTotal += (p.perPerson - paidAmt);
+
+                        let tickClass = isPaid ? 'tick-btn active' : 'tick-btn unpaid';
+                        let tickIcon = isPaid ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>';
+
+                        teamHtml += `
+                        <div class="item-clean ${isPaid ? 'member-paid' : 'member-unpaid'}" onclick="togglePartyPaid('${pId}', '${mId}', ${p.perPerson}, ${isPaid})">
+                            <div class="mem-name ${isPaid ? 'text-muted text-decoration-line-through' : ''}">${m.name}</div>
+                            <div class="${tickClass}">${tickIcon}</div>
+                        </div>`;
+                    }
+                });
+                if(teamHtml) html += `<div class="bg-light px-3 py-1 fw-bold small text-muted border-bottom">${t.name}</div>` + teamHtml;
+            });
+            
+            document.getElementById('bsPartyContent').innerHTML = html + '</div>';
+            const badgeDebt = document.getElementById('bsPartyDebt');
+            if(debtTotal > 0) { badgeDebt.className = 'badge bg-danger rounded-pill fs-6 shadow-sm'; badgeDebt.innerText = 'Cần thu: ' + window.formatShortMoney(debtTotal); }
+            else { badgeDebt.className = 'badge bg-success rounded-pill fs-6 shadow-sm'; badgeDebt.innerHTML = '<i class="fas fa-check"></i> Đã thu đủ'; }
+            
+            document.getElementById('bsOverlay').classList.add('show');
+            document.getElementById('bsParty').classList.add('show');
+        };
+
+        window.togglePartyPaid = (pId, mId, perPerson, isPaid) => { db.ref(`funds/${window.state.currentMonth}/parties/${pId}/members/${mId}`).set(isPaid ? 0 : perPerson); };
+        window.closePartySheet = () => { window.state.bsPartyId = null; document.getElementById('bsOverlay').classList.remove('show'); document.getElementById('bsParty').classList.remove('show'); };
+        window.deletePartyFromSheet = () => { if(confirm("Xóa toàn bộ bill nhậu này?")) { db.ref(`funds/${window.state.currentMonth}/parties/${window.state.bsPartyId}`).remove(); window.closePartySheet(); } };
 
         // ================= TAB 3: CHI QUỸ =================
         window.openAddExpenseModal = () => {
@@ -773,6 +1118,13 @@ window.state = {
                 } else {
                     tongChi += (Number(exp.amount) || 0);
                     miniLogs.push({ type: 'chi', desc: exp.desc, amt: Number(exp.amount), date: exp.rawDate || exp.date });
+                }
+            });
+
+            // CỘNG TIỀN PHẠT ĐÃ ĐÓNG VÀO QUỸ KHÁC (THU KHÁC)
+            Object.values(window.state.monthData.penalties || {}).forEach(p => {
+                if (p.isPaid) { // Chỉ cộng khi đã thu tiền phạt
+                    thuKhac += (Number(p.amount) || 0);
                 }
             });
 
@@ -1145,10 +1497,22 @@ window.state = {
 
         window.updateTeamSelects = () => {
             const select = document.getElementById('memTeam');
-            if(!select) return;
-            select.innerHTML = Object.entries(window.state.teams)
-                .sort((a,b) => (a[1].order||0) - (b[1].order||0))
-                .map(([id, t]) => `<option value="${id}">${t.name}</option>`).join('');
+            if(select) select.innerHTML = Object.entries(window.state.teams).sort((a,b) => (a[1].order||0) - (b[1].order||0)).map(([id, t]) => `<option value="${id}">${t.name}</option>`).join('');
+            
+            // Đổ danh sách cầu thủ vào bảng Tài trợ và bảng Phạt
+            let memOpts = '<option value="">Tập thể / Ẩn danh</option>';
+            let memOptsP = '<option value="">-- Chọn cầu thủ vi phạm --</option>'; // Thêm dòng nhắc nhở
+            
+            Object.entries(window.state.members).sort((a,b) => a[1].name.localeCompare(b[1].name)).forEach(([mId, m]) => { 
+                memOpts += `<option value="${mId}">${m.name}</option>`; 
+                memOptsP += `<option value="${mId}">${m.name}</option>`; 
+            });
+            
+            const incSel = document.getElementById('incMemberId'); 
+            if(incSel) incSel.innerHTML = memOpts;
+            
+            const penSel = document.getElementById('penMemberId'); 
+            if(penSel) penSel.innerHTML = memOptsP; // Cập nhật danh sách vào đây
         };
 
         window.openAddTeamForm = () => {
@@ -1696,11 +2060,11 @@ window.state = {
         window.handleFabClick = () => {
             if(window.state.activeTab === 'cado') {
                 if(window.state.cadoSubTab === 'giaoluu') window.openAddIncomeModal();
-                else window.openAddMatchModal();
+                else if(window.state.cadoSubTab === 'cado') window.openAddMatchModal();
+                else if(window.state.cadoSubTab === 'kyluat') window.openAddPenaltyModal();
+                else if(window.state.cadoSubTab === 'lienhoan') window.openAddPartyModal();
             }
-            else if(window.state.activeTab === 'chi') {
-                window.openAddExpenseModal();
-            }
+            else if(window.state.activeTab === 'chi') { window.openAddExpenseModal(); }
         };
         
         document.getElementById('monthSelectorMain').addEventListener('change', (e) => handleMonthChange(e.target.value));
@@ -1773,6 +2137,150 @@ window.state = {
             } else {
                 warn.style.display = 'none'; input.classList.remove('input-danger');
             }
+        };
+		// ================= XUẤT ẢNH BILL NHẬU =================
+        window.exportPartyCard = () => {
+            const pId = window.state.bsPartyId;
+            const p = window.state.monthData.parties?.[pId]; if(!p) return;
+            
+            const btn = document.getElementById('btnExportPartyCard');
+            const oldHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang vẽ...';
+
+            // Đổ dữ liệu vào vùng thiết kế ẩn
+            document.getElementById('exp-party-name').innerText = p.name;
+            document.getElementById('exp-party-date').innerText = `Ngày: ${p.date || '---'}`;
+            document.getElementById('exp-party-total').innerText = window.formatMoney(p.bill);
+            document.getElementById('exp-party-per').innerText = window.formatMoney(p.perPerson);
+
+            let listHtml = '';
+            Object.entries(window.state.teams).sort((a,b)=>(a[1].order||0)-(b[1].order||0)).forEach(([tId, t]) => {
+                let teamHasMember = false;
+                let teamItems = '';
+                
+                Object.keys(p.members || {}).forEach(mId => {
+                    const m = window.state.members[mId];
+                    if(m && m.teamId === tId) {
+                        teamHasMember = true;
+                        const paidAmt = Number(p.members[mId]) || 0;
+                        const isPaid = paidAmt >= p.perPerson;
+                        
+                        let statusBadge = isPaid 
+                            ? `<span style="background: #d1e7dd; color: #0f5132; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: bold;">Đã đóng ✅</span>` 
+                            : `<span style="background: #f8d7da; color: #842029; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: bold;">Chưa đóng ❌</span>`;
+                        
+                        teamItems += `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: #ffffff; border-bottom: 1px solid #f1f3f5; border-radius: 6px; margin-bottom: 4px;">
+                            <span style="font-weight: 700; color: #212529; font-size: 13px;">${m.name}</span>
+                            ${statusBadge}
+                        </div>`;
+                    }
+                });
+
+                if(teamHasMember) {
+                    listHtml += `<div style="font-size: 11px; font-weight: 800; color: #198754; text-transform: uppercase; margin-top: 8px; margin-bottom: 4px;">${t.name}</div>` + teamItems;
+                }
+            });
+
+            document.getElementById('exp-party-member-list').innerHTML = listHtml;
+
+            // Tiến hành chụp ảnh bằng html2canvas
+            setTimeout(() => {
+                const exportZone = document.getElementById('party-card-export-zone');
+                html2canvas(exportZone, { scale: 4, useCORS: true, backgroundColor: '#ffffff' }).then(canvas => {
+                    canvas.toBlob((blob) => {
+                        if (!blob) {
+                            alert('Lỗi bộ nhớ khi tạo ảnh.');
+                            btn.innerHTML = oldHtml;
+                            return;
+                        }
+                        
+                        const fileName = `Bill_Nhau_${p.name.replace(/\s+/g, '_')}.png`;
+                        const file = new File([blob], fileName, { type: 'image/png' });
+
+                        // Kiểm tra nếu thiết bị hỗ trợ share file trực tiếp
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            navigator.share({
+                                files: [file],
+                                title: 'Bill Nhậu FC Thập Cẩm',
+                                text: `Gửi anh em bill "${p.name}" (${window.formatMoney(p.perPerson)}/người) nhé!`
+                            }).then(() => {
+                                btn.innerHTML = oldHtml;
+                            }).catch(() => {
+                                btn.innerHTML = oldHtml;
+                            });
+                        } else {
+                            // Tải xuống file ảnh nếu không hỗ trợ share trực tiếp
+                            const objUrl = URL.createObjectURL(blob);
+                            const link = document.createElement('a');
+                            link.download = fileName;
+                            link.href = objUrl;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            URL.revokeObjectURL(objUrl);
+                            
+                            btn.innerHTML = oldHtml;
+                        }
+                    }, 'image/png');
+                }).catch(err => {
+                    alert('Lỗi khi vẽ ảnh bill.');
+                    console.error(err);
+                    btn.innerHTML = oldHtml;
+                });
+            }, 300);
+        };
+		// ================= XỬ LÝ ẢNH HÓA ĐƠN NHẬU =================
+        window.handlePartyBillUpload = (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_SIZE = 800; // Giới hạn kích thước tối đa 800px để giữ nét ảnh hóa đơn nhưng vẫn nhẹ cơ sở dữ liệu
+                    let width = img.width; let height = img.height;
+                    if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } 
+                    else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    
+                    document.getElementById('tempPartyBillBase64').value = dataUrl;
+                    document.getElementById('partyBillPreview').src = dataUrl;
+                    document.getElementById('partyBillPreview').classList.remove('d-none');
+                    document.getElementById('partyBillPlaceholder').classList.add('d-none');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.resetPartyBillModal = (base64Img = '') => {
+            const preview = document.getElementById('partyBillPreview');
+            const placeholder = document.getElementById('partyBillPlaceholder');
+            document.getElementById('partyBillInput').value = '';
+            document.getElementById('tempPartyBillBase64').value = base64Img;
+            
+            if (base64Img) {
+                preview.src = base64Img;
+                preview.classList.remove('d-none');
+                placeholder.classList.add('d-none');
+            } else {
+                preview.src = '';
+                preview.classList.add('d-none');
+                placeholder.classList.remove('d-none');
+            }
+        };
+
+        window.openBillImageViewer = () => {
+            const pId = window.state.bsPartyId;
+            const p = window.state.monthData.parties?.[pId];
+            if (!p || !p.billImage) return;
+            document.getElementById('modalBillImageFull').src = p.billImage;
+            new bootstrap.Modal(document.getElementById('modalViewBillImg')).show();
         };
         initApp();
 		
