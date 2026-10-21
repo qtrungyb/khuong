@@ -150,19 +150,44 @@ window.state = {
             const filter = window.state.currentFilter;
             const searchKeyword = (document.getElementById('searchMemberInput')?.value || '').trim().toLowerCase();
             
-            let html = ''; let totalMembers = 0; let totalPaid = 0;
+            // 1. Quét toàn bộ nợ cũ của các tháng trước (Dùng undefined để kiểm tra thay vì <=0)
+            let prevDebts = {};
+            Object.keys(window.state.members).forEach(mId => prevDebts[mId] = 0);
+            Object.keys(window.state.allFundsData).forEach(mStr => {
+                if (mStr < window.state.currentMonth) {
+                    const mData = window.state.allFundsData[mStr];
+                    Object.entries(window.state.members).forEach(([mId, m]) => {
+                        const rawPaid = mData.regular?.[mId];
+                        if (rawPaid === undefined || rawPaid === null) prevDebts[mId] += defaultFund; // Nợ quỹ
+                        Object.values(mData.betting || {}).forEach(match => {
+                            const matchTotal = Number(match.penalty_amount) || 0;
+                            if (match.losers && match.losers[mId] !== undefined) {
+                                const bPaid = Number(match.losers[mId]) || 0;
+                                if (bPaid < matchTotal) prevDebts[mId] += (matchTotal - bPaid); // Nợ độ
+                            }
+                        });
+                    });
+                }
+            });
+
+            let html = ''; let totalMembers = 0; let totalPaid = 0; let teamHtmls = ''; 
             
             Object.entries(window.state.teams).sort((a,b) => (a[1].order||0) - (b[1].order||0)).forEach(([tId, tData]) => {
                 let unpaids = []; let paids = []; let tMoney = 0; let tCount = 0;
                 
                 Object.entries(window.state.members).forEach(([mId, m]) => {
                     if(m.teamId === tId) {
-                        const paidAmt = Number(window.state.monthData.regular?.[mId]) || 0;
+                        const rawPaid = window.state.monthData.regular?.[mId];
+                        const isPaid = rawPaid !== undefined && rawPaid !== null; // Chìa khóa: 0đ vẫn là Đã Nộp
+                        const paidAmt = Number(rawPaid) || 0;
                         const note = window.state.monthData.regular_notes?.[mId] || '';
+                        
                         tCount++; totalMembers++;
                         if(searchKeyword && !m.name.toLowerCase().includes(searchKeyword)) return;
-                        if(paidAmt > 0) { totalPaid++; tMoney += paidAmt; paids.push({id: mId, name: m.name, amt: paidAmt, note, avatar: m.avatar}); } 
-                        else unpaids.push({id: mId, name: m.name, avatar: m.avatar});
+                        
+                        const mObj = {id: mId, name: m.name, amt: paidAmt, isPaid: isPaid, note: note, avatar: m.avatar, oldDebt: prevDebts[mId]};
+                        if(isPaid) { totalPaid++; tMoney += paidAmt; paids.push(mObj); } 
+                        else unpaids.push(mObj);
                     }
                 });
 
@@ -170,56 +195,66 @@ window.state = {
                     const dispUnpaid = (filter === 'all' || filter === 'unpaid') ? unpaids : [];
                     const dispPaid = (filter === 'all' || filter === 'paid') ? paids : [];
 
-                    html += `
+                    teamHtmls += `
                     <div class="d-flex justify-content-between align-items-end mt-4 mb-2 px-1">
                         <span class="fw-bold text-success text-uppercase border-start border-success border-4 ps-2">${tData.name}</span>
                         <small class="text-primary fw-bold bg-white px-2 py-1 rounded-pill shadow-sm">Tổng: ${window.formatMoney(tMoney)}</small>
                     </div>`;
 
-                    if(dispUnpaid.length > 0) {
-                        html += `<div class="avatar-grid">`;
-                        dispUnpaid.forEach(m => {
-                            let avatarContent = m.avatar ? `<img src="${m.avatar}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : window.getInitials(m.name);
-                            // THAY ĐỔI: Chỉ dùng 1 sự kiện onclick mở Modal, bỏ ấn giữ
-                            html += `
-                            <div class="avatar-item" onclick="openCustomFund('${m.id}', '${m.name}', 0, ${defaultFund})">
-                                <div class="avatar-circle avatar-unpaid">${avatarContent}</div>
-                                <span class="avatar-name">${m.name}</span>
-                            </div>`;
-                        });
-                        html += `</div>`;
-                    }
+                    const renderAvatar = (m) => {
+                        let avt = m.avatar ? `<img src="${m.avatar}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : window.getInitials(m.name);
+                        let debtBadge = m.oldDebt > 0 ? `<div class="debt-badge">Nợ ${window.formatShortMoney(m.oldDebt)}</div>` : '';
+                        let editBadge = (m.isPaid && (m.note || m.amt !== defaultFund)) ? '<div class="avatar-badge-edit"><i class="fas fa-pen"></i></div>' : '';
+                        let circleClass = m.isPaid ? 'avatar-paid' : 'avatar-unpaid';
+                        let freeBadge = (m.isPaid && m.amt === 0) ? `<div class="bg-success text-white px-2 rounded-pill mt-1" style="font-size: 8.5px; font-weight: 800;">Miễn phí</div>` : '';
+                        
+                        return `<div class="avatar-item" onclick="openCustomFund('${m.id}', '${m.name}', ${m.isPaid}, ${m.amt}, ${defaultFund})">
+                                    <div class="avatar-circle ${circleClass}">${avt}${editBadge}${debtBadge}</div>
+                                    <span class="avatar-name">${m.name}</span>
+                                    ${freeBadge}
+                                </div>`;
+                    };
 
+                    if(dispUnpaid.length > 0) {
+                        teamHtmls += `<div class="avatar-grid">`;
+                        dispUnpaid.forEach(m => teamHtmls += renderAvatar(m));
+                        teamHtmls += `</div>`;
+                    }
                     if(dispPaid.length > 0) {
                         if(filter === 'paid' || searchKeyword) {
-                            html += `<div class="avatar-grid">`;
-                            dispPaid.forEach(m => {
-                                let avatarContent = m.avatar ? `<img src="${m.avatar}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : window.getInitials(m.name);
-                                html += `<div class="avatar-item" onclick="openCustomFund('${m.id}', '${m.name}', ${m.amt}, ${defaultFund})"><div class="avatar-circle avatar-paid">${avatarContent}${(m.note || m.amt !== defaultFund) ? '<div class="avatar-badge-edit"><i class="fas fa-pen"></i></div>' : ''}</div><span class="avatar-name">${m.name}</span></div>`;
-                            });
-                            html += `</div>`;
+                            teamHtmls += `<div class="avatar-grid">`;
+                            dispPaid.forEach(m => teamHtmls += renderAvatar(m));
+                            teamHtmls += `</div>`;
                         } else {
-                            html += `
+                            teamHtmls += `
                             <div class="bg-white rounded-3 p-2 text-center text-muted fw-bold small shadow-sm mb-3" style="cursor:pointer;" onclick="this.nextElementSibling.classList.toggle('d-none');">
                                 <i class="fas fa-check-circle text-success me-1"></i> Đã nộp (${dispPaid.length} người) <i class="fas fa-chevron-down ms-1"></i>
                             </div>
                             <div class="avatar-grid d-none">`;
-                            dispPaid.forEach(m => {
-                                let avatarContent = m.avatar ? `<img src="${m.avatar}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : window.getInitials(m.name);
-                                html += `<div class="avatar-item" onclick="openCustomFund('${m.id}', '${m.name}', ${m.amt}, ${defaultFund})"><div class="avatar-circle avatar-paid">${avatarContent}${(m.note || m.amt !== defaultFund) ? '<div class="avatar-badge-edit"><i class="fas fa-pen"></i></div>' : ''}</div><span class="avatar-name">${m.name}</span></div>`;
-                            });
-                            html += `</div>`;
+                            dispPaid.forEach(m => teamHtmls += renderAvatar(m));
+                            teamHtmls += `</div>`;
                         }
                     }
                 }
             });
 
-            document.getElementById('thu-summary-badge').innerText = `${totalPaid}/${totalMembers} Đã nộp`;
-            container.innerHTML = html || '<div class="text-center text-muted mt-5">Không có dữ liệu.</div>';
+            let percent = totalMembers > 0 ? Math.round((totalPaid / totalMembers) * 100) : 0;
+            html += `
+            <div class="fund-progress-container">
+                <div class="d-flex justify-content-between align-items-end mb-1">
+                    <span class="fw-bold text-dark" style="font-size: 13px;"><i class="fas fa-flag-checkered text-success me-1"></i>Tiến độ thu quỹ tháng</span>
+                    <span class="text-success fw-black">${totalPaid}/${totalMembers} người</span>
+                </div>
+                <div class="fund-progress-bar shadow-inner">
+                    <div class="fund-progress-fill" style="width: ${percent}%;"></div>
+                </div>
+            </div>`;
+
+            document.getElementById('thu-summary-badge').innerText = `${percent}% Hoàn thành`;
+            container.innerHTML = html + (teamHtmls || '<div class="text-center text-muted mt-5">Không có dữ liệu.</div>');
         };
 
-        // ================= HÀM XỬ LÝ THU QUỸ MỚI (CHỐNG CHẠM NHẦM) =================
-        window.openCustomFund = (mId, mName, currentPaid, defaultFund) => {
+        window.openCustomFund = (mId, mName, isPaid, currentPaid, defaultFund) => {
             document.getElementById('customFundMemId').value = mId; 
             document.getElementById('customFundMemName').innerText = mName;
             
@@ -232,22 +267,19 @@ window.state = {
             document.getElementById('quickFundAmount').innerText = window.formatShortMoney(defaultFund);
             noteInput.value = window.state.monthData.regular_notes?.[mId] || '';
             
-            if (currentPaid > 0) {
-                // Nếu ĐÃ NỘP: Ẩn nút thu nhanh, hiện nút Hủy, điền sẵn số tiền đã nộp
+            if (isPaid) {
                 btnQuick.style.display = 'none';
                 divider.style.display = 'none';
                 btnCancel.style.display = 'block';
                 amtInput.value = new Intl.NumberFormat('vi-VN').format(currentPaid);
                 document.getElementById('cfModalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>Sửa Khoản Thu';
             } else {
-                // Nếu CHƯA NỘP: Hiện nút thu nhanh, ẩn nút Hủy, điền sẵn mức mặc định
                 btnQuick.style.display = 'block';
                 divider.style.display = 'flex';
                 btnCancel.style.display = 'none';
                 amtInput.value = new Intl.NumberFormat('vi-VN').format(defaultFund);
                 document.getElementById('cfModalTitle').innerHTML = '<i class="fas fa-wallet me-2"></i>Thu Quỹ';
             }
-
             new bootstrap.Modal(document.getElementById('modalCustomFund')).show();
         };
 
@@ -260,16 +292,17 @@ window.state = {
 
         window.saveCustomFund = () => {
             const mId = document.getElementById('customFundMemId').value;
+            const amtStr = document.getElementById('inputCustomFund').value.trim();
             const amt = window.getRealNumber('inputCustomFund');
             const note = document.getElementById('inputCustomNote').value.trim();
             
-            if(amt > 0) {
+            if(amtStr !== "") { // Cho phép người dùng gõ số 0
                 db.ref().update({
                     [`funds/${window.state.currentMonth}/regular/${mId}`]: amt,
                     [`funds/${window.state.currentMonth}/regular_notes/${mId}`]: note || null
                 }).then(() => bootstrap.Modal.getInstance(document.getElementById('modalCustomFund')).hide());
             } else {
-                alert("Vui lòng nhập số tiền hợp lệ!");
+                alert("Vui lòng nhập số tiền hợp lệ (có thể là 0)!");
             }
         };
 
@@ -699,8 +732,9 @@ window.state = {
             let unpaidQuyCount = 0; let unpaidCadoPeopleCount = 0;
             
             Object.entries(window.state.members).forEach(([mId, _]) => { 
-                const paid = Number(window.state.monthData.regular?.[mId]) || 0;
-                if(paid > 0) { 
+                const rawPaid = window.state.monthData.regular?.[mId];
+                if(rawPaid !== undefined && rawPaid !== null) {  // Đã có tương tác nộp (kể cả 0đ)
+                    const paid = Number(rawPaid) || 0;
                     thuQuy += paid; 
                     if(memberContributions[mId]) memberContributions[mId].totalPaid += paid;
                 } else if(memberDebts[mId]) { 
@@ -745,7 +779,8 @@ window.state = {
             const tonQuyThangTruoc = getCarryOverFund(window.state.currentMonth);
             const tongThu = thuQuy + thuCaDo + thuKhac;
             const tongHienTai = tonQuyThangTruoc + tongThu - tongChi;
-            
+            window.state.currentBalance = tongHienTai;
+			
             const netGrowth = tongThu - tongChi; 
             const trendEl = document.getElementById('tk-mom-trend');
             if (trendEl) {
@@ -870,39 +905,132 @@ window.state = {
         window.settleAllMemberDebt = (mId, mName, totalDebt) => {
             if(!confirm(`Xác nhận đã thu ${window.formatMoney(totalDebt)} của ${mName}?`)) return;
             const defaultFund = window.state.globalSettings.defaultFund || 100000; const updates = {};
-            if((Number(window.state.monthData.regular?.[mId]) || 0) <= 0) updates[`funds/${window.state.currentMonth}/regular/${mId}`] = Number(defaultFund);
+            
+            const rawPaid = window.state.monthData.regular?.[mId];
+            if(rawPaid === undefined || rawPaid === null) updates[`funds/${window.state.currentMonth}/regular/${mId}`] = Number(defaultFund);
             Object.entries(window.state.monthData.betting || {}).forEach(([matchId, match]) => {
                 const matchTotal = Number(match.penalty_amount) || 0;
                 if(match.losers && match.losers[mId] !== undefined && Number(match.losers[mId]) < matchTotal) updates[`funds/${window.state.currentMonth}/betting/${matchId}/losers/${mId}`] = matchTotal;
             }); db.ref().update(updates);
         };
 
-        // ================= THỐNG KÊ (RADAR & H2H) =================
+        // ================= THỐNG KÊ (RADAR, H2H & DOUGHNUT) =================
         window.currentStats = {};
         window.radarChartObj = null;
+        window.financeChartObj = null; 
 
         function renderThongKe() {
+            const container = document.getElementById('stat-container');
+            const statTotalMatchesEl = document.getElementById('stat-total-matches');
             const betting = window.state.monthData.betting || {};
-            const matchIds = Object.keys(betting);
-            const totalMatches = matchIds.length;
             
-            window.currentStats = {};
-            Object.entries(window.state.members).forEach(([mId, m]) => { 
-                window.currentStats[mId] = { name: m.name, win: 0, lose: 0, skip: 0, tongDongGop: (Number(window.state.monthData.regular?.[mId]) || 0) }; 
+            const sortedMatches = Object.entries(betting).sort((a,b) => new Date(a[1].date||0) - new Date(b[1].date||0));
+            const totalMatches = sortedMatches.length;
+            
+            // Cập nhật số trận đấu lên UI
+            if (statTotalMatchesEl) statTotalMatchesEl.innerText = `${totalMatches} trận đấu`;
+
+            const stats = {};
+            Object.keys(window.state.members).forEach(mId => { 
+                stats[mId] = { 
+                    name: window.state.members[mId].name, 
+                    win: 0, lose: 0, skip: 0, 
+                    tongDongGop: (Number(window.state.monthData.regular?.[mId]) || 0),
+                    form: [] 
+                }; 
             });
 
-            matchIds.forEach(mId => {
-                const match = betting[mId];
-                Object.keys(window.currentStats).forEach(memId => {
-                    if((match.winners||{})[memId]) window.currentStats[memId].win++;
-                    else if((match.losers||{})[memId] !== undefined) {
-                        window.currentStats[memId].lose++;
-                        window.currentStats[memId].tongDongGop += (Number(match.losers[memId]) || 0);
+            sortedMatches.forEach(([matchId, match]) => {
+                Object.keys(stats).forEach(memId => {
+                    if((match.winners||{})[memId]) { 
+                        stats[memId].win++; 
+                        stats[memId].form.push('W'); 
+                    } else if((match.losers||{})[memId] !== undefined) {
+                        stats[memId].lose++; 
+                        stats[memId].form.push('L');
+                        const penaltyPaid = Number(match.losers[memId]);
+                        if (!isNaN(penaltyPaid)) stats[memId].tongDongGop += penaltyPaid;
+                    } else { 
+                        stats[memId].skip++; 
+                        stats[memId].form.push('S'); 
                     }
-                    else window.currentStats[memId].skip++;
                 });
             });
 
+            const activeStats = Object.values(stats).filter(s => (s.win + s.lose) > 0).sort((a, b) => b.win - a.win || a.lose - b.lose);
+            
+            // RENDER BẢNG PHONG ĐỘ (Có màng lọc chống lỗi nếu thiếu div HTML)
+            if (container) {
+                if(activeStats.length === 0) {
+                    container.innerHTML = '<div class="text-center text-muted p-4">Chưa có ai tham gia thi đấu.</div>';
+                } else {
+                    let html = '';
+                    activeStats.forEach((s, index) => {
+                        const totalPlayed = s.win + s.lose; 
+                        const winRate = Math.round((s.win / totalPlayed) * 100);
+                        
+                        let rankHtml = `<span class="text-muted fw-bold" style="width:20px;">#${index+1}</span>`;
+                        if(index === 0) rankHtml = `<i class="fas fa-medal text-warning" style="font-size:18px; width:20px;"></i>`;
+                        else if(index === 1) rankHtml = `<i class="fas fa-medal text-secondary" style="font-size:18px; width:20px;"></i>`;
+                        else if(index === 2) rankHtml = `<i class="fas fa-medal" style="color: #cd7f32; font-size:18px; width:20px;"></i>`;
+
+                        const recentForm = s.form.slice(-5);
+                        let formHtml = '';
+                        recentForm.forEach(f => {
+                            let fClass = f === 'W' ? 'form-w' : (f === 'L' ? 'form-l' : 'form-s');
+                            formHtml += `<span class="form-dot ${fClass}">${f}</span>`;
+                        });
+
+                        html += `
+                        <div class="stat-item bg-white">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <div class="d-flex align-items-center gap-2">${rankHtml}<span class="fw-bold text-dark">${s.name}</span></div>
+                                <div class="form-guide-box">${formHtml}</div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 mt-1">
+                                <span class="small text-muted fw-bold" style="font-size:10px; width:25px;">${winRate}%</span>
+                                <div class="stat-bar flex-grow-1"><div class="bg-success" style="width: ${winRate}%"></div><div class="bg-danger" style="width: ${100 - winRate}%"></div></div>
+                            </div>
+                        </div>`;
+                    });
+                    container.innerHTML = html;
+                }
+            }
+
+            // --- VẼ BIỂU ĐỒ DOUGHNUT CỐNG HIẾN TÀI CHÍNH ---
+            const ctxDoughnut = document.getElementById('financeDoughnutChart');
+            if(ctxDoughnut) {
+                let financeData = Object.values(stats).filter(s => s.tongDongGop > 0).sort((a,b) => b.tongDongGop - a.tongDongGop);
+                let labels = []; let dataValues = [];
+                let top5 = financeData.slice(0, 5);
+                let rest = financeData.slice(5);
+                
+                top5.forEach(s => { labels.push(s.name); dataValues.push(s.tongDongGop); });
+                if(rest.length > 0) {
+                    labels.push('Còn lại');
+                    dataValues.push(rest.reduce((sum, s) => sum + s.tongDongGop, 0));
+                }
+
+                if(window.financeChartObj) window.financeChartObj.destroy();
+                
+                if(financeData.length > 0) {
+                    window.financeChartObj = new Chart(ctxDoughnut, {
+                        type: 'doughnut',
+                        data: {
+                            labels: labels,
+                            datasets: [{ 
+                                data: dataValues, 
+                                backgroundColor: ['#198754', '#0d6efd', '#ffc107', '#0dcaf0', '#6f42c1', '#adb5bd'], 
+                                borderWidth: 2, borderColor: '#fff' 
+                            }]
+                        },
+                        options: { maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } } } }
+                    });
+                }
+            }
+
+            // --- TÍNH TOÁN OVR CHO RADAR VÀ H2H ---
+            window.currentStats = stats;
             let maxPlayed = 1; let maxDongGop = 1;
             Object.values(window.currentStats).forEach(s => {
                 s.played = s.win + s.lose;
@@ -914,7 +1042,8 @@ window.state = {
             });
 
             Object.values(window.currentStats).forEach(s => {
-                s.scoreWinRate = s.winRate; s.scoreAttendance = s.attendance;
+                s.scoreWinRate = s.winRate; 
+                s.scoreAttendance = s.attendance;
                 s.scoreFinance = maxDongGop > 0 ? (s.tongDongGop / maxDongGop) * 100 : 0;
                 s.scoreDedication = maxPlayed > 0 ? (s.played / maxPlayed) * 100 : 0;
                 s.ovr = Math.round((s.scoreWinRate + s.scoreAttendance + s.scoreFinance + s.scoreDedication) / 4);
@@ -933,11 +1062,16 @@ window.state = {
 
             const memIds = Object.keys(window.currentStats);
             if(memIds.length >= 2) {
-                if(radarSel) radarSel.value = memIds[0];
-                if(h2hA) h2hA.value = memIds[0];
-                if(h2hB) h2hB.value = memIds[1];
+                if(radarSel && !radarSel.value) radarSel.value = memIds[0];
+                if(h2hA && !h2hA.value) h2hA.value = memIds[0];
+                if(h2hB && !h2hB.value) h2hB.value = memIds[1];
             }
-            updateRadarChart(); updateH2H();
+            
+            // Cập nhật biểu đồ Radar và H2H
+            setTimeout(() => { 
+                if(typeof window.updateRadarChart === 'function') window.updateRadarChart(); 
+                if(typeof window.updateH2H === 'function') window.updateH2H(); 
+            }, 100);
         }
 
         window.updateRadarChart = () => {
@@ -1267,9 +1401,14 @@ window.state = {
             });
 
             Object.entries(window.state.members).forEach(([mId, m]) => {
-                const paid = Number(window.state.monthData.regular?.[mId]) || 0;
-                if (paid > 0) { reportData[mId].quyPaid = paid; thuQuy += paid; } 
-                else if (reportData[mId]) { reportData[mId].quyDebt = defaultFund; }
+                const rawPaid = window.state.monthData.regular?.[mId];
+                if (rawPaid !== undefined && rawPaid !== null) { 
+                    const paid = Number(rawPaid) || 0;
+                    reportData[mId].quyPaid = paid; 
+                    thuQuy += paid; 
+                } else if (reportData[mId]) { 
+                    reportData[mId].quyDebt = defaultFund; 
+                }
             });
 
             Object.entries(window.state.monthData.betting || {}).forEach(([matchId, match]) => {
@@ -1600,6 +1739,40 @@ window.state = {
             
             lastScrollY = currentScrollY;
         }, { passive: true });
-
+		// ================= XUẤT ẢNH THẺ CẦU THỦ =================
+        window.exportPlayerCard = () => {
+            const btn = document.getElementById('btnExportCard');
+            const oldHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Đang in thẻ...';
+            
+            const exportZone = document.getElementById('player-card-export-zone');
+            const selectEl = document.getElementById('radarPlayerSelect');
+            const playerName = selectEl.options[selectEl.selectedIndex].text;
+            
+            setTimeout(() => {
+                html2canvas(exportZone, { scale: 4, useCORS: true, backgroundColor: '#f4f7f6' }).then(canvas => {
+                    canvas.toBlob((blob) => {
+                        if(!blob) return btn.innerHTML = oldHtml;
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.download = `The_FIFA_${playerName}.png`;
+                        link.href = url;
+                        link.click();
+                        URL.revokeObjectURL(url);
+                        btn.innerHTML = oldHtml;
+                    });
+                });
+            }, 300);
+        };
+		window.checkFundBalance = () => {
+            const amt = window.getRealNumber('expAmount');
+            const warn = document.getElementById('expWarning');
+            const input = document.getElementById('expAmount');
+            if(amt > (window.state.currentBalance || 0)) {
+                warn.style.display = 'block'; input.classList.add('input-danger');
+            } else {
+                warn.style.display = 'none'; input.classList.remove('input-danger');
+            }
+        };
         initApp();
 		
