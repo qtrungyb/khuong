@@ -573,85 +573,118 @@
         </div>
     </div>
 
-    <!-- Modal KỶ LUẬT / ĐÓNG PHẠT (Gắn theo Trận đấu) -->
+    <!-- Modal KỶ LUẬT / ĐÓNG PHẠT -->
     <div class="modal fade" id="modalPenalty" tabindex="-1">
         <div class="modal-dialog modal-fullscreen">
             <div class="modal-content bg-light">
-                <div class="modal-header text-white border-0" style="background:#fd7e14;">
-                    <h6 class="modal-title fw-bold"><i class="fas fa-gavel me-2"></i>Thêm Vi Phạm Kỷ Luật Theo Trận</h6>
+                <div class="modal-header text-white border-0 py-2" style="background: linear-gradient(135deg, #fd7e14, #e8590c);">
+                    <h6 class="modal-title fw-bold m-0"><i class="fas fa-gavel me-2"></i>Kỷ Luật Cầu Thủ</h6>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="p-3 bg-white shadow-sm border-bottom">
-                        <!-- CHỌN NGÀY VI PHẠM -->
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold mb-1 text-success"><i class="fas fa-calendar-alt me-1"></i>Ngày diễn ra vi phạm:</label>
-                            <input type="date" id="penDate" class="form-control bg-light fw-bold text-success">
+                <div class="modal-body p-0 d-flex flex-column">
+                    <div class="p-3 bg-white shadow-sm border-bottom position-relative z-1">
+                        <div class="row g-2 mb-2">
+                            <div class="col-5">
+                                <input type="date" id="penDate" class="form-control form-control-sm bg-light fw-bold text-success border-0" style="height: 38px;">
+                            </div>
+                            <div class="col-7">
+                                <!-- Đổi sang icon SVG chuyên nghiệp -->
+                                <div class="input-group-money">
+                                    <div class="money-icon bg-danger"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg></div>
+                                    <input type="text" inputmode="numeric" oninput="window.formatInputMoney(this)" id="penAmount" class="form-control" value="50.000">
+                                </div>
+                            </div>
                         </div>
-
-                        <label class="form-label small fw-bold mb-1">Lỗi vi phạm chung:</label>
-                        <input type="text" id="penDesc" class="form-control bg-light mb-2" placeholder="VD: Đi muộn, Bình chọn nhưng không đi...">
-                        <div class="mb-2">
-                            <span class="quick-chip" onclick="document.getElementById('penDesc').value='⏰ Đi muộn'"><i class="fas fa-clock text-warning me-1"></i>Đi muộn</span>
-                            <span class="quick-chip" onclick="document.getElementById('penDesc').value='🗳️ Bình chọn nhưng không đi'"><i class="fas fa-user-slash text-danger me-1"></i>Bình chọn nhưng không đi</span>
+                        <input type="text" id="penDesc" class="form-control form-control-sm bg-light mb-2 border-0" placeholder="Lý do phạt (VD: Đi muộn)...">
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="quick-chip m-0" onclick="document.getElementById('penDesc').value='⏰ Đi muộn'"><i class="fas fa-clock text-warning me-1"></i>Đi muộn</span>
+                            <span class="quick-chip m-0" onclick="document.getElementById('penDesc').value='🗳️ Bình chọn nhưng không đi'"><i class="fas fa-user-slash text-danger me-1"></i>BC nhưng không đi</span>
                         </div>
-                        <label class="form-label small fw-bold mb-1 text-danger">Tiền phạt mỗi người (₫):</label>
-                        <input type="text" inputmode="numeric" oninput="window.formatInputMoney(this)" id="penAmount" class="form-control bg-light text-danger fw-bold" value="50.000">
                     </div>
-                    
-                    <div class="p-2 bg-light fw-bold text-muted small text-center">CHỌN CÁC CẦU THỦ VI PHẠM TRONG TRẬN NÀY</div>
-                    <div class="flex-grow-1 overflow-auto p-2" id="penalty-members-container">
-                        <!-- Danh sách checkbox thành viên render ở đây -->
-                    </div>
+                    <div class="flex-grow-1 overflow-auto bg-light" id="penalty-members-container"></div>
                 </div>
-                <div class="modal-footer p-3 border-0 bg-white shadow-lg">
-                    <button type="button" class="btn w-100 rounded-pill fw-bold py-2 text-white shadow-sm" style="background:#fd7e14;" onclick="savePenalty()">LƯU VI PHẠM THEO TRẬN</button>
+                <div class="modal-footer p-2 border-0 bg-white shadow-lg">
+                    <button type="button" class="btn w-100 rounded-pill fw-bold py-2 text-white shadow-sm" style="background: linear-gradient(135deg, #fd7e14, #e8590c);" onclick="savePenalty()">LƯU BIÊN BẢN</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal TẠO BUỔI LIÊN HOAN -->
+    <!-- Modal TẠO BUỔI LIÊN HOAN (Rõ ràng & Chuyên nghiệp) -->
     <div class="modal fade" id="modalParty" tabindex="-1">
         <div class="modal-dialog modal-fullscreen">
             <div class="modal-content bg-light">
-                <div class="modal-header text-white border-0" style="background:#6f42c1;">
-                    <h6 class="modal-title fw-bold"><i class="fas fa-beer me-2"></i>Tạo Bill Liên Hoan / Nhậu</h6>
+                <div class="modal-header text-white border-0 py-2" style="background:#6f42c1;">
+                    <h6 class="modal-title fw-bold m-0"><i class="fas fa-glass-cheers me-2"></i>Tạo Liên Hoan</h6>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-0 d-flex flex-column">
-                    <div class="p-3 bg-white shadow-sm border-bottom">
+                    <div class="p-3 bg-white shadow-sm border-bottom position-relative z-1">
                         <input type="hidden" id="editPartyId">
-                        <label class="form-label small fw-bold mb-1">Tên buổi nhậu:</label>
-                        <input type="text" id="partyName" class="form-control bg-light mb-2" placeholder="VD: Bia hơi Hải Xồm sau trận">
-                        <div class="row g-2 mb-2">
-                            <div class="col-6"><label class="form-label small fw-bold mb-1">Ngày:</label><input type="date" id="partyDate" class="form-control bg-light"></div>
-                            <div class="col-6"><label class="form-label small fw-bold mb-1 text-danger">Tổng Bill (₫):</label><input type="text" inputmode="numeric" oninput="window.formatInputMoney(this); window.calculatePartySplit()" id="partyTotalBill" class="form-control bg-light text-danger fw-bold" value="0"></div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-7"><input type="text" id="partyName" class="form-control form-control-sm bg-light fw-bold text-primary border-0" placeholder="Tên bữa liên hoan..." style="height: 38px;"></div>
+                            <div class="col-5"><input type="date" id="partyDate" class="form-control form-control-sm bg-light text-muted border-0 fw-bold" style="height: 38px;"></div>
                         </div>
 
-                        <!-- KHU VỰC TẢI ẢNH HÓA ĐƠN -->
-                        <div class="mb-2">
-                            <label class="form-label small fw-bold mb-1 text-primary"><i class="fas fa-receipt me-1"></i>Ảnh hóa đơn (Bằng chứng):</label>
-                            <input type="file" id="partyBillInput" accept="image/*" class="d-none" onchange="handlePartyBillUpload(event)">
-                            <input type="hidden" id="tempPartyBillBase64">
-                            <div class="party-bill-img-box" onclick="document.getElementById('partyBillInput').click()">
-                                <div id="partyBillPlaceholder" class="text-center text-muted small">
-                                    <i class="fas fa-camera fa-lg mb-1"></i><br>Chạm để tải ảnh hóa đơn
-                                </div>
-                                <img id="partyBillPreview" class="d-none" src="">
+                        <!-- CÔNG TẮC CHỌN NGUỒN TIỀN SIÊU MƯỢT -->
+                        <div class="party-type-switch shadow-sm">
+                            <input type="radio" name="partyType" id="ptSelf" class="d-none pt-switch-input" checked onchange="togglePartyFund()">
+                            <label class="pt-switch-label" for="ptSelf"><i class="fas fa-user-friends me-1"></i>Tự đóng 100%</label>
+                            <input type="radio" name="partyType" id="ptFund" class="d-none pt-switch-input" onchange="togglePartyFund()">
+                            <label class="pt-switch-label" for="ptFund"><i class="fas fa-wallet me-1"></i>Trích quỹ đội</label>
+                            <div class="pt-switch-bg"></div>
+                        </div>
+
+                        <!-- GHI RÕ NHÃN, BỎ ICON KHÓ HIỂU -->
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold mb-1 text-danger">Tổng Bill (₫):</label>
+                                <input type="text" inputmode="numeric" oninput="window.formatInputMoney(this); window.calculatePartySplit()" id="partyTotalBill" class="form-control bg-light text-danger fw-black border-0 shadow-sm" value="0">
+                            </div>
+                            <div class="col-6" id="partyFundWrap" style="opacity: 0.4; pointer-events: none;">
+                                <label class="form-label small fw-bold mb-1" style="color:#fd7e14;">Trích Quỹ (₫):</label>
+                                <input type="text" inputmode="numeric" oninput="window.formatInputMoney(this); window.calculatePartySplit()" id="partyFundAmount" class="form-control bg-light fw-black border-0 shadow-sm" style="color:#fd7e14;" value="0">
                             </div>
                         </div>
-                        <div class="bg-primary bg-opacity-10 p-2 rounded-3 text-center mt-2 border border-primary border-opacity-25">
-                            <span class="small fw-bold text-primary">Chia đều mỗi người: </span>
-                            <span class="fw-black text-primary fs-5" id="partyPerPerson">0đ</span>
+                        
+                        <div class="bg-primary bg-opacity-10 rounded-2 d-flex align-items-center justify-content-center p-2 mt-2 mb-3 border border-primary border-opacity-25 shadow-sm">
+                            <span class="small fw-bold text-primary me-1">Campuchia:</span>
+                            <span class="fw-black text-primary" id="partyPerPerson" style="font-size: 16px;">0đ</span>
+                        </div>
+
+                        <!-- KHU VỰC HÓA ĐƠN -->
+                        <div class="border rounded-3 p-2 bg-light">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="small fw-bold text-muted"><i class="fas fa-file-invoice me-1"></i>Hóa đơn (Nhiều bill)</span>
+                                <button type="button" class="btn btn-sm btn-primary fw-bold px-3 py-1 rounded-pill shadow-sm" onclick="document.getElementById('partyBillInput').click()"><i class="fas fa-camera me-1"></i>Thêm ảnh</button>
+                                <input type="file" id="partyBillInput" accept="image/*" multiple class="d-none" onchange="handleMultiplePartyBills(event)">
+                            </div>
+                            <div id="partyBillGallery" class="d-flex gap-2 overflow-auto pb-1" style="min-height: 50px;">
+                                <div class="text-muted small fst-italic mt-2 w-100 text-center" id="partyBillPlaceholder">Chưa có ảnh nào</div>
+                            </div>
                         </div>
                     </div>
-                    <div class="p-2 bg-light fw-bold text-muted small text-center">CHỌN NGƯỜI THAM GIA ĐỂ CHIA TIỀN</div>
-                    <div class="flex-grow-1 overflow-auto p-2" id="party-members-container">
-                        <!-- Checkbox danh sách thành viên -->
-                    </div>
+                    
+                    <div class="flex-grow-1 overflow-auto bg-light" id="party-members-container"></div>
                 </div>
-                <div class="modal-footer p-3 border-0 bg-white shadow-lg">
-                    <button type="button" class="btn w-100 rounded-pill fw-bold py-2 text-white" style="background:#6f42c1;" onclick="saveParty()">TẠO BILL CHIA TIỀN</button>
+                <div class="modal-footer p-2 border-0 bg-white shadow-lg">
+                    <button type="button" class="btn w-100 rounded-pill fw-bold py-2 text-white shadow-sm" style="background:#6f42c1;" onclick="saveParty()">TẠO BILL CHIA TIỀN</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal XEM ẢNH HÓA ĐƠN (Cuộn dọc nếu có nhiều ảnh) -->
+    <div class="modal fade" id="modalViewBillImg" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-dark border-0 rounded-4 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h6 class="modal-title text-white fw-bold"><i class="fas fa-receipt me-2"></i>Ảnh Hóa Đơn</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <!-- Container cuộn dọc chứa nhiều ảnh -->
+                <div class="modal-body text-center p-3 d-flex flex-column gap-3 overflow-auto" id="modalBillImageFullContainer" style="max-height: 80vh;">
+                    <!-- Ảnh sẽ được chèn vào đây -->
                 </div>
             </div>
         </div>
