@@ -633,27 +633,27 @@ window.state = {
         }
 
         // --- 2. KỶ LUẬT (PHẠT THEO NGÀY TÙY CHỌN) ---
+        // --- Cập nhật giao diện Modal Phạt ---
         window.openAddPenaltyModal = () => {
             document.getElementById('penDesc').value = ''; 
             document.getElementById('penAmount').value = '20.000';
-            
-            // Mặc định điền ngày hôm nay
-            const todayStr = new Date().toISOString().slice(0, 10);
-            document.getElementById('penDate').value = todayStr;
+            document.getElementById('penDate').value = new Date().toISOString().slice(0, 10);
 
-            // Đổ danh sách cầu thủ dạng checkbox
-            let chkHtml = '<div class="row g-2 m-0">';
+            let chkHtml = '<div class="row g-2 m-0 px-2 pb-4">';
             Object.entries(window.state.teams).sort((a,b)=>(a[1].order||0)-(b[1].order||0)).forEach(([tId, t]) => {
-                chkHtml += `<div class="col-12 mt-2 mb-1 fw-bold text-primary small text-uppercase">${t.name}</div>`;
+                chkHtml += `<div class="col-12 mt-3 mb-1"><span class="badge bg-secondary bg-opacity-10 text-dark border shadow-sm px-3 py-2 rounded-pill"><i class="fas fa-shield-alt text-warning me-1"></i>${t.name}</span></div>`;
                 Object.entries(window.state.members).forEach(([mId, m]) => {
                     if(m.teamId === tId) {
-                        chkHtml += `<div class="col-6"><div class="form-check bg-white border rounded p-2 ps-4 shadow-sm mb-1"><input class="form-check-input penalty-checkbox" type="checkbox" value="${mId}" id="pen_chk_${mId}"><label class="form-check-label fw-bold text-dark w-100 text-truncate" for="pen_chk_${mId}" style="font-size:12px;">${m.name}</label></div></div>`;
+                        chkHtml += `
+                        <div class="col-6">
+                            <input class="mem-select-cb penalty-checkbox" type="checkbox" value="${mId}" id="pen_chk_${mId}">
+                            <label class="mem-select-label" for="pen_chk_${mId}"><i class="fas fa-user-times me-2 opacity-25"></i>${m.name}</label>
+                        </div>`;
                     }
                 });
             });
             chkHtml += '</div>';
             document.getElementById('penalty-members-container').innerHTML = chkHtml;
-            
             new bootstrap.Modal(document.getElementById('modalPenalty')).show();
         };
 
@@ -695,8 +695,6 @@ window.state = {
             const pens = window.state.monthData.penalties || {};
             
             let totalNo = 0; let totalThu = 0; let totalPhat = 0;
-            
-            // Gom nhóm phạt theo Ngày tháng
             const grouped = {};
 
             Object.entries(pens).forEach(([pId, p]) => {
@@ -705,7 +703,7 @@ window.state = {
                 else totalThu += (Number(p.amount) || 0);
 
                 const groupKey = p.customDate || p.date || 'Khác';
-                const groupTitle = '📌 Vi phạm ngày ' + (p.date || '---');
+                const groupTitle = 'Ngày ' + (p.date || '---');
 
                 if (!grouped[groupKey]) {
                     grouped[groupKey] = { title: groupTitle, rawDate: p.customDate || p.date || '', items: [] };
@@ -714,16 +712,14 @@ window.state = {
             });
 
             let html = '';
-            
-            // Sắp xếp các nhóm theo ngày (mới nhất lên trên)
             const sortedGroups = Object.values(grouped).sort((a,b) => new Date(b.rawDate || 0) - new Date(a.rawDate || 0));
 
             sortedGroups.forEach(group => {
                 html += `
-                <div class="fw-bold text-success text-uppercase border-start border-success border-4 ps-2 mt-4 mb-2">
-                    ${group.title}
+                <div class="d-flex align-items-center mb-2 mt-4 px-1">
+                    <span class="badge bg-secondary bg-opacity-10 text-dark border shadow-sm px-3 py-2 rounded-pill"><i class="far fa-calendar-alt text-warning me-2"></i>${group.title}</span>
                 </div>
-                <div class="card-clean border mb-3">`;
+                <div>`;
                 
                 group.items.forEach(p => {
                     const memName = window.state.members[p.memberId]?.name || 'Không rõ';
@@ -731,43 +727,91 @@ window.state = {
                     let tickIcon = p.isPaid ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>';
                     
                     html += `
-                    <div class="item-clean ${p.isPaid ? 'member-paid' : 'member-unpaid'}" onclick="togglePenaltyStatus('${p.pId}', ${p.isPaid})">
-                        <div class="flex-grow-1">
-                            <div class="fw-bold ${p.isPaid?'text-muted text-decoration-line-through':'text-dark'}">${memName}</div>
-                            <div class="small text-danger">${p.reason} • Phạt: ${window.formatShortMoney(p.amount)}</div>
-                        </div>
-                        <div class="d-flex align-items-center gap-3">
-                            <i class="fas fa-trash text-muted p-2" onclick="event.stopPropagation(); deletePenalty('${p.pId}')"></i>
-                            <div class="${tickClass}">${tickIcon}</div>
+                    <div class="penalty-ticket mb-2 ${p.isPaid ? 'paid' : 'unpaid'}" onclick="togglePenaltyStatus('${p.pId}', ${p.isPaid})">
+                        <div class="trash-btn" onclick="event.stopPropagation(); deletePenalty('${p.pId}')"><i class="fas fa-times"></i></div>
+                        <div class="d-flex align-items-center mt-1">
+                            <div class="ticket-icon">
+                                <i class="fas fa-gavel"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3 pe-2">
+                                <div class="fw-bold ${p.isPaid ? 'text-muted text-decoration-line-through' : 'text-dark'}" style="font-size: 14.5px;">${memName}</div>
+                                <div class="small ${p.isPaid ? 'text-muted' : 'text-danger'}" style="font-size: 11.5px; font-weight: 600; line-height: 1.3; margin-top: 4px;">${p.reason}</div>
+                            </div>
+                            <div class="text-end d-flex flex-column align-items-end justify-content-center">
+                                <div class="fw-black ${p.isPaid ? 'text-muted' : 'text-danger'} mb-2" style="font-size: 14px;">${window.formatShortMoney(p.amount)}</div>
+                                <div class="${tickClass}" style="width:24px; height:24px; font-size:12px;">${tickIcon}</div>
+                            </div>
                         </div>
                     </div>`;
                 });
                 html += `</div>`;
             });
 
-            container.innerHTML = html !== '' ? html : '<div class="card-clean border p-4 text-center text-muted small"><i class="fas fa-gavel fa-2x mb-2 opacity-25"></i><br>Đội bóng gương mẫu, chưa ai bị phạt!</div>';
+            container.innerHTML = html !== '' ? html : '<div class="card-clean border p-4 text-center text-muted small"><i class="fas fa-gavel fa-2x mb-3 text-warning opacity-50"></i><br>Đội bóng gương mẫu, chưa ai bị phạt!</div>';
             
             const headerEl = document.getElementById('kyluat-thu-header');
             const subEl = document.getElementById('kyluat-sub-header');
             if (headerEl) headerEl.innerText = window.formatMoney(totalThu);
             if (subEl) subEl.innerText = `${totalPhat} lỗi • Nợ: ${window.formatShortMoney(totalNo)}`;
         }
-        // --- 3. LIÊN HOAN (CHIA BILL QUỸ RIÊNG & ẢNH HÓA ĐƠN) ---
+
+        // ================= HÀM TÍNH TIỀN CHIA ĐỀU (ĐÃ ĐƯỢC KHÔI PHỤC) =================
+        // Biến toàn cục lưu mảng ảnh hóa đơn
+        window.tempPartyBills = []; 
+
+        window.togglePartyFund = () => {
+            const isFund = document.getElementById('ptFund').checked;
+            const fundWrap = document.getElementById('partyFundWrap');
+            if (isFund) {
+                fundWrap.style.opacity = '1';
+                fundWrap.style.pointerEvents = 'auto';
+            } else {
+                fundWrap.style.opacity = '0.4';
+                fundWrap.style.pointerEvents = 'none';
+                document.getElementById('partyFundAmount').value = '0';
+            }
+            window.calculatePartySplit();
+        };
+
+        window.calculatePartySplit = () => {
+            const bill = window.getRealNumber('partyTotalBill');
+            const fundAmt = window.getRealNumber('partyFundAmount');
+            const checks = document.querySelectorAll('.party-checkbox:checked').length;
+            
+            let remaining = bill - fundAmt;
+            if (remaining < 0) remaining = 0; // Không thể âm tiền
+
+            const perPerson = checks > 0 ? Math.ceil(remaining / checks) : 0;
+            const perPersonEl = document.getElementById('partyPerPerson');
+            if(perPersonEl) perPersonEl.innerText = window.formatMoney(perPerson);
+            return perPerson;
+        };
+
         window.openAddPartyModal = () => {
             document.getElementById('editPartyId').value = ''; 
             document.getElementById('partyName').value = ''; 
             document.getElementById('partyTotalBill').value = '0';
+            document.getElementById('partyFundAmount').value = '0';
             document.getElementById('partyDate').value = new Date().toISOString().slice(0, 10);
             
-            // Gọi hàm reset ảnh hóa đơn về trạng thái trống khi tạo bill mới
-            window.resetPartyBillModal(''); 
+            // Reset nút chọn quỹ
+            document.getElementById('ptSelf').checked = true;
+            window.togglePartyFund();
 
-            let chkHtml = '<div class="row g-2 m-0">';
+            window.tempPartyBills = [];
+            window.renderPartyBillGallery();
+
+            let chkHtml = `<div class="row g-2 m-0 px-2 pb-4 pt-2">`;
             Object.entries(window.state.teams).sort((a,b)=>(a[1].order||0)-(b[1].order||0)).forEach(([tId, t]) => {
-                chkHtml += `<div class="col-12 mt-2 mb-1 fw-bold text-primary small text-uppercase">${t.name}</div>`;
+                chkHtml += `<div class="col-12 mt-2 mb-1"><span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-2 rounded-pill">${t.name}</span></div>`;
                 Object.entries(window.state.members).forEach(([mId, m]) => {
                     if(m.teamId === tId) {
-                        chkHtml += `<div class="col-6"><div class="form-check bg-white border rounded p-2 ps-4 shadow-sm mb-1"><input class="form-check-input party-checkbox" type="checkbox" value="${mId}" id="chk_${mId}" onchange="window.calculatePartySplit()" checked><label class="form-check-label fw-bold text-dark w-100 text-truncate" for="chk_${mId}" style="font-size:12px;">${m.name}</label></div></div>`;
+                        // KHÔNG CÓ THUỘC TÍNH `checked` Ở ĐÂY NỮA
+                        chkHtml += `
+                        <div class="col-6">
+                            <input class="mem-select-cb party-checkbox" type="checkbox" value="${mId}" id="chk_${mId}" onchange="window.calculatePartySplit()">
+                            <label class="mem-select-label" for="chk_${mId}"><i class="fas fa-glass-cheers me-2 opacity-25"></i>${m.name}</label>
+                        </div>`;
                     }
                 });
             });
@@ -785,18 +829,37 @@ window.state = {
             document.getElementById('editPartyId').value = pId;
             document.getElementById('partyName').value = p.name || '';
             document.getElementById('partyTotalBill').value = new Intl.NumberFormat('vi-VN').format(p.bill || 0);
+            document.getElementById('partyFundAmount').value = new Intl.NumberFormat('vi-VN').format(p.fundAmount || 0);
             document.getElementById('partyDate').value = p.rawDate || new Date().toISOString().slice(0, 10);
+            
+            if ((p.fundAmount || 0) > 0) {
+                document.getElementById('ptFund').checked = true;
+            } else {
+                document.getElementById('ptSelf').checked = true;
+            }
+            window.togglePartyFund();
 
-            // Nạp lại ảnh hóa đơn cũ (nếu có) khi mở form sửa bill[cite: 10]
-            window.resetPartyBillModal(p.billImage || '');
+            // Khôi phục mảng ảnh cũ (nếu có)
+            if (p.billImages && Array.isArray(p.billImages)) {
+                window.tempPartyBills = [...p.billImages];
+            } else if (p.billImage) {
+                window.tempPartyBills = [p.billImage]; // Hỗ trợ dữ liệu cũ 1 ảnh
+            } else {
+                window.tempPartyBills = [];
+            }
+            window.renderPartyBillGallery();
 
-            let chkHtml = '<div class="row g-2 m-0">';
+            let chkHtml = `<div class="row g-2 m-0 px-2 pb-4 pt-2">`;
             Object.entries(window.state.teams).sort((a,b)=>(a[1].order||0)-(b[1].order||0)).forEach(([tId, t]) => {
-                chkHtml += `<div class="col-12 mt-2 mb-1 fw-bold text-primary small text-uppercase">${t.name}</div>`;
+                chkHtml += `<div class="col-12 mt-2 mb-1"><span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-2 rounded-pill">${t.name}</span></div>`;
                 Object.entries(window.state.members).forEach(([mId, m]) => {
                     if(m.teamId === tId) {
                         const isChecked = p.members && p.members[mId] !== undefined;
-                        chkHtml += `<div class="col-6"><div class="form-check bg-white border rounded p-2 ps-4 shadow-sm mb-1"><input class="form-check-input party-checkbox" type="checkbox" value="${mId}" id="chk_${mId}" onchange="window.calculatePartySplit()" ${isChecked ? 'checked' : ''}><label class="form-check-label fw-bold text-dark w-100 text-truncate" for="chk_${mId}" style="font-size:12px;">${m.name}</label></div></div>`;
+                        chkHtml += `
+                        <div class="col-6">
+                            <input class="mem-select-cb party-checkbox" type="checkbox" value="${mId}" id="chk_${mId}" onchange="window.calculatePartySplit()" ${isChecked ? 'checked' : ''}>
+                            <label class="mem-select-label" for="chk_${mId}"><i class="fas fa-glass-cheers me-2 opacity-25"></i>${m.name}</label>
+                        </div>`;
                     }
                 });
             });
@@ -810,83 +873,37 @@ window.state = {
             const editId = document.getElementById('editPartyId').value;
             const name = document.getElementById('partyName').value.trim(); 
             const bill = window.getRealNumber('partyTotalBill');
+            const fundAmount = document.getElementById('ptFund').checked ? window.getRealNumber('partyFundAmount') : 0;
             const rawDate = document.getElementById('partyDate').value; 
             const perPerson = window.calculatePartySplit();
-            
-            // Lấy chuỗi ảnh hóa đơn (nếu có)
-            const billImage = document.getElementById('tempPartyBillBase64')?.value || '';
 
-            if(!name) {
-                alert("Vui lòng nhập tên buổi nhậu!");
-                return;
-            }
-            if(bill <= 0) {
-                alert("Vui lòng nhập tổng số tiền bill hợp lệ!");
-                return;
-            }
+            if(!name) return alert("Vui lòng nhập tên bữa liên hoan!");
+            if(bill <= 0) return alert("Vui lòng nhập tổng số tiền bill!");
             
             const oldMembers = (editId && window.state.monthData.parties?.[editId]?.members) || {};
             const members = {};
-            const checkboxes = document.querySelectorAll('.party-checkbox:checked');
-            
-            checkboxes.forEach(chk => {
+            document.querySelectorAll('.party-checkbox:checked').forEach(chk => {
                 const mId = chk.value;
                 members[mId] = oldMembers[mId] !== undefined ? oldMembers[mId] : 0;
             });
             
-            if(Object.keys(members).length === 0) {
-                alert("Hãy chọn ít nhất 1 người tham gia chia tiền!");
-                return;
-            }
+            if(Object.keys(members).length === 0) return alert("Hãy chọn ít nhất 1 người tham gia chia tiền!");
 
             const payload = { 
-                name: name, 
-                bill: bill, 
-                rawDate: rawDate || '', 
+                name, bill, fundAmount, rawDate, 
                 date: rawDate ? new Date(rawDate).toLocaleDateString('vi-VN') : '', 
-                perPerson: perPerson, 
-                members: members, 
-                billImage: billImage ? billImage : null 
+                perPerson, members, 
+                billImages: window.tempPartyBills // Lưu mảng nhiều ảnh
             };
 
-            // Thực hiện đẩy dữ liệu lên Firebase
-            let savePromise;
-            if (editId) {
-                savePromise = db.ref(`funds/${window.state.currentMonth}/parties/${editId}`).set(payload);
-            } else {
-                savePromise = db.ref(`funds/${window.state.currentMonth}/parties`).push(payload);
-            }
-
-            savePromise.then(() => {
-                // Đóng modal thủ công trực tiếp bằng cách xóa class và lớp nền mờ
+            const ref = editId ? db.ref(`funds/${window.state.currentMonth}/parties/${editId}`).set(payload) : db.ref(`funds/${window.state.currentMonth}/parties`).push(payload);
+            
+            ref.then(() => {
                 const modalEl = document.getElementById('modalParty');
-                if (modalEl) {
-                    modalEl.classList.remove('show');
-                    modalEl.style.display = 'none';
-                    modalEl.setAttribute('aria-hidden', 'true');
-                    modalEl.removeAttribute('aria-modal');
-                    modalEl.removeAttribute('role');
-                }
-
-                // Dọn dẹp hoàn toàn backdrop và trạng thái khóa cuộn của Bootstrap
+                if (modalEl) modalEl.classList.remove('show'); modalEl.style.display = 'none';
                 document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-                document.body.classList.remove('modal-open');
-                document.body.style.overflow = '';
-                document.body.style.paddingRight = '';
-                
-                // Reset lại form
-                document.getElementById('editPartyId').value = '';
-                document.getElementById('partyName').value = '';
-                document.getElementById('partyTotalBill').value = '0';
-                if(typeof window.resetPartyBillModal === 'function') {
-                    window.resetPartyBillModal('');
-                }
-
-                console.log("Lưu bill nhậu thành công!");
-            }).catch(error => {
-                console.error("Lỗi Firebase khi lưu bill nhậu:", error);
-                alert("Lỗi khi lưu dữ liệu lên Firebase: " + error.message);
-            });
+                document.body.classList.remove('modal-open'); document.body.style.overflow = ''; document.body.style.paddingRight = '';
+            }).catch(err => alert("Lỗi khi lưu: " + err.message));
         };
 
         function renderLienHoan() {
@@ -930,14 +947,21 @@ window.state = {
             window.state.bsPartyId = pId;
             const p = window.state.monthData.parties?.[pId]; if(!p) return;
             
-            document.getElementById('bsPartyTitle').innerText = p.name;
-            document.getElementById('bsPartyPerPerson').innerText = `Campuchia: ${window.formatMoney(p.perPerson)} / người`;
+            const fAmt = Number(p.fundAmount) || 0;
+            const fundBadge = fAmt > 0 ? `<div class="badge bg-warning text-dark mt-1 shadow-sm"><i class="fas fa-wallet me-1"></i>Trích quỹ: ${window.formatMoney(fAmt)}</div>` : '';
             
-            // --- KIỂM TRA VÀ ẨN/HIỆN NÚT XEM HÓA ĐƠN ---
+            document.getElementById('bsPartyTitle').innerText = p.name;
+            document.getElementById('bsPartyPerPerson').innerHTML = `Campuchia: ${window.formatMoney(p.perPerson)} / ng<br>${fundBadge}`;
+            
+            // Hiện nút Xem Hóa đơn nếu có ảnh
             const btnViewImg = document.getElementById('btnViewBillImg');
             if (btnViewImg) {
-                // Nếu bill có lưu ảnh hóa đơn thì hiện nút, ngược lại thì ẩn đi
-                btnViewImg.style.display = p.billImage ? 'block' : 'none';
+                const hasImages = (p.billImages && p.billImages.length > 0) || p.billImage;
+                btnViewImg.style.display = hasImages ? 'block' : 'none';
+                if(hasImages) {
+                    const count = p.billImages ? p.billImages.length : 1;
+                    btnViewImg.innerHTML = `<i class="fas fa-image me-1"></i>Hóa đơn (${count})`;
+                }
             }
             // ---------------------------------------------
             
@@ -1022,6 +1046,18 @@ window.state = {
             const allItems = window.state.monthData.expenses || {};
             const expEntries = Object.entries(allItems).filter(([_, item]) => item.type !== 'thu'); 
             
+            // --- ĐỒNG BỘ: TỰ ĐỘNG THÊM KHOẢN TRÍCH QUỸ TỪ MỤC LIÊN HOAN VÀO LỊCH SỬ CHI ---
+            Object.entries(window.state.monthData.parties || {}).forEach(([pId, p]) => {
+                const fAmt = Number(p.fundAmount) || 0;
+                if (fAmt > 0) {
+                    expEntries.push([`party_${pId}`, {
+                        desc: `🍻 Trích quỹ liên hoan: ${p.name}`,
+                        amount: fAmt, type: 'chi', date: p.date, rawDate: p.rawDate || '',
+                        isParty: true // Cờ đánh dấu để khóa nút sửa/xóa bên tab Chi
+                    }]);
+                }
+            });
+
             let totalExp = 0; 
             expEntries.forEach(([_, exp]) => totalExp += (Number(exp.amount)||0));
             
@@ -1033,27 +1069,28 @@ window.state = {
                 return;
             }
             
-            // Dùng Timeline giống tab Giao Lưu
             let html = '<div class="timeline-container">';
             expEntries.sort((a,b) => new Date(b[1].rawDate || 0) - new Date(a[1].rawDate || 0)).forEach(([expId, exp]) => { 
-                // Tự động phân loại Icon giống Giao Lưu
                 let iconClass = 'bg-secondary'; let iconItem = 'fa-receipt';
                 const descLower = exp.desc.toLowerCase();
-                if(descLower.includes('sân')) { iconItem = 'fa-futbol'; iconClass = 'bg-primary';}
+                
+                if (exp.isParty) { iconItem = 'fa-glass-cheers'; iconClass = 'bg-warning text-dark'; }
+                else if(descLower.includes('sân')) { iconItem = 'fa-futbol'; iconClass = 'bg-primary';}
                 else if(descLower.includes('nước') || descLower.includes('đá')) { iconItem = 'fa-tint'; iconClass = 'bg-info';}
                 else if(descLower.includes('áo') || descLower.includes('bóng')) { iconItem = 'fa-tshirt'; iconClass = 'bg-warning'; }
                 else if(descLower.includes('y tế') || descLower.includes('băng')) { iconItem = 'fa-medkit'; iconClass = 'bg-danger'; }
 
+                let actionsHtml = exp.isParty 
+                    ? `<div class="small text-muted fst-italic mt-1" style="font-size: 10px;">(Khoản chi tự động từ tab Liên hoan)</div>`
+                    : `<div class="timeline-actions"><div class="tl-btn edit" onclick="openEditExpenseModal('${expId}')"><i class="fas fa-pen"></i></div><div class="tl-btn delete" onclick="deleteExpense('${expId}')"><i class="fas fa-trash"></i></div></div>`;
+
                 html += `
                 <div class="timeline-item">
-                    <div class="timeline-icon ${iconClass}"><i class="fas ${iconItem} text-white"></i></div>
+                    <div class="timeline-icon ${iconClass}"><i class="fas ${iconItem} ${exp.isParty ? 'text-dark' : 'text-white'}"></i></div>
                     <div class="timeline-content">
                         <div class="timeline-title">${exp.desc}</div>
                         <div class="timeline-date"><i class="far fa-calendar-times text-danger"></i> ${exp.date}</div>
-                        <div class="timeline-actions">
-                            <div class="tl-btn edit" onclick="openEditExpenseModal('${expId}')"><i class="fas fa-pen"></i></div>
-                            <div class="tl-btn delete" onclick="deleteExpense('${expId}')"><i class="fas fa-trash"></i></div>
-                        </div>
+                        ${actionsHtml}
                     </div>
                     <div class="timeline-amount" style="background:#f8d7da; color:#dc3545; border:1px solid #f5c2c7;">-${window.formatShortMoney(exp.amount)}</div>
                 </div>`;
@@ -1121,11 +1158,18 @@ window.state = {
                 }
             });
 
+            // --- ĐỒNG BỘ: CỘNG TIỀN TRÍCH QUỸ LIÊN HOAN VÀO TỔNG CHI ---
+            Object.values(window.state.monthData.parties || {}).forEach(p => {
+                const fAmt = Number(p.fundAmount) || 0;
+                if (fAmt > 0) {
+                    tongChi += fAmt;
+                    miniLogs.push({ type: 'chi', desc: `Trích LH: ${p.name}`, amt: fAmt, date: p.date });
+                }
+            });
+
             // CỘNG TIỀN PHẠT ĐÃ ĐÓNG VÀO QUỸ KHÁC (THU KHÁC)
             Object.values(window.state.monthData.penalties || {}).forEach(p => {
-                if (p.isPaid) { // Chỉ cộng khi đã thu tiền phạt
-                    thuKhac += (Number(p.amount) || 0);
-                }
+                if (p.isPaid) thuKhac += (Number(p.amount) || 0);
             });
 
             const tonQuyThangTruoc = getCarryOverFund(window.state.currentMonth);
@@ -2230,56 +2274,78 @@ window.state = {
                 });
             }, 300);
         };
-		// ================= XỬ LÝ ẢNH HÓA ĐƠN NHẬU =================
-        window.handlePartyBillUpload = (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const MAX_SIZE = 800; // Giới hạn kích thước tối đa 800px để giữ nét ảnh hóa đơn nhưng vẫn nhẹ cơ sở dữ liệu
-                    let width = img.width; let height = img.height;
-                    if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } 
-                    else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
-                    canvas.width = width; canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                    
-                    document.getElementById('tempPartyBillBase64').value = dataUrl;
-                    document.getElementById('partyBillPreview').src = dataUrl;
-                    document.getElementById('partyBillPreview').classList.remove('d-none');
-                    document.getElementById('partyBillPlaceholder').classList.add('d-none');
+		// ================= XỬ LÝ NHIỀU ẢNH HÓA ĐƠN LIÊN HOAN =================
+        window.handleMultiplePartyBills = (event) => {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+            
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX_SIZE = 1000; // Resize ảnh để không nặng DB
+                        let width = img.width; let height = img.height;
+                        if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } 
+                        else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
+                        canvas.width = width; canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        window.tempPartyBills.push(canvas.toDataURL('image/jpeg', 0.8));
+                        window.renderPartyBillGallery();
+                    };
+                    img.src = e.target.result;
                 };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
+                reader.readAsDataURL(file);
+            });
+            event.target.value = ''; // Reset input file
         };
 
-        window.resetPartyBillModal = (base64Img = '') => {
-            const preview = document.getElementById('partyBillPreview');
+        window.renderPartyBillGallery = () => {
+            const gallery = document.getElementById('partyBillGallery');
             const placeholder = document.getElementById('partyBillPlaceholder');
-            document.getElementById('partyBillInput').value = '';
-            document.getElementById('tempPartyBillBase64').value = base64Img;
             
-            if (base64Img) {
-                preview.src = base64Img;
-                preview.classList.remove('d-none');
-                placeholder.classList.add('d-none');
-            } else {
-                preview.src = '';
-                preview.classList.add('d-none');
-                placeholder.classList.remove('d-none');
+            if (window.tempPartyBills.length === 0) {
+                gallery.innerHTML = '';
+                gallery.appendChild(placeholder);
+                placeholder.style.display = 'block';
+                return;
             }
+            
+            let html = '';
+            window.tempPartyBills.forEach((b64, idx) => {
+                html += `
+                <div class="position-relative flex-shrink-0 shadow-sm" style="width: 55px; height: 55px; border-radius: 8px; overflow: hidden; border: 1px solid #ced4da;">
+                    <img src="${b64}" style="width: 100%; height: 100%; object-fit: cover;">
+                    <div class="position-absolute top-0 end-0 bg-danger text-white d-flex align-items-center justify-content-center" style="width: 20px; height: 20px; border-bottom-left-radius: 8px; cursor: pointer; font-size: 11px;" onclick="removePartyBill(${idx})"><i class="fas fa-times"></i></div>
+                </div>`;
+            });
+            gallery.innerHTML = html;
+        };
+
+        window.removePartyBill = (idx) => {
+            window.tempPartyBills.splice(idx, 1);
+            window.renderPartyBillGallery();
         };
 
         window.openBillImageViewer = () => {
             const pId = window.state.bsPartyId;
             const p = window.state.monthData.parties?.[pId];
-            if (!p || !p.billImage) return;
-            document.getElementById('modalBillImageFull').src = p.billImage;
+            if (!p) return;
+
+            let images = [];
+            if (p.billImages && Array.isArray(p.billImages)) images = p.billImages;
+            else if (p.billImage) images = [p.billImage];
+
+            if (images.length === 0) return;
+
+            let html = '';
+            images.forEach(imgData => {
+                html += `<img class="party-bill-preview-modal shadow-sm mb-2 border" src="${imgData}">`;
+            });
+            document.getElementById('modalBillImageFullContainer').innerHTML = html;
             new bootstrap.Modal(document.getElementById('modalViewBillImg')).show();
         };
         initApp();
