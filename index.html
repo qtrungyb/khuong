@@ -197,6 +197,7 @@
                         <div style="background: #f8d7da; padding: 12px 6px; border-radius: 12px; border: 1px solid #f5c2c7;">
                             <div style="font-size: 11px; color: #842029; font-weight: bold;">- TỔNG CHI</div>
                             <div style="font-size: 17px; font-weight: 900; color: #dc3545; margin-top: 4px;" id="exp-chi">0đ</div>
+							<div id="exp-chi-details-list" style="margin-top: 8px; display: flex; justify-content: center; gap: 6px; flex-wrap: wrap;"></div>
                         </div>
                         <div style="background: #198754; padding: 12px 6px; border-radius: 12px; border: 1px solid #146c43;">
                             <div style="font-size: 11px; color: #ffffff; font-weight: bold;">QUỸ HIỆN TẠI</div>
@@ -263,7 +264,17 @@
                 <div class="col-6"><div class="bg-white p-2 rounded-4 shadow-sm border border-light position-relative overflow-hidden h-100"><i class="fas fa-wallet position-absolute text-success" style="right:-5px; bottom:-5px; font-size: 40px; opacity: 0.05;"></i><span class="text-success small fw-bold text-uppercase d-block mb-1" style="font-size:10px;">Thu Quỹ</span><div class="fw-bold text-success m-0" id="tk-thuquy">0 ₫</div></div></div>
                 <div class="col-6"><div class="bg-white p-2 rounded-4 shadow-sm border border-light position-relative overflow-hidden h-100"><i class="fas fa-dice position-absolute text-primary" style="right:-5px; bottom:-5px; font-size: 40px; opacity: 0.05;"></i><span class="text-primary small fw-bold text-uppercase d-block mb-1" style="font-size:10px;">Thu Độ</span><div class="fw-bold text-primary m-0" id="tk-thucado">0 ₫</div></div></div>
                 <div class="col-6"><div class="bg-white p-2 rounded-4 shadow-sm border border-light position-relative overflow-hidden h-100"><i class="fas fa-handshake position-absolute text-info" style="right:-5px; bottom:-5px; font-size: 40px; opacity: 0.05;"></i><span class="text-info small fw-bold text-uppercase d-block mb-1" style="font-size:10px;">Giao Lưu</span><div class="fw-bold text-info m-0" id="tk-thukhac">0 ₫</div></div></div>
-            </div>
+				<!-- 🔥 THÊM MỚI: KHỐI CHI TIẾT CÁC KHOẢN CHI -->
+                <div class="col-12 mt-2">
+                    <div class="bg-white p-3 rounded-4 shadow-sm border border-danger border-opacity-25 position-relative overflow-hidden h-100">
+                        <i class="fas fa-receipt position-absolute text-danger" style="right:-5px; bottom:-5px; font-size: 50px; opacity: 0.05;"></i>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-danger small fw-bold text-uppercase" style="font-size:11px;"><i class="fas fa-minus-circle me-1"></i> Chi Tiết Các Khoản Chi</span>
+                        </div>
+                        <div id="tk-expense-list" class="d-flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
+			</div>
 			
             <!-- VỊ TRÍ 2 MỚI: BẢNG NỢ ACCORDION (GẬP MỞ THÔNG MINH - MẶC ĐỊNH ẨN) -->
             <div class="accordion shadow-sm rounded-4 overflow-hidden mb-4 border border-danger border-opacity-25" id="accDebt">
@@ -574,15 +585,16 @@
     </div>
 
     <!-- Modal KỶ LUẬT / ĐÓNG PHẠT -->
-    <div class="modal fade" id="modalPenalty" tabindex="-1">
-        <div class="modal-dialog modal-fullscreen">
-            <div class="modal-content bg-light">
-                <div class="modal-header text-white border-0 py-2" style="background: linear-gradient(135deg, #fd7e14, #e8590c);">
-                    <h6 class="modal-title fw-bold m-0"><i class="fas fa-gavel me-2"></i>Kỷ Luật Cầu Thủ</h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-0 d-flex flex-column">
+			<div class="modal fade" id="modalPenalty" tabindex="-1">
+			<div class="modal-dialog modal-fullscreen">
+				<div class="modal-content bg-light">
+					<div class="modal-header text-white border-0 py-2" style="background: linear-gradient(135deg, #fd7e14, #e8590c);">
+						<h6 class="modal-title fw-bold m-0" id="penaltyModalTitle"><i class="fas fa-gavel me-2"></i>Kỷ Luật Cầu Thủ</h6>
+						<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+					</div>
+					<div class="modal-body p-0 d-flex flex-column">
                     <div class="p-3 bg-white shadow-sm border-bottom position-relative z-1">
+						<input type="hidden" id="editPenaltyId">
                         <div class="row g-2 mb-2">
                             <div class="col-5">
                                 <input type="date" id="penDate" class="form-control form-control-sm bg-light fw-bold text-success border-0" style="height: 38px;">
@@ -604,7 +616,7 @@
                     <div class="flex-grow-1 overflow-auto bg-light" id="penalty-members-container"></div>
                 </div>
                 <div class="modal-footer p-2 border-0 bg-white shadow-lg">
-                    <button type="button" class="btn w-100 rounded-pill fw-bold py-2 text-white shadow-sm" style="background: linear-gradient(135deg, #fd7e14, #e8590c);" onclick="savePenalty()">LƯU BIÊN BẢN</button>
+                    <button type="button" id="btnSavePenalty" class="btn w-100 rounded-pill fw-bold py-2 text-white shadow-sm" style="background: linear-gradient(135deg, #fd7e14, #e8590c);" onclick="savePenalty()">LƯU BIÊN BẢN</button>
                 </div>
             </div>
         </div>
@@ -674,21 +686,6 @@
         </div>
     </div>
 
-    <!-- Modal XEM ẢNH HÓA ĐƠN (Cuộn dọc nếu có nhiều ảnh) -->
-    <div class="modal fade" id="modalViewBillImg" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content bg-dark border-0 rounded-4 shadow">
-                <div class="modal-header border-0 pb-0">
-                    <h6 class="modal-title text-white fw-bold"><i class="fas fa-receipt me-2"></i>Ảnh Hóa Đơn</h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <!-- Container cuộn dọc chứa nhiều ảnh -->
-                <div class="modal-body text-center p-3 d-flex flex-column gap-3 overflow-auto" id="modalBillImageFullContainer" style="max-height: 80vh;">
-                    <!-- Ảnh sẽ được chèn vào đây -->
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- BOTTOM SHEET CHI TIẾT BILL LIÊN HOAN -->
     <div class="bottom-sheet" id="bsParty">
