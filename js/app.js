@@ -1,4 +1,4 @@
-window.state = {
+		window.state = {
             members: {}, teams: {}, 
             monthData: { regular: {}, regular_notes: {}, betting: {}, expenses: {} },
             allFundsData: {}, globalSettings: { defaultFund: 100000 },
@@ -7,7 +7,13 @@ window.state = {
             activeTab: 'thu', currentFilter: 'all',
             bsMatchId: null 
         };
-        
+        // Hàm chuyển mã Hex sang RGBA để làm màu nền mờ
+        function hexToRgba(hex, alpha) {
+            let r = parseInt(hex.slice(1, 3), 16),
+                g = parseInt(hex.slice(3, 5), 16),
+                b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
         document.getElementById('monthSelectorMain').value = window.state.currentMonth;
         document.getElementById('monthSelectorCompact').value = window.state.currentMonth;
 
@@ -125,6 +131,12 @@ window.state = {
                         if (e.type === 'thu') tQ += (Number(e.amount)||0); 
                         else tChi += (Number(e.amount)||0); 
                     });
+                    
+                    // 🔥 BỔ SUNG: Trừ tiền trích quỹ từ các bữa Liên Hoan của tháng cũ
+                    Object.values(mData.parties || {}).forEach(p => {
+                        tChi += (Number(p.fundAmount) || 0);
+                    });
+
                     prevTotal += (tQ + tC - tChi);
                 }
             }); return prevTotal;
@@ -413,13 +425,20 @@ window.state = {
                             const isPaid = paidAmt >= matchTotal;
                             if(!isPaid) debtTotal += (matchTotal - paidAmt);
 
-                            let tickClass = isPaid ? 'tick-btn active' : 'tick-btn unpaid';
-                            let tickIcon = isPaid ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>';
-
                             teamHtml += `
-                            <div class="item-clean ${isPaid ? 'member-paid' : 'member-unpaid'}" onclick="toggleBettingStatus('${matchId}', '${mId}', ${matchTotal}, ${isPaid})">
-                                <div class="mem-name ${isPaid ? 'text-muted text-decoration-line-through' : ''}">${m.name}</div>
-                                <div class="${tickClass}">${tickIcon}</div>
+                            <div class="bg-white rounded-3 mb-2 shadow-sm border d-flex justify-content-between align-items-center p-2" style="border-left: 4px solid ${isPaid ? '#198754' : '#dc3545'} !important; transition: all 0.2s;">
+                                <div class="d-flex align-items-center gap-2 ps-1" style="min-width: 0;">
+                                    <div class="fw-bold ${isPaid ? 'text-muted text-decoration-line-through' : 'text-dark'} text-truncate" style="font-size: 14.5px;">
+                                        ${m.name}
+                                    </div>
+                                </div>
+                                <!-- Nút bấm Toggle trạng thái chống bấm nhầm -->
+                                <button class="btn btn-sm rounded-3 fw-bold d-flex align-items-center gap-1 shadow-sm flex-shrink-0" 
+                                        onclick="toggleBettingStatus('${matchId}', '${mId}', ${matchTotal}, ${isPaid})"
+                                        style="background: ${isPaid ? '#e8f5e9' : '#fff5f5'}; color: ${isPaid ? '#198754' : '#dc3545'}; border: 1px solid ${isPaid ? '#badbcc' : '#ffc9c9'}; padding: 6px 12px; font-size: 12px;">
+                                    <i class="fas ${isPaid ? 'fa-check-circle' : 'fa-times-circle'}"></i> 
+                                    ${isPaid ? 'Đã thu' : 'Chưa thu'}
+                                </button>
                             </div>`;
                         }
                     });
@@ -635,125 +654,241 @@ window.state = {
         // --- 2. KỶ LUẬT (PHẠT THEO NGÀY TÙY CHỌN) ---
         // --- Cập nhật giao diện Modal Phạt ---
         window.openAddPenaltyModal = () => {
-            document.getElementById('penDesc').value = ''; 
-            document.getElementById('penAmount').value = '20.000';
-            document.getElementById('penDate').value = new Date().toISOString().slice(0, 10);
+			document.getElementById('editPenaltyId').value = '';              // ← RESET Edit ID
+			document.getElementById('penDesc').value = ''; 
+			document.getElementById('penAmount').value = '20.000';
+			document.getElementById('penDate').value = new Date().toISOString().slice(0, 10);
+			document.getElementById('penaltyModalTitle').innerHTML = '<i class="fas fa-gavel me-2"></i>Kỷ Luật Cầu Thủ';  // ← Đổi tiêu đề
+			document.getElementById('btnSavePenalty').innerHTML = 'LƯU BIÊN BẢN';  // ← Đổi nút
 
-            let chkHtml = '<div class="row g-2 m-0 px-2 pb-4">';
-            Object.entries(window.state.teams).sort((a,b)=>(a[1].order||0)-(b[1].order||0)).forEach(([tId, t]) => {
-                chkHtml += `<div class="col-12 mt-3 mb-1"><span class="badge bg-secondary bg-opacity-10 text-dark border shadow-sm px-3 py-2 rounded-pill"><i class="fas fa-shield-alt text-warning me-1"></i>${t.name}</span></div>`;
-                Object.entries(window.state.members).forEach(([mId, m]) => {
-                    if(m.teamId === tId) {
-                        chkHtml += `
-                        <div class="col-6">
-                            <input class="mem-select-cb penalty-checkbox" type="checkbox" value="${mId}" id="pen_chk_${mId}">
-                            <label class="mem-select-label" for="pen_chk_${mId}"><i class="fas fa-user-times me-2 opacity-25"></i>${m.name}</label>
-                        </div>`;
-                    }
-                });
-            });
-            chkHtml += '</div>';
-            document.getElementById('penalty-members-container').innerHTML = chkHtml;
-            new bootstrap.Modal(document.getElementById('modalPenalty')).show();
-        };
+			let chkHtml = '<div class="row g-2 m-0 px-2 pb-4">';
+			Object.entries(window.state.teams).sort((a,b)=>(a[1].order||0)-(b[1].order||0)).forEach(([tId, t]) => {
+				chkHtml += `<div class="col-12 mt-3 mb-1"><span class="badge bg-secondary bg-opacity-10 text-dark border shadow-sm px-3 py-2 rounded-pill"><i class="fas fa-shield-alt text-warning me-1"></i>${t.name}</span></div>`;
+				Object.entries(window.state.members).forEach(([mId, m]) => {
+					if(m.teamId === tId) {
+						chkHtml += `
+						<div class="col-6">
+							<input class="mem-select-cb penalty-checkbox" type="checkbox" value="${mId}" id="pen_chk_${mId}">
+							<label class="mem-select-label" for="pen_chk_${mId}"><i class="fas fa-user-times me-2 opacity-25"></i>${m.name}</label>
+						</div>`;
+					}
+				});
+			});
+			chkHtml += '</div>';
+			document.getElementById('penalty-members-container').innerHTML = chkHtml;
+			new bootstrap.Modal(document.getElementById('modalPenalty')).show();
+		};
+		// 🔥 HÀM MỚI 1: Toggle đã thu / chưa thu tiền phạt
+		window.togglePenaltyStatus = (pId, currentIsPaid) => {
+			const newStatus = !currentIsPaid;
+			db.ref(`funds/${window.state.currentMonth}/penalties/${pId}`)
+				.update({ isPaid: newStatus })
+				.catch(err => alert('Lỗi cập nhật: ' + err.message));
+		};
 
+		// 🔥 HÀM MỚI 2: Xóa biên bản phạt
+		window.deletePenalty = (pId) => {
+			if (confirm('Xóa biên bản phạt này? Không thể hoàn tác!')) {
+				db.ref(`funds/${window.state.currentMonth}/penalties/${pId}`)
+					.remove()
+					.catch(err => alert('Lỗi xóa: ' + err.message));
+			}
+		};
+
+		// 🔥 HÀM MỚI 3: Mở modal sửa biên bản phạt
+		window.openEditPenalty = (pId) => {
+			const p = window.state.monthData.penalties?.[pId];
+			if (!p) return;
+
+			document.getElementById('editPenaltyId').value = pId;
+			document.getElementById('penDate').value = p.customDate || new Date().toISOString().slice(0, 10);
+			document.getElementById('penAmount').value = new Intl.NumberFormat('vi-VN').format(p.amount || 0);
+			document.getElementById('penDesc').value = p.reason || '';
+			document.getElementById('penaltyModalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>Sửa Biên Bản Phạt';
+			document.getElementById('btnSavePenalty').innerHTML = 'CẬP NHẬT BIÊN BẢN';
+
+			// Hiển thị thông tin người vi phạm (không cho đổi người khi sửa)
+			const memName = window.state.members[p.memberId]?.name || 'Không rõ';
+			document.getElementById('penalty-members-container').innerHTML = `
+				<div class="p-4 text-center text-muted">
+					<i class="fas fa-user-lock fa-2x mb-2 text-warning opacity-50"></i><br>
+					Đang sửa biên bản của: <strong class="text-dark">${memName}</strong>
+					<div class="small mt-2 fst-italic">(Không thể thay đổi người vi phạm — chỉ sửa số tiền, lý do, ngày)</div>
+				</div>`;
+
+			new bootstrap.Modal(document.getElementById('modalPenalty')).show();
+		};
         window.savePenalty = () => {
-            const rawDate = document.getElementById('penDate').value;
-            const desc = document.getElementById('penDesc').value.trim(); 
-            const amt = window.getRealNumber('penAmount');
-            const checkedBoxes = document.querySelectorAll('.penalty-checkbox:checked');
+			const editId = document.getElementById('editPenaltyId').value;   // ← PHÂN BIỆT EDIT/CREATE
+			const rawDate = document.getElementById('penDate').value;
+			const desc = document.getElementById('penDesc').value.trim(); 
+			const amt = window.getRealNumber('penAmount');
+			
+			if(!desc || amt <= 0) return alert("Vui lòng nhập lý do phạt và số tiền hợp lệ!");
+			if(!rawDate) return alert("Vui lòng chọn ngày vi phạm!");
+
+			const displayDate = new Date(rawDate).toLocaleDateString('vi-VN');
+
+			// ---- CHẾ ĐỘ SỬA ----
+			if (editId) {
+				db.ref(`funds/${window.state.currentMonth}/penalties/${editId}`).update({
+					customDate: rawDate,
+					reason: desc,
+					amount: amt,
+					date: displayDate
+				}).then(() => {
+					const modalEl = document.getElementById('modalPenalty');
+					const modalInst = bootstrap.Modal.getInstance(modalEl);
+					if (modalInst) modalInst.hide();
+				});
+				return;
+			}
+
+			// ---- CHẾ ĐỘ TẠO MỚI ----
+			const checkedBoxes = document.querySelectorAll('.penalty-checkbox:checked');
+			if(checkedBoxes.length === 0) return alert("Vui lòng chọn ít nhất 1 cầu thủ vi phạm!");
+
+			const updates = {};
+			checkedBoxes.forEach(chk => {
+				const mId = chk.value;
+				const newRef = db.ref(`funds/${window.state.currentMonth}/penalties`).push();
+				updates[newRef.key] = { 
+					memberId: mId, 
+					customDate: rawDate, 
+					reason: desc, 
+					amount: amt, 
+					isPaid: false, 
+					date: displayDate 
+				};
+			});
+
+			db.ref(`funds/${window.state.currentMonth}/penalties`).update(updates).then(() => {
+				const modalEl = document.getElementById('modalPenalty');
+				const modalInst = bootstrap.Modal.getInstance(modalEl);
+				if (modalInst) modalInst.hide();
+			});
+		};
+		// 🔥 HÀM MỚI: Xổ xuống / Thu gọn thẻ Phạt
+        window.togglePenaltyExpand = (el) => {
+            const actions = el.nextElementSibling; // Lấy khối div chứa nút bấm bên dưới
+            const chevron = el.querySelector('.penalty-chevron'); // Lấy icon mũi tên
             
-            if(!desc || amt <= 0) return alert("Vui lòng nhập lý do phạt và số tiền hợp lệ!");
-            if(!rawDate) return alert("Vui lòng chọn ngày vi phạm!");
-            if(checkedBoxes.length === 0) return alert("Vui lòng chọn ít nhất 1 cầu thủ vi phạm!");
-
-            const updates = {};
-            const displayDate = new Date(rawDate).toLocaleDateString('vi-VN');
-
-            checkedBoxes.forEach(chk => {
-                const mId = chk.value;
-                const newRef = db.ref(`funds/${window.state.currentMonth}/penalties`).push();
-                updates[newRef.key] = { 
-                    memberId: mId, 
-                    customDate: rawDate, 
-                    reason: desc, 
-                    amount: amt, 
-                    isPaid: false, 
-                    date: displayDate 
-                };
-            });
-
-            db.ref(`funds/${window.state.currentMonth}/penalties`).update(updates).then(() => {
-                const modalEl = document.getElementById('modalPenalty');
-                const modalInst = bootstrap.Modal.getInstance(modalEl);
-                if (modalInst) modalInst.hide();
-            });
-        };
-
-        function renderKyLuat() {
-            const container = document.getElementById('kyluat-container'); if(!container) return;
-            const pens = window.state.monthData.penalties || {};
-            
-            let totalNo = 0; let totalThu = 0; let totalPhat = 0;
-            const grouped = {};
-
-            Object.entries(pens).forEach(([pId, p]) => {
-                totalPhat++;
-                if(!p.isPaid) totalNo += (Number(p.amount) || 0);
-                else totalThu += (Number(p.amount) || 0);
-
-                const groupKey = p.customDate || p.date || 'Khác';
-                const groupTitle = 'Ngày ' + (p.date || '---');
-
-                if (!grouped[groupKey]) {
-                    grouped[groupKey] = { title: groupTitle, rawDate: p.customDate || p.date || '', items: [] };
+            if (actions.classList.contains('d-none')) {
+                actions.classList.remove('d-none');
+                if (chevron) {
+                    chevron.classList.remove('fa-chevron-down');
+                    chevron.classList.add('fa-chevron-up');
+                    chevron.style.transform = 'rotate(180deg)';
                 }
-                grouped[groupKey].items.push({ pId, ...p });
-            });
+            } else {
+                actions.classList.add('d-none');
+                if (chevron) {
+                    chevron.classList.remove('fa-chevron-up');
+                    chevron.classList.add('fa-chevron-down');
+                    chevron.style.transform = 'rotate(0deg)';
+                }
+            }
+        };
+        function renderKyLuat() {
+			const container = document.getElementById('kyluat-container'); if(!container) return;
+			const pens = window.state.monthData.penalties || {};
+			
+			let totalNo = 0; let totalThu = 0; let totalPhat = 0;
+			const grouped = {};
 
-            let html = '';
-            const sortedGroups = Object.values(grouped).sort((a,b) => new Date(b.rawDate || 0) - new Date(a.rawDate || 0));
+			Object.entries(pens).forEach(([pId, p]) => {
+				totalPhat++;
+				if(!p.isPaid) totalNo += (Number(p.amount) || 0);
+				else totalThu += (Number(p.amount) || 0);
 
-            sortedGroups.forEach(group => {
-                html += `
-                <div class="d-flex align-items-center mb-2 mt-4 px-1">
-                    <span class="badge bg-secondary bg-opacity-10 text-dark border shadow-sm px-3 py-2 rounded-pill"><i class="far fa-calendar-alt text-warning me-2"></i>${group.title}</span>
-                </div>
-                <div>`;
-                
-                group.items.forEach(p => {
-                    const memName = window.state.members[p.memberId]?.name || 'Không rõ';
-                    let tickClass = p.isPaid ? 'tick-btn active' : 'tick-btn unpaid';
-                    let tickIcon = p.isPaid ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>';
-                    
-                    html += `
-                    <div class="penalty-ticket mb-2 ${p.isPaid ? 'paid' : 'unpaid'}" onclick="togglePenaltyStatus('${p.pId}', ${p.isPaid})">
-                        <div class="trash-btn" onclick="event.stopPropagation(); deletePenalty('${p.pId}')"><i class="fas fa-times"></i></div>
-                        <div class="d-flex align-items-center mt-1">
-                            <div class="ticket-icon">
-                                <i class="fas fa-gavel"></i>
-                            </div>
-                            <div class="flex-grow-1 ms-3 pe-2">
-                                <div class="fw-bold ${p.isPaid ? 'text-muted text-decoration-line-through' : 'text-dark'}" style="font-size: 14.5px;">${memName}</div>
-                                <div class="small ${p.isPaid ? 'text-muted' : 'text-danger'}" style="font-size: 11.5px; font-weight: 600; line-height: 1.3; margin-top: 4px;">${p.reason}</div>
-                            </div>
-                            <div class="text-end d-flex flex-column align-items-end justify-content-center">
-                                <div class="fw-black ${p.isPaid ? 'text-muted' : 'text-danger'} mb-2" style="font-size: 14px;">${window.formatShortMoney(p.amount)}</div>
-                                <div class="${tickClass}" style="width:24px; height:24px; font-size:12px;">${tickIcon}</div>
-                            </div>
-                        </div>
-                    </div>`;
-                });
-                html += `</div>`;
-            });
+				const groupKey = p.customDate || p.date || 'Khác';
+				const groupTitle = 'Ngày ' + (p.date || '---');
 
-            container.innerHTML = html !== '' ? html : '<div class="card-clean border p-4 text-center text-muted small"><i class="fas fa-gavel fa-2x mb-3 text-warning opacity-50"></i><br>Đội bóng gương mẫu, chưa ai bị phạt!</div>';
-            
-            const headerEl = document.getElementById('kyluat-thu-header');
-            const subEl = document.getElementById('kyluat-sub-header');
-            if (headerEl) headerEl.innerText = window.formatMoney(totalThu);
-            if (subEl) subEl.innerText = `${totalPhat} lỗi • Nợ: ${window.formatShortMoney(totalNo)}`;
-        }
+				if (!grouped[groupKey]) {
+					grouped[groupKey] = { title: groupTitle, rawDate: p.customDate || p.date || '', items: [] };
+				}
+				grouped[groupKey].items.push({ pId, ...p });
+			});
+
+			let html = '';
+			const sortedGroups = Object.values(grouped).sort((a,b) => new Date(b.rawDate || 0) - new Date(a.rawDate || 0));
+
+			sortedGroups.forEach(group => {
+				// Header "Ngày ..." của nhóm
+				html += `
+				<div class="d-flex align-items-center mb-2 mt-4 px-1">
+					<span class="badge bg-secondary bg-opacity-10 text-dark border shadow-sm px-3 py-2 rounded-pill">
+						<i class="far fa-calendar-alt text-warning me-2"></i>${group.title}
+					</span>
+				</div>
+				<div>`;
+
+				 // Loop qua từng biên bản trong nhóm
+				group.items.forEach(p => {
+					const memName = window.state.members[p.memberId]?.name || 'Không rõ';
+					const statusColor = p.isPaid ? '#adb5bd' : '#fd7e14'; // Xám nếu đã thu, Cam nếu chưa
+					const dotColor = p.isPaid ? 'bg-secondary' : 'bg-danger';
+					
+					html += `
+					<div class="bg-white rounded-3 mb-2 shadow-sm border" style="border-left: 4px solid ${statusColor} !important; overflow: hidden;">
+						
+						<!-- KHU VỰC TIÊU ĐỀ (LUÔN HIỂN THỊ - BẤM VÀO ĐỂ XỔ XUỐNG) -->
+						<div class="d-flex justify-content-between align-items-center p-3" onclick="togglePenaltyExpand(this)" style="cursor: pointer; user-select: none; background: ${p.isPaid ? '#f8f9fa' : '#ffffff'};">
+							<div class="d-flex align-items-center gap-2 flex-grow-1" style="min-width: 0;">
+								<div class="${dotColor}" style="width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;"></div>
+								<div class="fw-bold ${p.isPaid ? 'text-muted text-decoration-line-through' : 'text-dark'} text-truncate" style="font-size: 15px;">
+									${memName}
+								</div>
+							</div>
+							<div class="d-flex align-items-center gap-3 flex-shrink-0">
+								<span class="fw-black ${p.isPaid ? 'text-muted' : 'text-danger'}" style="font-size: 15px;">
+									${window.formatShortMoney(p.amount)}
+								</span>
+								<i class="fas fa-chevron-down text-muted penalty-chevron" style="font-size: 12px; transition: transform 0.3s;"></i>
+							</div>
+						</div>
+
+						<!-- KHU VỰC XỔ XUỐNG (ẨN MẶC ĐỊNH - CHỨA LÝ DO VÀ NÚT BẤM) -->
+						<div class="d-none bg-light border-top p-3">
+							<div class="mb-3 d-flex align-items-start gap-2">
+								<i class="fas fa-info-circle text-warning mt-1" style="font-size: 14px;"></i>
+								<div>
+									<div class="text-muted small fw-bold" style="font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.5px;">Lý do vi phạm</div>
+									<div class="text-dark fw-bold" style="font-size: 13.5px;">${p.reason}</div>
+								</div>
+							</div>
+							
+							<div class="d-flex gap-2">
+								<!-- Nút Toggle Đã Thu / Chưa Thu (To rõ, chống bấm nhầm) -->
+								<button class="btn btn-sm w-100 fw-bold shadow-sm py-2" onclick="togglePenaltyStatus('${p.pId}', ${p.isPaid})" style="background: ${p.isPaid ? '#ffffff' : '#198754'}; color: ${p.isPaid ? '#6c757d' : '#ffffff'}; border: 1px solid ${p.isPaid ? '#ced4da' : '#198754'}; border-radius: 8px;">
+									${p.isPaid ? '<i class="fas fa-undo me-1"></i> Hủy Trạng Thái Đã Thu' : '<i class="fas fa-check-circle me-1"></i> Xác Nhận Đã Thu Tiền'}
+								</button>
+								
+								<!-- Nút Sửa -->
+								<button class="btn btn-sm btn-light border text-primary shadow-sm" style="width: 45px; border-radius: 8px;" onclick="event.stopPropagation(); openEditPenalty('${p.pId}')" title="Sửa">
+									<i class="fas fa-pen"></i>
+								</button>
+								
+								<!-- Nút Xóa -->
+								<button class="btn btn-sm btn-light border text-danger shadow-sm" style="width: 45px; border-radius: 8px;" onclick="event.stopPropagation(); deletePenalty('${p.pId}')" title="Xóa">
+									<i class="fas fa-trash"></i>
+								</button>
+							</div>
+						</div>
+						
+					</div>`;
+				});
+
+				html += `</div>`;   // đóng wrapper của group
+			});                     // đóng sortedGroups.forEach — CHỈ 1 DẤU });
+
+			container.innerHTML = html !== '' ? html : '<div class="card-clean border p-4 text-center text-muted small"><i class="fas fa-gavel fa-2x mb-3 text-warning opacity-50"></i><br>Đội bóng gương mẫu, chưa ai bị phạt!</div>';
+			
+			const headerEl = document.getElementById('kyluat-thu-header');
+			const subEl = document.getElementById('kyluat-sub-header');
+			if (headerEl) headerEl.innerText = window.formatMoney(totalThu);
+			if (subEl) subEl.innerText = `${totalPhat} lỗi • Nợ: ${window.formatShortMoney(totalNo)}`;
+		}
 
         // ================= HÀM TÍNH TIỀN CHIA ĐỀU (ĐÃ ĐƯỢC KHÔI PHỤC) =================
         // Biến toàn cục lưu mảng ảnh hóa đơn
@@ -976,13 +1111,21 @@ window.state = {
                         const isPaid = paidAmt >= p.perPerson;
                         if(!isPaid) debtTotal += (p.perPerson - paidAmt);
 
-                        let tickClass = isPaid ? 'tick-btn active' : 'tick-btn unpaid';
-                        let tickIcon = isPaid ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>';
 
                         teamHtml += `
-                        <div class="item-clean ${isPaid ? 'member-paid' : 'member-unpaid'}" onclick="togglePartyPaid('${pId}', '${mId}', ${p.perPerson}, ${isPaid})">
-                            <div class="mem-name ${isPaid ? 'text-muted text-decoration-line-through' : ''}">${m.name}</div>
-                            <div class="${tickClass}">${tickIcon}</div>
+                        <div class="bg-white rounded-3 mb-2 shadow-sm border d-flex justify-content-between align-items-center p-2" style="border-left: 4px solid ${isPaid ? '#198754' : '#dc3545'} !important; transition: all 0.2s;">
+                            <div class="d-flex align-items-center gap-2 ps-1" style="min-width: 0;">
+                                <div class="fw-bold ${isPaid ? 'text-muted text-decoration-line-through' : 'text-dark'} text-truncate" style="font-size: 14.5px;">
+                                    ${m.name}
+                                </div>
+                            </div>
+                            <!-- Nút bấm Toggle trạng thái to rõ, chống bấm nhầm -->
+                            <button class="btn btn-sm rounded-3 fw-bold d-flex align-items-center gap-1 shadow-sm flex-shrink-0" 
+                                    onclick="togglePartyPaid('${pId}', '${mId}', ${p.perPerson}, ${isPaid})"
+                                    style="background: ${isPaid ? '#e8f5e9' : '#fff5f5'}; color: ${isPaid ? '#198754' : '#dc3545'}; border: 1px solid ${isPaid ? '#badbcc' : '#ffc9c9'}; padding: 6px 12px; font-size: 12px;">
+                                <i class="fas ${isPaid ? 'fa-check-circle' : 'fa-times-circle'}"></i> 
+                                ${isPaid ? 'Đã đóng' : 'Chưa đóng'}
+                            </button>
                         </div>`;
                     }
                 });
@@ -1101,21 +1244,23 @@ window.state = {
         // ================= TAB 4: TỔNG KẾT =================
         function renderTongKet() {
             const defaultFund = window.state.globalSettings.defaultFund || 100000;
-            let thuQuy = 0, thuCaDo = 0, tongChi = 0; 
+            let thuQuy = 0, thuCaDo = 0, thuKhac = 0, tongChi = 0; 
             
             const memberDebts = {};
             const memberContributions = {}; 
             
             Object.entries(window.state.members).forEach(([mId, m]) => {
-                memberDebts[mId] = { name: m.name, teamName: window.state.teams[m.teamId]?.name || '', quyDebt: 0, cadoDebt: 0, cadoCount: 0 };
+                // Thêm phatDebt vào cấu trúc lưu trữ
+                memberDebts[mId] = { name: m.name, teamName: window.state.teams[m.teamId]?.name || '', quyDebt: 0, cadoDebt: 0, cadoCount: 0, phatDebt: 0, partyDebt: 0 };
                 memberContributions[mId] = { name: m.name, totalPaid: 0 };
             });
 
             let unpaidQuyCount = 0; let unpaidCadoPeopleCount = 0;
             
+            // 1. Quét Thu Quỹ
             Object.entries(window.state.members).forEach(([mId, _]) => { 
                 const rawPaid = window.state.monthData.regular?.[mId];
-                if(rawPaid !== undefined && rawPaid !== null) {  // Đã có tương tác nộp (kể cả 0đ)
+                if(rawPaid !== undefined && rawPaid !== null) { 
                     const paid = Number(rawPaid) || 0;
                     thuQuy += paid; 
                     if(memberContributions[mId]) memberContributions[mId].totalPaid += paid;
@@ -1125,6 +1270,7 @@ window.state = {
                 }
             });
             
+            // 2. Quét Cá độ
             let miniLogs = [];
             Object.entries(window.state.monthData.betting || {}).forEach(([_, match]) => {
                 const matchTotal = Number(match.penalty_amount) || 0;
@@ -1141,37 +1287,78 @@ window.state = {
                         memberDebts[mId].cadoCount += 1; 
                     }
                 });
-
                 if (collectedInMatch > 0) {
                     miniLogs.push({ type: 'cado', desc: `Độ: ${match.name}`, amt: collectedInMatch, date: match.date || '' });
                 }
             });
             
-            let thuKhac = 0;
+            // 3 & 4. Quét Thu Khác & Chi Tiêu (Phân loại chi tiết)
+            let expenseStats = { san: 0, nuoc: 0, ao: 0, yte: 0, khac: 0 };
+            let partyExpenses = []; // 🔥 Mảng mới lưu danh sách các bữa nhậu
+            
             Object.values(window.state.monthData.expenses || {}).forEach(exp => {
+                const amt = Number(exp.amount) || 0;
                 if (exp.type === 'thu') {
-                    thuKhac += (Number(exp.amount) || 0);
-                    miniLogs.push({ type: 'giaoluu', desc: exp.desc, amt: Number(exp.amount), date: exp.rawDate || exp.date });
+                    thuKhac += amt;
+                    miniLogs.push({ type: 'giaoluu', desc: exp.desc, amt: amt, date: exp.rawDate || exp.date });
                 } else {
-                    tongChi += (Number(exp.amount) || 0);
-                    miniLogs.push({ type: 'chi', desc: exp.desc, amt: Number(exp.amount), date: exp.rawDate || exp.date });
+                    tongChi += amt;
+                    const desc = exp.desc.toLowerCase();
+                    if (desc.includes('sân')) expenseStats.san += amt;
+                    else if (desc.includes('nước') || desc.includes('đá')) expenseStats.nuoc += amt;
+                    else if (desc.includes('áo') || desc.includes('bóng')) expenseStats.ao += amt;
+                    else if (desc.includes('y tế') || desc.includes('băng')) expenseStats.yte += amt;
+                    else expenseStats.khac += amt;
+                    
+                    miniLogs.push({ type: 'chi', desc: exp.desc, amt: amt, date: exp.rawDate || exp.date });
                 }
             });
 
-            // --- ĐỒNG BỘ: CỘNG TIỀN TRÍCH QUỸ LIÊN HOAN VÀO TỔNG CHI ---
+             // Quét Liên hoan
+           // Quét Liên hoan
             Object.values(window.state.monthData.parties || {}).forEach(p => {
                 const fAmt = Number(p.fundAmount) || 0;
                 if (fAmt > 0) {
                     tongChi += fAmt;
                     miniLogs.push({ type: 'chi', desc: `Trích LH: ${p.name}`, amt: fAmt, date: p.date });
                 }
+                
+                // 🔥 TÍNH NỢ NHẬU:
+                const perPerson = Number(p.perPerson) || 0;
+                Object.entries(p.members || {}).forEach(([mId, paid]) => {
+                    const paidAmt = Number(paid) || 0;
+                    if (paidAmt < perPerson && memberDebts[mId]) {
+                        memberDebts[mId].partyDebt += (perPerson - paidAmt);
+                    }
+                });
+            });
+            
+            // Tạo HTML hiển thị Chi tiết chi
+            let expTags = [];
+            if(expenseStats.san > 0) expTags.push(`<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25" style="font-size:11px;">⚽ Sân: ${window.formatShortMoney(expenseStats.san)}</span>`);
+            if(expenseStats.nuoc > 0) expTags.push(`<span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25" style="font-size:11px;">💧 Nước: ${window.formatShortMoney(expenseStats.nuoc)}</span>`);
+            if(expenseStats.ao > 0) expTags.push(`<span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25" style="font-size:11px;">👕 Áo: ${window.formatShortMoney(expenseStats.ao)}</span>`);
+            if(expenseStats.yte > 0) expTags.push(`<span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25" style="font-size:11px;">🚑 Y tế: ${window.formatShortMoney(expenseStats.yte)}</span>`);
+            
+            // 🔥 THAY ĐỔI: Duyệt mảng để in từng tên bữa nhậu
+            partyExpenses.forEach(pe => {
+                expTags.push(`<span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25" style="font-size:11px;">🍻 ${pe.name}: ${window.formatShortMoney(pe.amount)}</span>`);
             });
 
-            // CỘNG TIỀN PHẠT ĐÃ ĐÓNG VÀO QUỸ KHÁC (THU KHÁC)
+            if(expenseStats.khac > 0) expTags.push(`<span class="badge bg-dark bg-opacity-10 text-dark border border-dark border-opacity-25" style="font-size:11px;">📦 Khác: ${window.formatShortMoney(expenseStats.khac)}</span>`);
+            
+            const expListEl = document.getElementById('tk-expense-list');
+            if(expListEl) expListEl.innerHTML = expTags.join('') || '<span class="text-muted small fst-italic">Tháng này chưa có khoản chi nào.</span>';
+
+            // 🔥 5. MỚI: Quét Tiền Phạt (Cộng vào Thu Khác và Nợ Phạt)
             Object.values(window.state.monthData.penalties || {}).forEach(p => {
-                if (p.isPaid) thuKhac += (Number(p.amount) || 0);
+                if (p.isPaid) {
+                    thuKhac += (Number(p.amount) || 0); // Phạt đã đóng thì cộng vào tổng thu
+                } else if (memberDebts[p.memberId]) {
+                    memberDebts[p.memberId].phatDebt += (Number(p.amount) || 0); // Phạt chưa đóng thì cộng vào nợ
+                }
             });
-
+			
             const tonQuyThangTruoc = getCarryOverFund(window.state.currentMonth);
             const tongThu = thuQuy + thuCaDo + thuKhac;
             const tongHienTai = tonQuyThangTruoc + tongThu - tongChi;
@@ -1227,7 +1414,6 @@ window.state = {
                 }
             }
 
-
             const mvpList = Object.values(memberContributions).filter(c => c.totalPaid > 0).sort((a,b) => b.totalPaid - a.totalPaid).slice(0, 3);
             const mvpBoard = document.getElementById('tk-mvp-board');
             if (mvpList.length === 0) {
@@ -1255,9 +1441,20 @@ window.state = {
                 mvpBoard.innerHTML = mvpHtml;
             }
             
-            const debtors = Object.entries(memberDebts).map(([mId, d]) => { if(d.cadoDebt > 0) unpaidCadoPeopleCount++; return { mId, ...d, totalDebt: d.quyDebt + d.cadoDebt }; }).filter(d => d.totalDebt > 0).sort((a, b) => b.totalDebt - a.totalDebt);
+            // 🔥 CẬP NHẬT: Tính tổng nợ bao gồm cả Nợ Phạt và Nợ Nhậu
+            let unpaidPhatCount = 0;
+            let unpaidPartyCount = 0;
+
+            const debtors = Object.entries(memberDebts).map(([mId, d]) => { 
+                if(d.cadoDebt > 0) unpaidCadoPeopleCount++; 
+                if(d.phatDebt > 0) unpaidPhatCount++;   // Đếm số người nợ phạt
+                if(d.partyDebt > 0) unpaidPartyCount++; // Đếm số người nợ nhậu
+                return { mId, ...d, totalDebt: d.quyDebt + d.cadoDebt + d.phatDebt + d.partyDebt }; 
+            }).filter(d => d.totalDebt > 0).sort((a, b) => b.totalDebt - a.totalDebt);
+            
             document.getElementById('tk-tongno-badge').innerText = window.formatMoney(debtors.reduce((sum, d) => sum + d.totalDebt, 0));
-            document.getElementById('tk-debt-sub').innerText = `Nợ quỹ: ${unpaidQuyCount} • Nợ độ: ${unpaidCadoPeopleCount}`;
+            // 🔥 HIỂN THỊ CHI TIẾT SỐ LƯỢNG NGƯỜI NỢ TỪNG KHOẢN
+            document.getElementById('tk-debt-sub').innerText = `Quỹ: ${unpaidQuyCount} • Độ: ${unpaidCadoPeopleCount} • Phạt: ${unpaidPhatCount} • Nhậu: ${unpaidPartyCount}`;
 
             if(debtors.length === 0) {
                 document.getElementById('tk-bangtongno').innerHTML = '<div class="text-success fw-bold p-4 text-center"><i class="fas fa-check-circle me-1"></i> Xong! Không còn ai nợ.</div>';
@@ -1267,7 +1464,9 @@ window.state = {
                     let tagsHtml = '';
                     if(d.quyDebt > 0) tagsHtml += `<span class="debt-tag debt-tag-quy">Quỹ ${window.formatShortMoney(d.quyDebt)}</span>`;
                     if(d.cadoDebt > 0) tagsHtml += `<span class="debt-tag debt-tag-cado">Độ ${window.formatShortMoney(d.cadoDebt)} (${d.cadoCount}t)</span>`;
-                    
+                    // 🔥 BỔ SUNG TAG PHẠT
+                    if(d.phatDebt > 0) tagsHtml += `<span class="debt-tag" style="background-color: #ffe5d0; color: #d95319; border: 1px solid #ffcba4;">Phạt ${window.formatShortMoney(d.phatDebt)}</span>`;
+                    if(d.partyDebt > 0) tagsHtml += `<span class="debt-tag" style="background-color: #e2d9f3; color: #432874; border: 1px solid #d5c9e8;">Nhậu ${window.formatShortMoney(d.partyDebt)}</span>`;
                     htmlDebt += `
                     <div class="debt-item bg-white border-bottom">
                         <div class="text-truncate flex-grow-1 me-2">
@@ -1283,10 +1482,8 @@ window.state = {
                 document.getElementById('tk-bangtongno').innerHTML = htmlDebt;
             }
 
-		// ================= ĐỔ DỮ LIỆU VÀO MINI DASHBOARD =================
             const miniFund = document.getElementById('miniDashFund');
             const miniDebt = document.getElementById('miniDashDebt');
-            
             if (miniFund) miniFund.innerText = window.formatMoney(tongHienTai);
             
             if (miniDebt) {
@@ -1302,12 +1499,31 @@ window.state = {
             if(!confirm(`Xác nhận đã thu ${window.formatMoney(totalDebt)} của ${mName}?`)) return;
             const defaultFund = window.state.globalSettings.defaultFund || 100000; const updates = {};
             
+            // 1. Thu Quỹ
             const rawPaid = window.state.monthData.regular?.[mId];
             if(rawPaid === undefined || rawPaid === null) updates[`funds/${window.state.currentMonth}/regular/${mId}`] = Number(defaultFund);
+            
+            // 2. Thu Cá độ
             Object.entries(window.state.monthData.betting || {}).forEach(([matchId, match]) => {
                 const matchTotal = Number(match.penalty_amount) || 0;
-                if(match.losers && match.losers[mId] !== undefined && Number(match.losers[mId]) < matchTotal) updates[`funds/${window.state.currentMonth}/betting/${matchId}/losers/${mId}`] = matchTotal;
-            }); db.ref().update(updates);
+                if(match.losers && match.losers[mId] !== undefined && Number(match.losers[mId]) < matchTotal) {
+                    updates[`funds/${window.state.currentMonth}/betting/${matchId}/losers/${mId}`] = matchTotal;
+                }
+            }); 
+
+            // 🔥 3. Thu Phạt (Đánh dấu tất cả các lỗi chưa đóng của người này thành đã đóng)
+            Object.entries(window.state.monthData.penalties || {}).forEach(([penId, p]) => {
+                if(p.memberId === mId && !p.isPaid) {
+                    updates[`funds/${window.state.currentMonth}/penalties/${penId}/isPaid`] = true;
+                }
+            });
+			// 🔥 4. Thu Nhậu (Đánh dấu đã đóng đủ tiền cho tất cả các bữa nhậu)
+            Object.entries(window.state.monthData.parties || {}).forEach(([pId, p]) => {
+                if(p.members && p.members[mId] !== undefined && p.members[mId] < p.perPerson) {
+                    updates[`funds/${window.state.currentMonth}/parties/${pId}/members/${mId}`] = p.perPerson;
+                }
+            });
+            db.ref().update(updates);
         };
 
         // ================= THỐNG KÊ (RADAR, H2H & DOUGHNUT) =================
@@ -1803,7 +2019,7 @@ window.state = {
                 reportData[mId] = {
                     name: m.name,
                     quyPaid: 0, cadoPaid: 0,
-                    quyDebt: 0, cadoDebt: 0,
+                    quyDebt: 0, cadoDebt: 0, phatDebt: 0, // Thêm phatDebt
                     owedMatches: [] 
                 };
             });
@@ -1835,10 +2051,36 @@ window.state = {
                     }
                 });
             });
+			// 🔥 THÊM VÀO ĐÂY: Quét nợ Phạt cho ảnh báo cáo
+            Object.values(window.state.monthData.penalties || {}).forEach(p => {
+                if (!p.isPaid && reportData[p.memberId]) {
+                    reportData[p.memberId].phatDebt += (Number(p.amount) || 0);
+                }
+            });
+            let expenseStats = { san: 0, nuoc: 0, ao: 0, yte: 0, khac: 0 };
+            let partyExpenses = []; // 🔥 Mảng mới
 
             Object.values(window.state.monthData.expenses || {}).forEach(exp => {
-                if (exp.type === 'thu') thuKhac += (Number(exp.amount) || 0);
-                else tongChi += (Number(exp.amount) || 0);
+                const amt = Number(exp.amount) || 0;
+                if (exp.type === 'thu') {
+                    thuKhac += amt;
+                } else {
+                    tongChi += amt;
+                    const desc = exp.desc.toLowerCase();
+                    if (desc.includes('sân')) expenseStats.san += amt;
+                    else if (desc.includes('nước') || desc.includes('đá')) expenseStats.nuoc += amt;
+                    else if (desc.includes('áo') || desc.includes('bóng')) expenseStats.ao += amt;
+                    else if (desc.includes('y tế') || desc.includes('băng')) expenseStats.yte += amt;
+                    else expenseStats.khac += amt;
+                }
+            });
+
+            Object.values(window.state.monthData.parties || {}).forEach(p => {
+                const fAmt = Number(p.fundAmount) || 0;
+                if (fAmt > 0) {
+                    tongChi += fAmt;
+                    partyExpenses.push({ name: p.name, amount: fAmt }); // 🔥 Lưu vào mảng
+                }
             });
 
             const tonQuyThangTruoc = getCarryOverFund(window.state.currentMonth);
@@ -1849,7 +2091,7 @@ window.state = {
 
             Object.values(reportData).forEach(d => {
                 const totalPaid = d.quyPaid + d.cadoPaid;
-                const totalDebt = d.quyDebt + d.cadoDebt;
+                const totalDebt = d.quyDebt + d.cadoDebt + d.phatDebt;
                 
                 if (totalPaid > 0) paidList.push({ ...d, totalPaid });
                 if (totalDebt > 0) debtList.push({ ...d, totalDebt });
@@ -1865,6 +2107,22 @@ window.state = {
             document.getElementById('exp-thucado').innerText = window.formatMoney(thuCaDo);
             document.getElementById('exp-thukhac').innerText = window.formatMoney(thuKhac);
             document.getElementById('exp-chi').innerText = window.formatMoney(tongChi);
+			// 🔥 THÊM MỚI: Render chi tiết chi vào ảnh
+            let expTagsHtml = [];
+            if(expenseStats.san > 0) expTagsHtml.push(`<span style="background:#cfe2ff; color:#084298; border:1px solid #b6d4fe; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:bold;">⚽ Sân: ${window.formatShortMoney(expenseStats.san)}</span>`);
+            if(expenseStats.nuoc > 0) expTagsHtml.push(`<span style="background:#cff4fc; color:#055160; border:1px solid #b6effb; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:bold;">💧 Nước: ${window.formatShortMoney(expenseStats.nuoc)}</span>`);
+            if(expenseStats.ao > 0) expTagsHtml.push(`<span style="background:#fff3cd; color:#664d03; border:1px solid #ffecb5; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:bold;">👕 Áo: ${window.formatShortMoney(expenseStats.ao)}</span>`);
+            if(expenseStats.yte > 0) expTagsHtml.push(`<span style="background:#f8d7da; color:#842029; border:1px solid #f5c2c7; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:bold;">🚑 Y tế: ${window.formatShortMoney(expenseStats.yte)}</span>`);
+            
+            // 🔥 THAY ĐỔI: Duyệt mảng để in từng tên bữa nhậu
+            partyExpenses.forEach(pe => {
+                expTagsHtml.push(`<span style="background:#e2d9f3; color:#432874; border:1px solid #d5c9e8; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:bold;">🍻 ${pe.name}: ${window.formatShortMoney(pe.amount)}</span>`);
+            });
+
+            if(expenseStats.khac > 0) expTagsHtml.push(`<span style="background:#e2e3e5; color:#41464b; border:1px solid #d3d6d8; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:bold;">📦 Khác: ${window.formatShortMoney(expenseStats.khac)}</span>`);
+            
+            const expDetailsEl = document.getElementById('exp-chi-details-list');
+            if(expDetailsEl) expDetailsEl.innerHTML = expTagsHtml.length > 0 ? expTagsHtml.join('') : '<span style="color:#adb5bd; font-style:italic;">Không có chi tiết</span>';
             document.getElementById('exp-now').innerText = window.formatMoney(tongHienTai);
 
             let paidHtml = '';
@@ -1896,7 +2154,8 @@ window.state = {
                     let tags = '';
                     if(d.quyDebt > 0) tags += `<span style="background:#fff5f5; color:#dc3545; border:1px solid #ffc9c9; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold;">Quỹ ${window.formatShortMoney(d.quyDebt)}</span>`;
                     if(d.cadoDebt > 0) tags += `<span style="background:#fff9db; color:#b45309; border:1px solid #fde68a; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold;">Độ ${window.formatShortMoney(d.cadoDebt)}</span>`;
-                    
+                    // 👇 DÒNG MỚI THÊM VÀO ĐÂY (Màu cam đất giống tag Nợ Phạt bên ngoài)
+                    if(d.phatDebt > 0) tags += `<span style="background:#ffe5d0; color:#d95319; border:1px solid #ffcba4; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold; margin-left:4px;">Phạt ${window.formatShortMoney(d.phatDebt)}</span>`;
                     let matchDetails = '';
                     if (d.owedMatches.length > 0) {
                         matchDetails = `<div style="font-size:11.5px; color:#b45309; margin-top:4px; font-style:italic; font-weight:500;">⚠️ Trận: ${d.owedMatches.join(', ')}</div>`;
@@ -2046,8 +2305,22 @@ window.state = {
                 .then(() => bootstrap.Modal.getInstance(document.getElementById('modalAdminProfile')).hide());
         };
         // ================= HEADER & CHUYỂN TAB =================
-        window.switchTab = (tabId, element) => {
+		window.switchTab = (tabId, element) => {
             window.state.activeTab = tabId;
+            
+            // 🔥 TỰ ĐỘNG ĐỔI MÀU THEO TAB
+            const tabColors = {
+                'thu': '#198754',       // Thu Quỹ: Xanh lá (Tiền tệ)
+                'cado': '#0d6efd',      // Giao lưu/Cá độ: Xanh dương (Thể thao)
+                'chi': '#dc3545',       // Chi Quỹ: Đỏ (Cảnh báo chi tiêu)
+                'tongket': '#6f42c1',   // Tổng kết: Tím (Phân tích/Báo cáo)
+                'thongke': '#0dcaf0'    // Thống kê: Xanh lơ (Biểu đồ)
+            };
+            const activeColor = tabColors[tabId] || '#198754';
+            
+            // Gán biến màu vào CSS
+            document.documentElement.style.setProperty('--theme-color', activeColor);
+            document.documentElement.style.setProperty('--theme-color-alpha', hexToRgba(activeColor, 0.15));
             const headerFull = document.getElementById('headerFull');
             const headerCompact = document.getElementById('headerCompact');
             const titleElement = document.getElementById('headerTabTitle');
@@ -2090,10 +2363,12 @@ window.state = {
 
             const fab = document.getElementById('globalFabBtn');
             if(tabId === 'cado') {
+                // Giữ nguyên logic đổi màu theo sub-tab của Cado
                 const isGiaoLuu = window.state.cadoSubTab === 'giaoluu';
                 fab.className = isGiaoLuu ? 'fab-btn bg-primary show' : 'fab-btn bg-success show';
                 fab.innerHTML = '<i class="fas fa-plus"></i>';
             } else if(tabId === 'chi') { 
+                // Nút Chi Quỹ dùng màu đỏ
                 fab.className = 'fab-btn bg-danger show'; 
                 fab.innerHTML = '<i class="fas fa-plus"></i>'; 
             } else { 
